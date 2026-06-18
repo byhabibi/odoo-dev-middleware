@@ -1,0 +1,48 @@
+/* Custom Variable untuk Theme Dashboard */
+:root {
+    --bg-main: #0d0e12;
+    --bg-sidebar: #13151c;
+    --bg-card: #181b24;
+    --bg-card-hover: #1f2330;
+    --text-muted: #71778c;
+    --text-light: #f3f4f6;
+    --accent-indigo: #4f46e5;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-light);
+}
+
+/* Custom Card Glassmorphism Effect */
+.premium-card {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-card:hover {
+    background-color: var(--bg-card-hover);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+/* Line Clamp untuk nama produk yang panjang */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;  
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    /* Tambahkan standar properti di bawah ini untuk menghilangkan warning VS Code */
+    line-clamp: 2; 
+}
+
+/* Animasi Pulse untuk dot Indikator Status */
+@keyframes custom-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .5; transform: scale(1.15); }
+}
+
+.animate-pulse-slow {
+    animation: custom-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

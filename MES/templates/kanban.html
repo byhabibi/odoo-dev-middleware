@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ name }} - Live Machine Monitoring</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a0c10] font-sans antialiased min-h-screen text-gray-200">
+
+    <nav class="bg-[#13151c] border-b border-gray-800 px-6 py-4 flex justify-between items-center shadow-lg">
+        <div class="flex items-center space-x-3">
+            <a href="/" class="text-xs text-[#71778c] hover:text-white transition font-medium bg-gray-800/50 px-3 py-1.5 rounded-md border border-gray-700/50">← Dashboard</a>
+            <span class="text-gray-600">/</span>
+            <span class="text-base font-black uppercase tracking-wider text-white">{{ name }} Area</span>
+        </div>
+        <div class="flex items-center space-x-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded text-[11px] font-mono font-bold text-emerald-400">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>LIVE MONITORING</span>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6 md:p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% if not machine %}
+            <div class="col-span-full text-center p-16 rounded-xl border border-gray-800 bg-[#13151c]">
+                <p class="text-lg text-gray-400 font-bold">No Machines Found</p>
+            </div>
+            {% else %}
+
+
+                {% for mc in machine %}
+                <div class="bg-[#13151c] rounded-xl border border-gray-800 p-5 shadow-lg">
+                    <h3 class="text-lg font-black text-white mb-2">{{ mc.name }}</h3>
+
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between items-center bg-[#1a1d26] px-3 py-2 rounded-lg border border-gray-700/50">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase">PRODUCT</span>
+                            <span class="text-white font-mono text-sm font-semibold whitespace-normal ml-4">{{ mc.product }}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-[#1a1d26] px-3 py-2 rounded-lg border border-gray-700/50 text-center">
+                                <span class="text-[9px] text-gray-400 font-bold uppercase block">SHIFT</span>
+                                <span class="text-indigo-300 font-mono text-sm font-bold">{{ mc.shift }}</span>
+                            </div>
+                            <div class="bg-[#1a1d26] px-3 py-2 rounded-lg border border-gray-700/50 text-center">
+                                <span class="text-[9px] text-gray-400 font-bold uppercase block">OPERATOR</span>
+                                <span class="text-indigo-300 font-mono text-sm font-bold">{{ mc.mp }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-[#0f1116] border border-emerald-500/20 rounded-lg p-3">
+                            <span class="text-[9px] text-emerald-500 font-bold uppercase tracking-widest block mb-1">ACTUAL</span>
+                            <input type="number" 
+                                id="counter_{{ mc.name | replace(' ', '_') }}" 
+                                value="{{ mc.qty }}" 
+                                class="w-full bg-transparent text-emerald-400 font-mono font-black text-xl outline-none">
+                        </div>
+
+                        <div class="bg-indigo-500/5 border border-indigo-500/10 rounded-lg p-3">
+                            <span class="text-[9px] text-indigo-400 font-bold uppercase tracking-widest block mb-1">TARGET PLAN</span>
+                            <p class="text-xl font-black text-indigo-300 font-mono">
+                                {{ "{:,}".format(mc.qty) }} <span class="text-[10px] font-normal">pcs</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <button data-machine-name="{{ mc.name | replace(' ', '_') }}" 
+                            class="save-btn w-full bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/30 text-indigo-300 hover:text-white font-bold py-2 rounded text-xs transition">
+                        UPDATE ACTUAL COUNTER
+                    </button>
+                </div>
+                {% endfor %}
+
+
+            {% endif %}
+        </div>
+    </main>
+
+    <script>
+        document.querySelectorAll('.save-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                // 1. Ambil data mesin dan nilai counter
+                const machineName = this.getAttribute('data-machine-name');
+                const inputField = document.getElementById('counter_' + machineName);
+                const counterVal = inputField ? inputField.value : 0;
+                const realName = machineName.replace(/_/g, ' ');
+
+                // 2. Buat timestamp dalam format yang disukai Odoo (YYYY-MM-DD HH:MM:SS)
+                const now = new Date();
+                const wibTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+                const currentTimestamp = wibTime.getUTCFullYear() + "-" + 
+                    String(wibTime.getUTCMonth() + 1).padStart(2, '0') + "-" + 
+                    String(wibTime.getUTCDate()).padStart(2, '0') + " " + 
+                    String(wibTime.getUTCHours()).padStart(2, '0') + ":" + 
+                    String(wibTime.getUTCMinutes()).padStart(2, '0') + ":" + 
+                    String(wibTime.getUTCSeconds()).padStart(2, '0');
+                
+                // 3. Berikan feedback visual ke user
+                const originalText = this.innerText;
+                this.innerText = 'SAVING...';
+                this.disabled = true;
+
+                try {
+                    // 4. Kirim ke API backend
+                    const response = await fetch('/api/save-counter', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            machine_id: realName,
+                            val: parseInt(counterVal),
+                            timestamp: currentTimestamp // Data ini yang akan diterima di kanban.py
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert('Data ' + realName + ' tersimpan!');
+                    } else {
+                        // Tampilkan pesan error spesifik dari server
+                        alert('Gagal menyimpan: ' + (data.detail || data.message || 'Server error'));
+                    }
+                } catch (error) {
+                    alert('Tidak dapat terhubung ke server');
+                    console.error('Fetch error:', error);
+                } finally {
+                    this.innerText = originalText;
+                    this.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
