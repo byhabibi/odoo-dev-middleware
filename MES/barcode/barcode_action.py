@@ -47,42 +47,37 @@ async def check_attendance_dummy(employee_id):
     )
     return len(attendance_ids) > 0
     """
-
+    
 @router.post("/api/scan-operator")
 async def scan_operator(payload: dict):
-    pin = payload.get('pin')
-    machine_id = payload.get('machine_id') 
-    print("DEBUG: Request diterima:", payload)
-    
     uid, models = get_odoo_client()
     db = os.getenv("ODOO_DB")
     pwd = os.getenv("ODOO_PASSWORD")
+
+    pin = payload.get('pin')
+    machine_id = payload.get('machine_id')
     
-    # 1. Cari Employee
+    # 1. Cari Employee berdasarkan PIN
     employee = models.execute_kw(db, uid, pwd, 'hr.employee', 'search_read', [[['pin', '=', pin]]], {'fields': ['id', 'name']})
     if not employee: return {"status": "error", "message": "PIN tidak ditemukan"}
     emp = employee[0]
 
-    # 2. Cek Absensi (Gunakan fungsi dummy yang tadi sudah kita buat)
-    if not await check_attendance_dummy(emp['id']):
-        return {"status": "not_attended", "message": "Anda belum melakukan absensi!", "employee": emp}
-
-    # 3. Cari WO yang 'ready' di mesin tersebut
-    # Kita cari workcenter yang namanya mirip machine_id (misal: "NF01")
+    # 2. Cari WO yang berada di mesin tersebut (Tanpa filter 'ready' agar fleksibel)
     wo_list = models.execute_kw(db, uid, pwd, 'mrp.workorder', 'search_read',
-        [[['workcenter_id.name', 'ilike', machine_id], ['state', 'in', ['ready', 'pending']]]],
-        {'fields': ['id', 'name', 'state'], 'limit': 1}
+        [[['workcenter_id.name', 'ilike', machine_id], ['state', 'in', ['ready', 'waiting', 'pending']]]],
+        {'fields': ['id', 'name'], 'limit': 1}
     )
     
-    if not wo_list:
-        return {"status": "error", "message": f"Tidak ada antrian WO di {machine_id}"}
-    
+    if not wo_list: return {"status": "error", "message": "Tidak ada WO di mesin ini"}
     wo = wo_list[0]
 
-    # 4. Update WO: Set Operator & Auto-Start
+    # 3. Update Operator
     models.execute_kw(db, uid, pwd, 'mrp.workorder', 'write', [[wo['id']], {
-        'operator_id': emp['id'],
-        'state': 'progress' # Auto-start menjadi In-Progress
+        'employee_id': emp['id'] # Pastikan field di Odoo Anda bernama employee_id
     }])
     
-    return {"status": "success", "employee": emp, "wo_name": wo['name']}
+    # 4. Trigger Auto-Start (Memicu status In Progress)
+    # Ini akan membuat WO yang tadinya 'waiting' atau 'ready' berubah jadi 'in progress'
+    models.execute_kw(db, uid, pwd, 'mrp.workorder', 'button_start', [[wo['id']]])
+    
+    return {"status": "success", "employee_name": emp['name']}
