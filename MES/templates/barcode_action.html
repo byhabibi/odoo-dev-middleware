@@ -25,7 +25,8 @@
 
         // Fungsi utama untuk menangani pengecekan (otomatis dari scanner atau manual)
         async function testManual() {
-            const pin = document.getElementById('manual-pin').value;
+            // Definisi variabel pin agar sesuai dengan input
+            const pinValue = document.getElementById('manual-pin').value; 
             const output = document.getElementById('output-display');
             
             output.innerText = "Memproses...";
@@ -34,33 +35,21 @@
                 const response = await fetch('/api/scan-operator', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pin: pin, workorder_id: CURRENT_WO_ID })
+                    // Pastikan menggunakan pinValue yang sudah didefinisikan di atas
+                    body: JSON.stringify({ pin: pinValue, machine_id: "nf03" }) 
                 });
-                
+
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    // Tampilan sukses
-                    output.innerHTML = `
-                        <div class="text-green-500">
-                            <p class="font-bold">Berhasil! Mesin berjalan untuk:</p>
-                            <p class="text-2xl">${result.employee.name}</p>
-                        </div>`;
-                } 
-                else if (result.status === 'not_attended') {
-                    // Tampilan jika belum absen (trigger pop-up)
-                    if (confirm(result.message + "\n\nSilahkan melakukan absensi wajah terlebih dahulu!")) {
-                        output.innerText = "Absen terlebih dahulu";
-                        // Contoh redirect: window.location.href = "/halaman-absen";
-                    } else {
-                        output.innerText = "Absensi dibatalkan.";
-                    }
-                } 
-                else {
-                    // Tampilan error (operator tidak ditemukan)
-                    output.innerHTML = `<p class="text-red-500">${result.message}</p>`;
+                    alert("Berhasil! Operator: " + result.employee_name);
+                    output.innerText = "Berhasil: " + result.employee_name;
+                } else {
+                    alert("Error dari Server: " + result.message);
+                    output.innerText = "Error: " + result.message;
                 }
             } catch (error) {
+                console.error(error); // Lihat detail error di F12 Console
                 output.innerText = "Gagal terhubung ke server.";
             }
         }
