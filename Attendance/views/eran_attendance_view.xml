@@ -1,0 +1,444 @@
+<odoo>
+
+    <!-- Start page machine configuration-->
+    <record id="eran_attendance_machine_config_view_tree" model="ir.ui.view">
+        <field name="name">eran.attendance.machine.config.view.tree</field>
+        <field name="model">eran.attendance.machine.config</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="ip_address"/>
+                <field name="port"/>
+                <field name="connection_status" 
+                    widget="badge" 
+                    decoration-success="connection_status == 'online'" 
+                    decoration-danger="connection_status == 'error'"/>
+                <!-- Tombol Test Koneksi -->
+                <button name="action_test_connection" 
+                    type="object" 
+                    string="Connect" 
+                    icon="fa-link" 
+                    class="btn-primary"
+                    attrs="{'invisible': [('connection_status', '==', 'online')]}"/>
+                <!-- Tombol Disconnect (Muncul hanya jika Online) -->
+                <button name="action_disconnect" 
+                        type="object" 
+                        string="Disconnect" 
+                        icon="fa-chain-broken" 
+                        class="btn-secondary"
+                        attrs="{'invisible': [('connection_status', '!=', 'online')]}"/>
+                <button name="action_download_data" 
+                    type="object" 
+                    string="Download Data" 
+                    icon="fa-download" 
+                    class="btn-info"
+                    attrs="{'invisible': [('connection_status', '!=', 'online')]}"/>
+                <field name="last_sync" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_attendance_machine_config_view_form" model="ir.ui.view">
+        <field name="name">eran.attendance.machine.config.view.form</field>
+        <field name="model">eran.attendance.machine.config</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button string="Test Connection" name="action_test_connection" type="object" class="btn-primary"/>
+                    <field name="connection_status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1 class="d-flex">
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="ip_address"/>
+                            <field name="port"/>
+                            <field name="last_sync" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="eran_action_attendance_machine_config" model="ir.actions.act_window">
+        <field name="name">Machine Configuration</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.attendance.machine.config</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="eran_attendance_machine_config_view_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new attendance machine configuration to connect and synchronize attendance data from your biometric devices. Click on "Test Connection" to verify the connectivity status of your device.
+            </p>
+        </field>
+    </record>
+    <!-- End page machine configuration-->
+
+    <!-- Start page attendance log transaction -->
+    <record id="eran_action_attendance_log_transaction" model="ir.actions.act_window">
+        <field name="name">Transaction Logs</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.attendance.log.transaction</field>
+        <field name="view_mode">tree</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new attendance log transaction to view the history of attendance data synchronization from your biometric devices. This log will help you track successful synchronizations as well as any errors that may have occurred during the process.
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_attendance_log_transaction_view_tree" model="ir.ui.view">
+        <field name="name">eran.attendance.log.transaction.view.tree</field>
+        <field name="model">eran.attendance.log.transaction</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="user_id"/>
+                <field name="employee_id"/>
+                <field name="timestamp"/>
+                <field name="is_processed"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_eran_attendance_log_transaction_search" model="ir.ui.view">
+        <field name="name">eran.attendance.log.transaction.search</field>
+        <field name="model">eran.attendance.log.transaction</field>
+        <field eval="3" name="priority"/>
+        <field name="arch" type="xml">
+            <search string="Search Attendance Logs">
+                <field name="employee_id"/>
+            </search>
+        </field>
+    </record>
+    <!-- End page attendance log transaction -->
+
+    <!-- Start page attendance -->
+    <record id="eran_attendance_tree_view" model="ir.ui.view">
+        <field name="name">eran.attendance.view.tree</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree">
+                <field name="shift_id"/>
+                <field name="checkin_lembur"/>
+                <field name="checkout_lembur"/>
+                <field name="istirahat_lembur"/>
+                <field name="total_lembur"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_attendance_form" model="ir.ui.view">
+        <field name="name">eran.attendance.view.form</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='check_out']" position="after">
+                <field name="checkin_lembur"/>
+                <field name="checkout_lembur"/>
+                <field name="istirahat_lembur"/>
+            </xpath>
+        </field>
+    </record>
+    <!-- End page attendance -->
+
+    <!-- Start page attendance lembur -->
+    <record id="eran_attendance_lembur_view_tree" model="ir.ui.view">
+        <field name="name">eran.attendance.lembur.view.tree</field>
+        <field name="model">eran.hr.overtime</field>
+        <field name="arch" type="xml">
+            <tree string="Overtime">
+                <field name="name"/>
+                <field name="tanggal_pengajuan"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_attendance_lembur_kanban_view" model="ir.ui.view">
+        <field name="name">eran.attendance.lembur.kanban</field>
+        <field name="model">eran.hr.overtime</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="tanggal_pengajuan"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="row mb4">
+                                <strong class="col-6">
+                                    <span t-esc="record.name.value"/>
+                                </strong>
+                            </div>
+                            <div class="row mb4">
+                                <div class="col-6">
+                                    <span t-esc="record.tanggal_pengajuan.value"/>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span t-esc="record.state.value"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="eran_attendance_lembur_view_form" model="ir.ui.view">
+        <field name="name">eran.attendance.lembur.view.form</field>
+        <field name="model">eran.hr.overtime</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Overtime">
+                <header>
+                    <button name="btn_draft" string="Reset To Draft" type="object" states="closed"/>
+                    <button name="btn_waiting_approval" string="Request Approval" type="object" class="btn btn-primary" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                    <button name="btn_approved" string="Approve" type="object" class="btn btn-primary" attrs="{'invisible': ['|', ('user_in_assigned_to', '=', False),('state', '!=', 'waiting_approval')]}"/>
+                    <button name="btn_set_to_draft" string="Set To Draft" type="object" class="btn btn-primary" attrs="{'invisible': [('state', 'in', ('draft','done','closed'))]}"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="tanggal_pengajuan"/>
+                        <field name="assigned_to_ids" widget="many2many_tags" invisible="1"/>
+                        <field name="user_in_assigned_to" invisible="1"/>
+                        <field name="company_id" invisible="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Attendance Overtime Lines" name="attendance_overtime_lines">
+                            <field name="attendance_overtime_line"  attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}" >
+                                <tree
+                                    string="Attendance Overtime Lines"
+                                    editable="bottom"
+                                >
+                                    <field name="employee_id"/>
+                                    <field name="start_plan"/>
+                                    <field name="finish_plan"/>
+                                    <field name="istirahat_plan"/>
+                                    <field name="durasi_plan"/>
+                                    <field name="start_actual"/>
+                                    <field name="finish_actual"/>
+                                    <field name="istirahat_actual"/>
+                                    <field name="durasi_actual"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="approver" string="Approver">
+                            <group>
+                                <group>
+                                    <field name="approval_attendance_overtime_id"/>
+                                    <field name="approval_rule"/>
+                                    <field name="approval_type"/>
+                                </group>
+                            </group>
+                            <field name="approval_line_ids" mode="tree" readonly="1">
+                                <tree string="Approval Line" name="approval_line" editable="bottom">
+                                    <field name="user_id"/>
+                                    <field name="is_approved"/>
+                                    <field name="date_approved"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="eran_action_attendance_lembur" model="ir.actions.act_window">
+        <field name="name">Attendance Overtime</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.hr.overtime</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="view_id" ref="eran_attendance_lembur_view_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new attendance overtime record to manage and track employee overtime hours. This view allows you to see the check-in and check-out times for overtime, as well as any breaks taken during the overtime period. Use this information to ensure accurate calculation of overtime pay and compliance with labor regulations.
+            </p>
+        </field>
+    </record>
+    <!-- End page attendance lembur -->
+
+    <!-- Start page Reporting Rekap Absensi Detail-->
+    <record id="eran_action_attendance_rekap_absensi_detail" model="ir.actions.act_window">
+        <field name="name">Rekap Absensi Bulanan Detail</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.rekap.absen.report.detail</field>
+        <field name="view_mode">tree,pivot</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Belum ada data rekap absensi.
+            </p>
+            <p>
+                Data akan otomatis terisi berdasarkan pencatatan transaksi Kehadiran (Attendance) dan Cuti (Time Off).
+            </p>
+        </field>
+    </record>
+    
+    <record id="view_eran_rekap_absen_report_detail_tree" model="ir.ui.view">
+        <field name="name">eran.rekap.absen.report.detail.tree</field>
+        <field name="model">eran.rekap.absen.report.detail</field>
+        <field name="arch" type="xml">
+            <tree string="Rekap Absensi" create="false" edit="false" delete="false">
+                <field name="date"/>
+                <field name="employee_id"/>
+                <field name="start_checkin"/>
+                <field name="start_checkout"/>
+                <field name="actual_checkin"/>
+                <field name="actual_checkout"/>
+                <field name="total_jam_kerja" sum="Total Kerja"/>
+                <field name="alfa_kb" sum="Total"/>
+                <field name="alfa_ks" sum="Total"/>
+                <field name="izin_kb" sum="Total"/>
+                <field name="izin_ks" sum="Total"/>
+                <field name="sakit_kb" sum="Total"/>
+                <field name="sakit_ks" sum="Total"/>
+                <field name="cuti_kb" sum="Total"/>
+                <field name="cuti_ks" sum="Total"/>
+                <field name="non_aktif_kb"/>
+                <field name="non_aktif_ks"/>
+                <field name="lembur_kb_in"/>
+                <field name="lembur_kb_out"/>
+                <field name="lembur_kb_istirahat"/>
+                <field name="lembur_kb_total" sum="Total" widget="float_time"/>
+                <field name="lembur_ks_in"/>
+                <field name="lembur_ks_out"/>
+                <field name="lembur_ks_istirahat"/>
+                <field name="lembur_ks_total" sum="Total" widget="float_time"/>
+                <field name="telat_hk"/>
+                <field name="catering_hk"/>
+                <field name="catering_hl"/>
+                <field name="hari_kerja"/>
+                <field name="hari_libur"/>
+                <field name="hari_effective"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_eran_rekap_absen_report_detail_pivot" model="ir.ui.view">
+        <field name="name">eran.rekap.absen.report.detail.pivot</field>
+        <field name="model">eran.rekap.absen.report.detail</field>
+        <field name="arch" type="xml">
+            <pivot string="Analisis Rekap Absensi" disable_linking="true">
+                <!-- Sumbu Baris (Row): Mengelompokkan berdasarkan Departemen lalu Nama Karyawan -->
+                <field name="employee_id" type="row"/>
+                
+                <!-- Sumbu Kolom (Column): Mengelompokkan berdasarkan Waktu Tanggal -->
+                <field name="date" interval="month" type="col"/>
+                
+                <!-- Nilai Ukuran (Measures): Data angka yang akan dijumlahkan otomatis -->
+                <field name="start_checkin" type="measure"/>
+                <field name="start_checkout" type="measure"/>
+                <field name="cuti_kb" type="measure"/>
+                <field name="lembur_kb_in" type="measure"/>
+                <field name="lembur_ks_in" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <!-- End page Reporting Rekap Absensi Detail-->
+
+    <!-- Start page Reporting Rekap Absensi Global-->
+    <record id="view_eran_rekap_absen_report_global_search" model="ir.ui.view">
+        <field name="name">eran.rekap.absen.report.global.search</field>
+        <field name="model">eran.rekap.absen.report.global</field>
+        <field name="arch" type="xml">
+            <search string="Pencarian Rekap Absensi">
+                <field name="employee_id" string="Karyawan"/>
+                <field name="department_id" string="Departemen"/>
+
+                <separator/>
+                
+                    <!-- FILTER OTOMATIS BERDASARKAN BULAN PERIODE -->
+                    <filter string="Bulan Ini" name="filter_bulan_ini" 
+                            domain="[('date', '&gt;=', (context_today()).strftime('%Y-%m-01')), 
+                                        ('date', '&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-01'))]"/>
+                    
+                    <filter string="Bulan Kemarin" name="filter_bulan_kemarin" 
+                            domain="[('date', '&gt;=', (context_today() - relativedelta(months=1)).strftime('%Y-%m-01')), 
+                                        ('date', '&lt;', (context_today()).strftime('%Y-%m-01'))]"/>
+
+                <separator/>
+                <group expand="1" string="Group By">
+                    <filter string="Departemen" name="group_by_department" context="{'group_by': 'department_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_action_attendance_rekap_absensi_global" model="ir.actions.act_window">
+        <field name="name">Rekap Absensi Bulanan Global</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.rekap.absen.report.global</field>
+        <field name="view_mode">tree,pivot</field>
+        <field name="search_view_id" ref="view_eran_rekap_absen_report_global_search"/>
+        <field name="context">{'search_default_filter_bulan_ini': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Belum ada data rekap absensi.
+            </p>
+            <p>
+                Data akan otomatis terisi berdasarkan pencatatan transaksi Kehadiran (Attendance) dan Cuti (Time Off).
+            </p>
+        </field>
+    </record>
+    
+    <record id="view_eran_rekap_absen_report_global_tree" model="ir.ui.view">
+        <field name="name">eran.rekap.absen.report.global.tree</field>
+        <field name="model">eran.rekap.absen.report.global</field>
+        <field name="arch" type="xml">
+            <tree string="Rekap Absensi" create="false" edit="false" delete="false">
+                <field name="periode_bulan"/>
+                <field name="employee_id"/>
+                <field name="department_id" optional="show"/>
+                <field name="terlambat_jam" sum="Total Terlambat (Jam)" widget="float_time"/>
+                <field name="frekuensi_terlambat" sum="Total Frekuensi"/>
+                <field name="alfa_hkb" sum="Total"/>
+                <field name="alfa_hks" sum="Total"/>
+                <field name="izin_hkb" sum="Total"/>
+                <field name="izin_hks" sum="Total"/>
+                <field name="sakit_hkb" sum="Total"/>
+                <field name="sakit_hks" sum="Total"/>
+                <field name="cuti_hkb" sum="Total"/>
+                <field name="cuti_hks" sum="Total"/>
+                <field name="non_aktif_hkb" string="Non Aktif HKB"/>
+                <field name="non_aktif_hks" string="Non Aktif HKS"/>
+                <field name="absen_hkb" string="Absen HKB" decoration-bf="1"/>
+                <field name="absen_hks" string="Absen HKS" decoration-bf="1"/>
+                <field name="lembur_hkb" sum="Total" widget="float_time"/>
+                <field name="lembur_hkm" sum="Total" widget="float_time"/>
+                <field name="totalan_absen" string="Totalan Absen" class="fw-bold"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_eran_rekap_absen_report_global_pivot" model="ir.ui.view">
+        <field name="name">eran.rekap.absen.report.global.pivot</field>
+        <field name="model">eran.rekap.absen.report.global</field>
+        <field name="arch" type="xml">
+            <pivot string="Analisis Rekap Absensi" disable_linking="true">
+                <!-- Sumbu Baris (Row): Mengelompokkan berdasarkan Departemen lalu Nama Karyawan -->
+                <field name="department_id" type="row"/>
+                <field name="employee_id" type="row"/>
+                
+                <!-- Sumbu Kolom (Column): Mengelompokkan berdasarkan Waktu Tanggal -->
+                <field name="date" interval="month" type="col"/>
+                
+                <!-- Nilai Ukuran (Measures): Data angka yang akan dijumlahkan otomatis -->
+                <field name="terlambat_jam" type="measure"/>
+                <field name="frekuensi_terlambat" type="measure"/>
+                <field name="cuti_hkb" type="measure"/>
+                <field name="lembur_hkb" type="measure"/>
+                <field name="lembur_hkm" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <!-- End page Reporting Rekap Absensi Detail-->
+</odoo>

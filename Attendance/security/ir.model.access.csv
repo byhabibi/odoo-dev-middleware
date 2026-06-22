@@ -1,0 +1,13 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_eran_attendance_machine_config","eran_attendance_machine_config","model_eran_attendance_machine_config","base.group_user",1,1,1,1
+"access_eran_attendance_log_transaction","eran_attendance_log_transaction","model_eran_attendance_log_transaction","base.group_user",1,1,1,1
+"access_eran_hr_overtime","eran_hr_overtime","model_eran_hr_overtime","base.group_user",1,1,1,1
+"access_eran_hr_overtime_line","eran_hr_overtime_line","model_eran_hr_overtime_line","base.group_user",1,1,1,1
+"access_eran_attendance_overtime_approval_line","eran_attendance_overtime_approval_line","model_eran_attendance_overtime_approval_line","base.group_user",1,1,1,1
+"access_eran_rekap_absen_report_detail","eran_rekap_absen_report_detail","model_eran_rekap_absen_report_detail","base.group_user",1,1,1,1
+"access_eran_rekap_absen_report_global","eran_rekap_absen_report_global","model_eran_rekap_absen_report_global","base.group_user",1,1,1,1
+
+
+
+
+

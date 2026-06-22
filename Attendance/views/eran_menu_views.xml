@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Attendance -->
+    <record id="hr_attendance.menu_hr_attendance_view_attendances" model="ir.ui.menu">
+        <field name="action" eval="False"/>
+    </record>
+
+    <menuitem id="menu_attendance_sub"
+              name="Attendance"
+              parent="hr_attendance.menu_hr_attendance_view_attendances"
+              action="hr_attendance.hr_attendance_action"
+              sequence="1"/>
+    
+    <menuitem id="eran_menu_hr_attendance_lembur"
+              name="Attendance Overtime"
+              parent="hr_attendance.menu_hr_attendance_view_attendances"
+              action="eran_custom.eran_action_attendance_lembur"
+              sequence="2"/>
+
+    <!-- Attendance Reporting -->
+    <record id="hr_attendance.menu_hr_attendance_report" model="ir.ui.menu">
+        <field name="action" eval="False"/>
+    </record>
+
+    <menuitem id="menu_attendance_reporting_sub"
+              name="Reporting"
+              parent="hr_attendance.menu_hr_attendance_report"
+              action="hr_attendance.hr_attendance_report_action"
+              sequence="1"/>
+
+    <menuitem id="eran_attendance_reporting_rekap_absen_detail"
+              name="Rekap Absensi Detail"
+              parent="hr_attendance.menu_hr_attendance_report"
+              action="eran_custom.eran_action_attendance_rekap_absensi_detail"
+              sequence="2"/>
+    
+    <menuitem id="eran_attendance_reporting_rekap_absen_global"
+              name="Rekap Absensi Global"
+              parent="hr_attendance.menu_hr_attendance_report"
+              action="eran_custom.eran_action_attendance_rekap_absensi_global"
+              sequence="3"/>
+
+    <!-- Attendance Setting -->
+    <record id="hr_attendance.menu_hr_attendance_settings" model="ir.ui.menu">
+        <field name="action" eval="False"/>
+    </record>
+
+    <menuitem id="menu_attendance_sub_settings"
+              name="Settings"
+              parent="hr_attendance.menu_hr_attendance_settings"
+              action="hr_attendance.action_hr_attendance_settings"
+              sequence="1"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+
+    <menuitem id="eran_menu_hr_attendance_machine_config"
+              name="Machine Configuration"
+              parent="hr_attendance.menu_hr_attendance_settings"
+              action="eran_action_attendance_machine_config"
+              sequence="2"/>
+
+    <menuitem id="eran_menu_hr_attendance_log_transaction"
+              name="Transaction Logs"
+              parent="hr_attendance.menu_hr_attendance_settings"
+              action="eran_action_attendance_log_transaction"
+              sequence="3"/>
+
+</odoo>

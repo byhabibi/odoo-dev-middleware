@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_master_shift_view_tree" model="ir.ui.view">
+        <field name="name">eran.master.shift.view.tree</field>
+        <field name="model">eran.master.shift</field>
+        <field name="arch" type="xml">
+            <tree string="Master Shift" editable="bottom">
+                <field name="name"/>
+                <field name="start_time" widget="float_time"/>
+                <field name="end_time" widget="float_time"/>
+                <field name="start_checkin" widget="float_time"/>
+                <field name="end_checkin" widget="float_time"/>
+                <field name="start_checkout" widget="float_time"/>
+                <field name="end_checkout" widget="float_time"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_master_shift_view_search" model="ir.ui.view">
+        <field name="name">eran.master.shift.view.search</field>
+        <field name="model">eran.master.shift</field>
+        <field name="arch" type="xml">
+            <search string="">
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_master_shift_action" model="ir.actions.act_window">
+        <field name="name">Master Shift</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.master.shift</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="eran_master_shift_view_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new
+            </p>
+        </field>
+    </record>
+</odoo>

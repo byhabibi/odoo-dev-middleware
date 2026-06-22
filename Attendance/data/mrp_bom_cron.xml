@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- <record id="ir_cron_tarik_data_zkteco" model="ir.cron">
+        <field name="name">Tarik Data Mesin Absensi</field>
+        <field name="model_id" ref="model_eran_attendance_machine_config"/>
+        <field name="state">code</field>
+        <field name="code">model.action_sync_attendance()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+    </record> -->
+
+    <record id="ir_cron_sync_attendance_log" model="ir.cron">
+        <field name="name">Attendance: Sync From Log Transaction</field>
+        <field name="model_id" ref="model_hr_attendance"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_attendance_from_log()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+    </record>
+
+    <record id="reminder_attendance_overtime_approval" model="mail.activity.type">
+        <field name="name">Attendance Overtime Approval</field>
+        <field name="icon">fa-users</field>
+        <field name="sequence">3</field>
+    </record>
+</odoo>
