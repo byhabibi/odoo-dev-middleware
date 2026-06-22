@@ -13,10 +13,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-TEMPLATES_DIR = os.path.join(os.path.dirname(BASE_DIR), "templates")
-
-templates = Jinja2Templates(directory=TEMPLATES_DIR)
-
 app = FastAPI(title="MES Gateway - Odoo Integration", debug=True)
 
 app.include_router(machine.router)
@@ -25,6 +21,7 @@ app.include_router(barcode_router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+templates = Jinja2Templates(directory="templates")
 
 get_odoo_client()
 load_dotenv()
@@ -155,7 +152,7 @@ def machine_card_ui(request: Request, area_id: int, name: str = ""):
         context={"request": request, 'name': name, 'machine': filtered_machine}
     )
 
-@app.post("api/sync-odoo")
+@app.post("/api/sync-odoo")
 def sync_odoo():
     uid, models = get_odoo_client()
     summaries = db.get_all_summaries()
@@ -172,7 +169,6 @@ def sync_odoo():
 
 @app.get("/scan")
 async def scan_page(request: Request):
-    # Gunakan format parameter eksplisit agar lebih aman
     return templates.TemplateResponse(
         request=request,
         name="barcode_action.html",
@@ -183,7 +179,13 @@ async def scan_page(request: Request):
 
 @app.get("/scan/nf/{machine_id}")
 async def scan_page(request: Request, machine_id: str):
-    return templates.TemplateResponse("barcode_scan.html", {"request": request, "machine_id": machine_id.upper()})
+    return templates.TemplateResponse(
+        request=request,  
+        name="barcode_action.html",
+        context={
+            "machine_id": machine_id.upper() 
+        }
+    )
 
 if __name__ == "__main__":
     import uvicorn

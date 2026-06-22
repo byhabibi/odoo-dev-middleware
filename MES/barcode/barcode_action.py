@@ -51,38 +51,38 @@ async def check_attendance_dummy(employee_id):
 @router.post("/api/scan-operator")
 async def scan_operator(payload: dict):
     pin = payload.get('pin')
-    workorder_id = payload.get('workorder_id')
+    machine_id = payload.get('machine_id') 
+    print("DEBUG: Request diterima:", payload)
     
     uid, models = get_odoo_client()
+    db = os.getenv("ODOO_DB")
+    pwd = os.getenv("ODOO_PASSWORD")
     
-    # 1. Cari Employee berdasarkan PIN
-    employee = models.execute_kw(
-        os.getenv("ODOO_DB"), uid, os.getenv("ODOO_PASSWORD"), 
-        'hr.employee', 'search_read',
-        [[['pin', '=', pin]]], 
-        {'fields': ['id', 'name', 'job_id', 'department_id']}
+    # 1. Cari Employee
+    employee = models.execute_kw(db, uid, pwd, 'hr.employee', 'search_read', [[['pin', '=', pin]]], {'fields': ['id', 'name']})
+    if not employee: return {"status": "error", "message": "PIN tidak ditemukan"}
+    emp = employee[0]
+
+    # 2. Cek Absensi (Gunakan fungsi dummy yang tadi sudah kita buat)
+    if not await check_attendance_dummy(emp['id']):
+        return {"status": "not_attended", "message": "Anda belum melakukan absensi!", "employee": emp}
+
+    # 3. Cari WO yang 'ready' di mesin tersebut
+    # Kita cari workcenter yang namanya mirip machine_id (misal: "NF01")
+    wo_list = models.execute_kw(db, uid, pwd, 'mrp.workorder', 'search_read',
+        [[['workcenter_id.name', 'ilike', machine_id], ['state', 'in', ['ready', 'pending']]]],
+        {'fields': ['id', 'name', 'state'], 'limit': 1}
     )
     
-    if not employee:
-        return {"status": "error", "message": "PIN Operator tidak ditemukan"}
+    if not wo_list:
+        return {"status": "error", "message": f"Tidak ada antrian WO di {machine_id}"}
     
-    emp_data = employee[0]
+    wo = wo_list[0]
+
+    # 4. Update WO: Set Operator & Auto-Start
+    models.execute_kw(db, uid, pwd, 'mrp.workorder', 'write', [[wo['id']], {
+        'operator_id': emp['id'],
+        'state': 'progress' # Auto-start menjadi In-Progress
+    }])
     
-    # 2. Dummy Verification: Cek Absensi
-    is_absent = await check_attendance_dummy(emp_data['id'])
-    
-    if not is_absent:
-        return {
-            "status": "not_attended", 
-            "message": "Anda belum melakukan absensi wajah!",
-            "employee": emp_data
-        }
-    
-    # 3. Update MO di Odoo (jika sudah absen)
-    models.execute_kw(
-        os.getenv("ODOO_DB"), uid, os.getenv("ODOO_PASSWORD"), 
-        'mrp.workorder', 'write', 
-        [[workorder_id], {'operator_name': emp_data['name'], 'state': 'progress'}]
-    )
-    
-    return {"status": "success", "employee": emp_data}
+    return {"status": "success", "employee": emp, "wo_name": wo['name']}
