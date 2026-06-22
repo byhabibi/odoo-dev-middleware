@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import xmlrpc.client
 import uvicorn
 import db, os
-from utility import get_odoo_client
+from src.utility import get_odoo_client
 
 router = APIRouter()
 load_dotenv()

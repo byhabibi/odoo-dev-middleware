@@ -2,20 +2,29 @@ from fastapi import FastAPI, HTTPException, Request, APIRouter
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-import xmlrpc.client
-import uvicorn, db, os
-import src.machine as machine
-from utility import get_odoo_client
+import xmlrpc.client, sys, os
+from src import machine
+from src.utility import get_odoo_client
+import db as db
 from dotenv import load_dotenv
+from barcode.barcode_action import router as barcode_router
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-app = FastAPI(title="MES Gateway - Odoo Integration")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+TEMPLATES_DIR = os.path.join(os.path.dirname(BASE_DIR), "templates")
+
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
+
+app = FastAPI(title="MES Gateway - Odoo Integration", debug=True)
 
 app.include_router(machine.router)
 
+app.include_router(barcode_router)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-templates = Jinja2Templates(directory="templates")
 
 get_odoo_client()
 load_dotenv()
@@ -159,6 +168,18 @@ def sync_odoo():
     
     return {"status": 'success', "synced_coount": len(summaries)}
 
+# Endpoint buat barcode scanner
+
+@app.get("/scan")
+async def scan_page(request: Request):
+    # Gunakan format parameter eksplisit agar lebih aman
+    return templates.TemplateResponse(
+        request=request,
+        name="barcode_action.html",
+        context={}
+    )
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)
