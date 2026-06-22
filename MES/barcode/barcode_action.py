@@ -13,25 +13,39 @@ ODOO_USER = os.getenv("ODOO_USER")
 ODOO_PASSWORD = os.getenv("ODOO_PASSWORD") 
 
 
+# Fungsi Dummy untuk simulasi status absensi
 # --- KONFIGURASI TESTING ---
 # Set ke True untuk simulasi "Sudah Absen", False untuk "Belum Absen"
 TEST_MODE_ABSEN = True 
 
-# Fungsi Dummy untuk simulasi status absensi
 async def check_attendance_dummy(employee_id):
     """
-    Fungsi ini akan digantikan oleh programmer modul attendance di masa depan.
+    Fungsi ini melakukan pengecekan absensi.
+    - Jika TEST_MODE_ABSEN adalah True, simulasi dianggap sudah absen.
+    - Jika TEST_MODE_ABSEN adalah False, sistem akan mengecek data riil di Odoo.
     """
-    # Saat ingin testing, cukup ubah variabel TEST_MODE_ABSEN di atas
-    return TEST_MODE_ABSEN 
     
-    # --- CATATAN UNTUK INTEGRASI NANTI ---
-    # Saat modul attendance sudah jadi, hapus return di atas dan gunakan ini:
+    # 1. BAGIAN TESTING (DUMMY)
+    # Anda cukup ganti variabel TEST_MODE_ABSEN di atas saja
+    # Jika Anda ingin testing flow 'berhasil', ubah jadi True
+    # Jika ingin testing flow 'belum absen', ubah jadi False
+    # KITA TAMBAHKAN KONDISI: hanya gunakan dummy jika kita memang mau memaksa mode testing
+    # Jika Anda ingin selalu pakai dummy, biarkan kode ini berjalan:
+    return TEST_MODE_ABSEN 
+
+    # 2. BAGIAN ASLI (PRODUCTION)
+    # Nanti, saat programmer absensi sudah selesai, cukup hapus 
+    # baris 'return TEST_MODE_ABSEN' dan buka comment di bawah ini:
+    
     """
     uid, models = get_odoo_client()
-    attendance = models.execute_kw(ODOO_DB, uid, ODOO_PASSWORD, 'hr.attendance', 'search',
-        [[['employee_id', '=', employee_id], ['check_out', '=', False]]])
-    return len(attendance) > 0
+    # Mencari record attendance yang check_in ada tapi check_out masih False
+    attendance_ids = models.execute_kw(
+        os.getenv("ODOO_DB"), uid, os.getenv("ODOO_PASSWORD"), 
+        'hr.attendance', 'search',
+        [[['employee_id', '=', employee_id], ['check_out', '=', False]]]
+    )
+    return len(attendance_ids) > 0
     """
 
 @router.post("/api/scan-operator")

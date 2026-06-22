@@ -168,7 +168,7 @@ def sync_odoo():
     
     return {"status": 'success', "synced_coount": len(summaries)}
 
-# Endpoint buat barcode scanner
+# Endpoint buat barcode scanner boy
 
 @app.get("/scan")
 async def scan_page(request: Request):
@@ -179,6 +179,11 @@ async def scan_page(request: Request):
         context={}
     )
 
+# Gatau ini fitur apa pokoknya kerem
+
+@app.get("/scan/nf/{machine_id}")
+async def scan_page(request: Request, machine_id: str):
+    return templates.TemplateResponse("barcode_scan.html", {"request": request, "machine_id": machine_id.upper()})
 
 if __name__ == "__main__":
     import uvicorn
