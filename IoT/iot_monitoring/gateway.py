@@ -5,7 +5,7 @@ import time
 ODOO_URL = "http://localhost:8069"
 DB = "db_odoo"
 USERNAME = "admin"
-API_KEY = "3eb31d8aafb20c3d4064d964ac6d010bbd917db0"
+API_KEY = "x"
 MACHINE_CODE = "NF 04"
 STEP = 100
 
