@@ -8,7 +8,7 @@ from datetime import datetime, UTC
 url = "http://localhost:8069"
 db = "db_odoo"
 username = "admin"
-password = "eran_admin"
+password = 'x'
 
 # =========================
 # LOGIN
