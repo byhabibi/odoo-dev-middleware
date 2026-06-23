@@ -1,0 +1,317 @@
+<odoo>
+  <data>
+
+    <!-- ACTION MESIN PER AREA -->
+    <record id="action_iot_machine_by_area" model="ir.actions.act_window">
+      <field name="name">Mesin</field>
+      <field name="res_model">iot.machine</field>
+      <field name="view_mode">kanban,tree,form</field>
+      <field name="domain">[('area_id', '=', active_id)]</field>
+      <field name="context">{'default_area_id': active_id}</field>
+    </record>
+
+    <!-- KANBAN VIEW MESIN -->
+    <record id="view_iot_machine_kanban" model="ir.ui.view">
+        <field name="name">iot.machine.kanban</field>
+        <field name="model">iot.machine</field>
+        <field name="arch" type="xml">
+            <kanban class="iot_dashboard_kanban">
+                <field name="name"/>
+                <field name="workcenter_id"/>
+                <field name="production_status"/>
+                <field name="current_product"/>
+                <field name="latest_counter"/>
+                <field name="latest_timestamp"/>
+                <field name="product_qty"/>
+                <field name="plan_status"/>
+                <field name="shift_status"/>
+                <field name="mp_name"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click"
+                            style="margin:10px"
+                            t-att-style="
+                                   record.plan_status.raw_value == 'low'
+                                ? 'background:#fff5f5; border-left:6px solid #dc3545; border-radius:12px; padding:12px;'
+                                : (
+                                    record.plan_status.raw_value == 'ok'
+                                    ? 'background:#f3fff6; border-left:6px solid #28a745; border-radius:12px; padding:12px;'
+                                    : 'background:white; border-radius:12px; padding:12px;'
+                                )
+                            ">
+
+                            <!-- Nama Mesin -->
+                            <div style="
+                                display:flex;
+                                justify-content:space-between;
+                                align-items:flex-start;
+                                margin-bottom:8px;
+                            ">
+
+                                <!-- LEFT -->
+                                <div style="flex:1;">
+
+                                    <!-- Nama Mesin -->
+                                    <div style="margin-bottom:4px;">
+                                        <strong style="font-size:15px;">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+
+                                    <!-- Product -->
+                                    <div style="
+                                        font-size:11px;
+                                        color:#555;
+                                        white-space:normal;
+                                        word-break:break-word;
+                                        line-height:1.2;
+                                        max-width:180px;
+                                    ">
+                                        <span style="color:#888;">Product: </span>
+                                        <strong>
+                                            <field name="current_product"/>
+                                        </strong>
+                                    </div>
+
+                                </div>
+
+                                <!-- RIGHT -->
+                                <div style="
+                                    text-align:right;
+                                    margin-left:8px;
+                                    display:flex;
+                                    flex-direction:column;
+                                    gap:2px;
+                                    font-size:11px;
+                                    font-weight:bold;
+                                ">
+
+                                    <div>
+                                        SHIFT : <t t-esc="record.shift_status.value"/>
+                                    </div>
+
+                                    <div>
+                                        MP : <t t-esc="record.mp_name.value"/>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <!-- Counter -->
+                            <div style="text-align:center; margin:6px 0;">
+                                <div style="font-size:10px; color:#888;">COUNTER</div>
+                                    <div style="font-size:36px; font-weight:bold; color:#333;
+                                                line-height:1.1;">
+                                        <field name="latest_counter"/>
+                                    </div>
+                                <div style="font-size:11px; color:#888;">pcs</div>
+                            </div>
+
+                            <!-- Timestamp -->
+                            <div style="font-size:11px; color:#888; text-align:center;
+                                        margin:4px 0 8px 0;">
+                                <field name="latest_timestamp" widget="relative_time"/>
+                            </div>
+
+                            <!--- PLAN-->
+                            <div style="text-align:center; margin:6px 0;">
+                                <div style="font-size:11px; color:#888;">PLAN</div>
+                                    <div style="font-size:20px; font-weight:bold; color:#333;
+                                                line-height:1.1">
+                                        <field name="product_qty"/>
+                                    </div>
+                                <div style="font-size:11px; color:#888">pcs</div>
+                            </div>
+                            
+                            <!-- ACHIEVEMNT RATE -->
+                            <div class="text-center">
+                                <div> Achievement </div>
+                                <div style="font-size:24px;font-weight:bold">
+                                    <field name="achievement_rate"/>
+                                    %
+                                </div>    
+                            </div>
+
+                            <!-- Status Achieved-->
+                            <div style="display:flex; justify-content:center; margin-top:6px;">
+
+                                <t t-if="record.plan_status.raw_value == 'ok'">
+                                    <div style="
+                                        background:#d4edda;
+                                        color:#155724;
+                                        border-radius:8px;
+                                        padding:4px 8px;
+                                        font-size:11px;
+                                        font-weight:bold;
+                                        text-align:center;
+                                    ">
+                                        Target Tercapai!
+                                    </div>
+                                </t>
+ 
+                                <t t-if="record.plan_status.raw_value == 'low'">
+                                    <div style="
+                                        background:#f8d7da;
+                                        color:#721c24;
+                                        border-radius:8px;
+                                        padding:4px 8px;
+                                        font-size:11px;
+                                        font-weight:bold;
+                                        text-align:center;
+                                    ">
+                                        Belum Target!
+                                    </div>
+                                </t>
+
+                            </div>
+
+                            <!-- SPH Section -->
+                            <div style="
+                                margin-top:10px;
+                                padding-top:8px;
+                                border-top:1px solid #ddd;
+                                text-align:center;
+                            ">
+
+                                <div style="font-size:10px; color:#888;">
+                                    SPH TARGET
+                                </div>
+
+                                <div style="font-size:18px; font-weight:bold;">
+                                    <field name="sph_target"/>
+                                </div>
+
+                                <div style="font-size:10px; color:#888; margin-top:6px;">
+                                    SPH ACTUAL
+                                </div>
+
+                                <div style="font-size:18px; font-weight:bold;">
+                                    <field name="actual_sph"/>
+                                </div>
+
+                            </div>
+
+
+                            <!-- Status + Monitoring -->
+                            <div class="iot-footer" style="display:flex; gap:6px;">
+                                <t t-if="record.production_status.value == 'progress'">
+                                    <button name="action_open_workorders" type="object"
+                                            style="background:#28a745; color:white;
+                                                padding:4px 0; border-radius:6px;
+                                                font-size:11px; border:none; cursor:pointer;
+                                                flex:1;">
+                                    ● In Progress
+                                    </button>
+                                </t>
+                                <t t-else="">
+                                    <button name="action_open_workorders" type="object"
+                                            style="background:#dc3545; color:white;
+                                                padding:4px 0; border-radius:6px;
+                                                font-size:11px; border:none; cursor:pointer;
+                                                flex:1;">
+                                    ● Stop Line
+                                    </button>
+                                </t>
+                                <button name="action_open_monitoring" type="object"
+                                        style="background:#17a2b8; color:white;
+                                                padding:4px 0; border-radius:6px;
+                                                font-size:11px; border:none; cursor:pointer;
+                                                flex:1;">
+                                    📡 Monitoring
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- KANBAN VIEW AREA -->
+    <record id="view_iot_area_kanban" model="ir.ui.view">
+      <field name="name">iot.area.kanban</field>
+      <field name="model">iot.area</field>
+      <field name="arch" type="xml">
+        <kanban>
+          <field name="name"/>
+          <field name="machine_count"/>
+          <field name="running_machine"/>
+          <field name="stop_machine"/>
+          <templates>
+            <t t-name="kanban-box">
+              <div class="oe_kanban_card"
+                   style="min-height:120px; padding:16px;">
+                <div class="o_kanban_record_title" style="font-size:15px">
+                  <t t-esc="record.name.value"/>
+                </div>
+                <div class="mt-2">
+                  <div style="font-size:15px; color:#888;">INFORMASI</div>
+                  <div>
+                        Total Mesin : <t t-esc="record.machine_count.value"/>
+                  </div>
+                  <div>
+                        Mesin Stop        : <t t-esc="record.stop_machine.value"/>       
+                  </div>
+                  <div>
+                        Mesin Berjalan     : <t t-esc="record.running_machine.value"/>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <a type="action"
+                     name="%(action_iot_machine_by_area)d"
+                     class="btn btn-primary btn-sm">
+                    Lihat Mesin
+                  </a>
+                </div>
+              </div>
+            </t>
+          </templates>
+        </kanban>
+      </field>
+    </record>
+
+    <!-- FORM VIEW AREA -->
+    <record id="view_iot_area_form" model="ir.ui.view">
+      <field name="name">iot.area.form</field>
+      <field name="model">iot.area</field>
+      <field name="arch" type="xml">
+        <form string="IoT Area">
+          <sheet>
+            <group>
+              <field name="name" string="Nama Area"/>
+            </group>
+            <notebook>
+              <page string="Mesin">
+                <field name="machine_ids">
+                  <tree editable="bottom">
+                    <field name="name" string="Nama Mesin"/>
+                    <field name="workcenter_id" string="Work Center"/>
+                  </tree>
+                </field>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- ACTION AREA -->
+    <record id="action_iot_area" model="ir.actions.act_window">
+      <field name="name">IoT Area</field>
+      <field name="res_model">iot.area</field>
+      <field name="view_mode">kanban,tree,form</field>
+    </record>
+
+    <!-- MENU ROOT -->
+    <menuitem id="menu_iot_root" name="IoT Monitoring"/>
+
+    <!-- MENU AREA -->
+    <menuitem id="menu_iot_area"
+              name="Area"
+              parent="menu_iot_root"
+              action="action_iot_area"
+              sequence="1"/>
+
+  </data>
+</odoo>

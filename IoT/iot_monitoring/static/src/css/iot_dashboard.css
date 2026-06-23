@@ -1,0 +1,34 @@
+/* ==========================
+   IoT Dashboard Kanban
+========================== */
+
+.iot_dashboard_kanban{
+    /* Ukuran ideal card */
+    --KanbanRecord-width: 360px;
+
+    /* Posisi card */
+    justify-content: center !important;
+}
+
+/* Jarak antar card */
+.iot_dashboard_kanban .o_kanban_record{
+    margin: 8px !important;
+}
+
+/* Isi card */
+.iot_dashboard_kanban .oe_kanban_global_click{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Footer selalu di bawah */
+.iot_dashboard_kanban .iot-footer{
+    margin-top: auto;
+}
+
+/* Hover */
+.iot_dashboard_kanban .o_kanban_record:hover{
+    transform: translateY(-2px);
+    transition: 0.2s ease;
+}

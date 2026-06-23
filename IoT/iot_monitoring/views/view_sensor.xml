@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <record id="view_iot_production_summary_graph" model="ir.ui.view">
+      <field name="name">iot.production.summary.graph</field>
+      <field name="model">iot.production.summary</field>
+      <field name="arch" type="xml">
+        <graph string="Plan vs Actual" type="bar" stacked="0">
+          <field name="product_name" type="row"/>
+          <field name="type" type="col"/>
+          <field name="qty" type="measure"/>
+        </graph>
+      </field>
+    </record>
+
+  </data>
+</odoo>

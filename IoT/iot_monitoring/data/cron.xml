@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record id="ir_cron_sync_workorder" model="ir.cron">
+      <field name="name">IoT: Sync Workorder per Mesin</field>
+      <field name="model_id" ref="model_iot_machine"/>
+      <field name="state">code</field>
+      <field name="code">model._cron_sync_all_workorders()</field>
+      <field name="interval_number">1</field>
+      <field name="interval_type">minutes</field>
+      <field name="numbercall">-1</field>
+      <field name="active">True</field>
+    </record>
+
+    <record id="cron_generate_sph" model="ir.cron">
+      <field name="name">Generate Actual SPH</field>
+      <field name="model_id" ref="model_iot_machine"/>
+      <field name="state">code</field>
+      <field name="code">model.cron_generate_sph()</field>
+
+      <field name="interval_number">1</field>
+      <field name="interval_type">hours</field>
+
+      <field name="numbercall">-1</field>
+      <field name="active">True</field>
+    </record>
+  </data>
+</odoo>
