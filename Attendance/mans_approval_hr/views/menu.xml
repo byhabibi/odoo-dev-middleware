@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>    
+    <!-- Action Window Approval Settings -->
+    <record id="action_mans_approval_hr" model="ir.actions.act_window">
+      <field name="name">HR Approval</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">mans.approval.hr</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    <!-- Approval Settings Menuitem -->
+    <menuitem id="menu_item_dsn_approval_setting_hr"
+              name="HR"
+              sequence="10"
+              parent="dsn_approval.menu_item_dsn_approval_setting"
+              groups="dsn_approval.group_approval_manager"
+              action="action_mans_approval_hr"/>
+    <!-- To Approve Menuitem -->
+    <menuitem id="menu_item_dsn_to_approve_hr"
+                name="HR"
+                sequence="3"
+                parent="dsn_approval.menu_item_dsn_to_approve"/>
+</odoo>

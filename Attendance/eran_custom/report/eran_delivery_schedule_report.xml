@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_paperformat_delivery_schedule" model="report.paperformat">
+        <field name="name">Invoice</field>
+        <field name="default" eval="True" />
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">10</field>
+        <field name="margin_right">10</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">10</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_delivery_schedule" model="ir.actions.report">
+        <field name="name">Delivery Schedule Report</field>
+        <field name="model">eran.delivery.schedule.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_delivery_schedule</field>
+        <field name="report_file">eran_custom.eran_template_report_delivery_schedule</field>
+        <field name="print_report_name">'Delivery Schedule - %s' % object.purchase_id.name</field>
+        <field name="binding_model_id" eval="False"/>
+        <field name="paperformat_id" ref="eran_custom.eran_paperformat_delivery_schedule"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="eran_template_report_delivery_schedule">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <!-- <div class="header">
+                    </div>     -->
+                    <div class="page">
+                        <style type="text/css">
+                            thead tr th,
+                            thead tr td{
+                                text-align:center;
+                                vertical-align: middle;
+                            }
+                            tbody tr td,
+                            tbody tr td span{
+                                vertical-align: middle;
+                            }
+                            table,
+                            table th,
+                            table td{
+                                border : 1px solid black;
+                            }
+                            table th,
+                            table td{
+                                padding: 5px 5px;
+                            }
+                            table.borderless,
+                            table.borderless tr,
+                            table.borderless th,
+                            table.borderless td{
+                                border : transparent;
+                            }
+                            .text-left-right {
+                                display: flex;
+                                justify-content: space-between;
+                            }
+                        </style>
+                        <t t-set="order_sheets" t-value="o.purchase_id._get_order_sheet()"/>
+                        <t t-set="earliest_schedule_date" t-value="min(order_sheets.mapped('schedule_date'), default=datetime.date.today())"/>
+                        <t t-set="latest_schedule_date" t-value="max(order_sheets.mapped('schedule_date'), default=datetime.date.today())+datetime.timedelta(days=1)"/>
+                        <t t-set="list_date" t-value="[earliest_schedule_date+datetime.timedelta(days=x) for x in range((latest_schedule_date-earliest_schedule_date).days)]"/>
+                        <t t-if="o.purchase_id.company_id.logo">
+                            <img t-att-src="image_data_uri(o.purchase_id.company_id.logo)" style="max-height: 80px;max-width:300px;"/>
+                        </t>
+                        <br/>
+                        <b><i>DELIVERY SCHEDULE RAW MATERIAL</i></b><br/>
+                        <t t-set="purchase_date" t-value="o.purchase_id.date_approve"/>
+                        <t t-set="purchase_month" t-value="purchase_date.strftime('%B')"/>
+
+                        <b><i><span t-esc="o.purchase_id.partner_id.name.upper()"/> BULAN <span t-esc="purchase_date.strftime('%B %Y').upper()"/></i></b>
+                        <table style="">
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>NO Po.</th>
+                                    <th>DESCRIPTION</th>
+                                    <th>QTY Po.</th>
+                                    <th>UOM</th>
+                                    <th t-foreach="list_date" t-as="date">
+                                        <span t-esc="date.strftime('%d-%b')"/>
+                                    </th>
+                                    <th>TOTAL</th>
+                                </tr>
+                            </thead>
+                            <t t-set="nomor" t-value="1"/>
+                            <tbody>
+                                <tr t-foreach="o.purchase_id.order_line" t-as="line">
+                                    <t t-set="total" t-value="0"/>
+                                    <td class="text-center"><span t-esc="nomor"/></td>
+                                    <td class="text-center"><span t-field="o.purchase_id.name"/></td>
+                                    <td><span t-field="line.product_id.name"/></td>
+                                    <td class="text-center"><span t-field="line.product_qty"/></td>
+                                    <td class="text-center"><span t-field="line.product_uom"/></td>
+                                    <td class="text-center" t-foreach="list_date" t-as="date">
+                                        <t t-set="sheet_line" t-value="order_sheets.filtered(lambda sheet:sheet.schedule_date == date).sheet_line_ids.filtered(lambda sl:sl.product_id.id == line.product_id.id)"/>
+                                        <t t-set="qty" t-value="sum(sheet_line.mapped('qty_receipt'))"/>
+                                        <span t-esc="qty"/>
+                                        <t t-set="total" t-value="total+qty"/>
+                                    </td>
+                                    <td class="text-center"><t t-esc="total"/></td>
+                                    <t t-set="nomor" t-value="nomor+1"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br/>
+                        <b>NOTE:</b><br/>
+                        <t t-esc="o.notes"/>
+                        <!-- <ol style="padding-left:1rem;">
+                            <li>WAKTU PENERIMAAN ITEM JAM 08:00 S/D 15.30 WIB (MOON KONFIRMASI JIKA DILUAR JAM TERSEBUT)</li>
+                            <li>MOHON SEGERA KONFIRMASI JIKA ADA DELIVERY TIDAK SESUAI SCHEDULE INI MINIMAL H-1.</li>
+                            <li>BERAT PALLET TIDAK MELEBIHI QTY 2.500 KG</li>
+                        </ol> -->
+                        
+                        <span t-field="o.purchase_id.company_id"/><br/>
+                        <span t-field="o.purchase_id.user_id.employee_id.department_id"/><br/>
+                        <br/>
+                        <br/>
+                        Dibuat<br/>
+                        <span t-field="o.purchase_id.user_id"/>
+                    </div>
+                </t>
+            </t>   
+        </t>
+    </template>
+</odoo>

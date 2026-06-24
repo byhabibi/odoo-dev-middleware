@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_view_sale_advance_payment_inv_inherit" model="ir.ui.view">
+        <field name="name">view.sale.advance.payment.inv.inherit</field>
+        <field name="model">sale.advance.payment.inv</field>
+        <field name="inherit_id" ref="sale.view_sale_advance_payment_inv"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='deposit_account_id']" position="attributes">
+                <attribute name="attrs">{}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FIX ORDER-->
+    <record model="ir.actions.act_window" id="dsn_action_sale_forecast_fix_order">
+        <field name="name">Fix Order</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">dsn.forecast.order</field>
+        <field name="domain">[('type', '=', 'fix_order')]</field>
+        <field name="context">{'default_type': 'fix_order'}</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to start a new fix order process.
+            </p>
+            <p>
+                Fix orders plan the production finished goods.
+            </p>
+        </field>
+    </record>
+
+
+    <!--DEMAND-->
+    <record id="eran_view_demand_order_form_inherit" model="ir.ui.view">
+        <field name="name">eran.view.demand.order.form.inherit</field>
+        <field name="model">dsn.demand.planning</field>
+        <field name="inherit_id" ref="mrp_forecast_order.dsn_view_demand_order_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//group/field[@name='company_id']" position="before">
+                <label for="percen_forecast" attrs="{'invisible':  [('type', '!=', 'fix_order')]}"/>
+                <div name="percen_div" class="d-flex" attrs="{'invisible':  [('type', '!=', 'fix_order')]}">
+                    <field name="percen_forecast" class="oe_inline"/>
+                    <span class="oe_inline o_form_label mx-3"> % </span>
+                </div>
+            </xpath>
+            <xpath expr="//button[@name='set_mrp']" position="after">
+                <button name="action_report_mrp_xlsx" string="Print MRP" type="object"/>
+                <!-- <button name="%(eran_action_report_cover_letter_attachment)d" string="Print CLA" type="action" attrs="{'invisible':  [('type', '!=', 'fix_order')]}"/> -->
+                <button name="action_print_report_cla" string="Print CLA" type="object" attrs="{'invisible':  [('type', '!=', 'fix_order')]}"/>
+            </xpath>
+            <xpath expr="//label[@for='start_date']" position="before">
+                <field name="type" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"></field>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='deadline_date']" position="attributes">
+                <attribute name="required">0</attribute>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='product_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='product_id']" position="after">
+                <field name="default_code" readonly="1"/>
+                <field name="part_name" readonly="1"/>
+            </xpath>
+            <xpath expr="//button[@name='set_mrp']" position="after">
+                <button name="set_mrp_non_material" string="Set MRP Non Material" type="object" class="oe_highlight" 
+                   attrs="{'invisible':['|',('state', '=', 'draft'),('overhead_ids', '!=', [])]}" confirm="Are you sure about the quantity that will be produced?"/>
+                <button name="set_demand_forecast" string="Set Forecast" type="object" class="oe_highlight" attrs="{'invisible':['|',('state', '=', 'draft'),('demand_order_forecast_count', '!=', 0)]}" confirm="Are you sure?"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Work Center Overhead Detail" attrs="{'invisible':[('overhead_ids', '=', [])]}">
+                    <field name="overhead_ids" readonly="1">
+                        <tree editable="bottom">
+                            <field name="product_id" options="{'no_open':True,'no_create': True}" required="1" 
+                                domain="[('detailed_type', '=', 'product')]" readonly="1"/>
+                            <field name="bom_id" readonly="1"/>
+                            <field name="demand_workcenter_id" />
+                            <field name="qty" readonly="1"/>
+                            <field name="uom_id" options="{'no_open':True,'no_create': True}" required="1" force_save="1" readonly="1"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//button[@name='view_mrp']" position="after">
+                <button class="oe_stat_button" name="view_demand_order_forecast" type="object" icon="fa-book"
+                    attrs="{'invisible':[('demand_order_forecast_count','=',0)]}">
+                    <field string="Forecast" name="demand_order_forecast_count" widget="statinfo"/>
+                </button>
+                <button class="oe_stat_button" name="view_mrp_non_material" type="object" icon="fa-pencil"
+                    attrs="{'invisible':[('mrp_non_material_count','=',0)]}">
+                    <field string="MRP Non Material" name="mrp_non_material_count" widget="statinfo"/>
+                </button>
+                 <button class="oe_stat_button" name="view_deman_order_detail" type="object" icon="fa-pencil"
+                    attrs="{'invisible':[('state','=','draft')]}">
+                    <field string="Demand Order Detail" name="demand_order_detail_count" widget="statinfo"/>
+                </button>
+            </xpath>
+            <xpath expr="//group//group" position="inside">
+                <label for="forecast_start_date" string="Forecast Range"/>
+                <div>
+                    <field name="forecast_start_date"  class="oe_inline"
+                        attrs="{'readonly': [('demand_order_forecast_count', '!=', 0)]}"/> - <field name="forecast_end_date" class="oe_inline" attrs="{'readonly': [('demand_order_forecast_count', '!=', 0)]}"/>
+                </div>
+                <field name="deadline_date" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"></field>
+                <field name="forecast_ids" invisible="1"></field>
+            </xpath>
+            <xpath expr="//button[@name='action_confirm']" position="attributes">
+                <attribute name="confirm">Bill of Material in demand detail cannot be empty. Are you sure want to continue?</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_view_demand_order_filter" model="ir.ui.view">
+        <field name="name">eran.view.demand.order.filter</field>
+        <field name="model">dsn.demand.planning</field>
+        <field name="arch" type="xml">
+            <search string="Search Demand Order">
+                <field name="name" string="Document Number" filter_domain="[('name', 'ilike', self)]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Type" name="type_order" domain="[]" context="{'group_by': 'type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="mrp_forecast_order.dsn_action_demand_order">
+        <field name="name">Demand Order</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">dsn.demand.planning</field>
+        <field name="context">{}</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_type_order': 1}</field>
+        <field name="search_view_id" ref="eran_view_demand_order_filter"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to start a new demand order process.
+            </p>
+            <p>
+                Demand orders plan the production of semi-finished and finished goods and make purchases for materials.
+            </p>
+        </field>
+    </record>
+
+    <!--DEMAND LINE-->
+    <record id="mrp_forecast_order.dsn_view_demand_order_detail_filter" model="ir.ui.view">
+        <field name="name">dsn.view.demand.order.detail.filter</field>
+        <field name="model">dsn.demand.planning.line</field>
+        <field name="arch" type="xml">
+            <search string="Search Demand Order Detail">
+                <field name="demand_id" string="Demand Order" filter_domain="[('demand_id', 'ilike', self)]"/>
+                <field name="product_id" string="Product" filter_domain="[('product_id', 'ilike', self)]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Type" name="type_order" domain="[]" context="{'group_by': 'type'}"/>
+                    <filter string="Demand Order" name="demand_order" domain="[]" context="{'group_by': 'demand_id'}"/>
+                    <filter string="Deadline Date" name="deadline_date" domain="[]" context="{'group_by': 'deadline_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <record id="eran_inherit_dsn_view_demand_order_detail_tree" model="ir.ui.view">
+        <field name="name">eran.inherit.dsn.view.demand.order.detail.tree</field>
+        <field name="model">dsn.demand.planning.line</field>
+        <field name="inherit_id" ref="mrp_forecast_order.dsn_view_demand_order_detail_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='generate_mps']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='level']" position="before">
+                <header>
+                     <button name="generate_multi_mps" string="Generate MPS" type="object"/>
+                </header>
+                <field name="id" string="ID"/>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="default_code" readonly="1"/>
+                <field name="part_name" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <record model="ir.actions.act_window" id="mrp_forecast_order.dsn_action_demand_order_detail">
+        <field name="name">Demand Order Detail</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">dsn.demand.planning.line</field>
+        <field name="domain">[('demand_id.state', '!=', 'draft'), ('production_qty', '!=', 0), ('bom_type', '=', 'normal')]</field>
+        <field name="context">{'create': 0, 'copy': 0, 'delete':0, 'search_default_type_order': 1, 'search_default_demand_order': 1}</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="mrp_forecast_order.dsn_view_demand_order_detail_filter"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to start a new demand order for demand order detail process.
+            </p>
+            <p>
+                Demand orders detail plan the production of semi-finished and finished goods.
+            </p>
+        </field>
+    </record>
+
+    <!--MPS-->
+    <record id="mrp_forecast_order.dsn_view_mps_filter" model="ir.ui.view">
+        <field name="name">dsn.view.mps.filter</field>
+        <field name="model">dsn.mps</field>
+        <field name="arch" type="xml">
+            <search string="Search MPS">
+                <field name="name" string="Name" filter_domain="[('name', 'ilike', self)]"/>
+                <field name="demand_id" string="Demand Order" filter_domain="[('demand_id', 'ilike', self)]"/>
+                <field name="product_id" string="Product" filter_domain="[('product_id', 'ilike', self)]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Type" name="type_order" domain="[]" context="{'group_by': 'type'}"/>
+                    <filter string="Demand Order" name="demand_order" domain="[]" context="{'group_by': 'demand_id'}"/>
+                    <filter string="Product" name="product" domain="[]" context="{'group_by': 'product_id'}"/>
+                    <filter string="Scheduled Date" name="scheduled_date" domain="[]" context="{'group_by': 'scheduled_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_inherit_dsn_view_mps_tree" model="ir.ui.view">
+        <field name="name">eran.inherit.dsn.view.mps.tree</field>
+        <field name="model">dsn.mps</field>
+        <field name="inherit_id" ref="mrp_forecast_order.dsn_view_mps_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='scheduled_date']" position="after">
+                <field name="level" invisible="1"/>
+                <field name="shift_id" readonly="1"/>
+                <field name="leader_id" readonly="1"/>
+                <field name="operator_id" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="default_code" readonly="1"/>
+                <field name="part_name" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <record model="ir.actions.act_window" id="mrp_forecast_order.dsn_action_mps">
+        <field name="name">MPS</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">dsn.mps</field>
+        <field name="domain">[]</field>
+        <field name="context">{'create': 0, 'copy': 0, 'delete':0, 'search_default_type_order': 1, 'search_default_demand_order': 1}</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="mrp_forecast_order.dsn_view_mps_filter"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to start a new demand order for demand order detail process and generate mps from demand order detail.
+            </p>
+            <p>
+                MPS of semi-finished and finished goods.
+            </p>
+        </field>
+    </record>
+
+    <!--MRP-->
+    <record id="eran_inherit_dsn_view_mrp_tree" model="ir.ui.view">
+        <field name="name">eran.inherit.dsn.view.mrp.tree</field>
+        <field name="model">dsn.mrp</field>
+        <field name="inherit_id" ref="mrp_forecast_order.dsn_view_mrp_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="default_code" readonly="1"/>
+                <field name="part_name" readonly="1"/>
+                <field name="categ_group_id" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mrp_forecast_order.dsn_view_mrp_filter" model="ir.ui.view">
+        <field name="name">dsn.view.mrp.filter</field>
+        <field name="model">dsn.mrp</field>
+        <field name="arch" type="xml">
+            <search string="Search MPS">
+                <field name="name" string="Name" filter_domain="[('name', 'ilike', self)]"/>
+                <field name="demand_id" string="Demand Order" filter_domain="[('demand_id', 'ilike', self)]"/>
+                <field name="product_id" string="Product" filter_domain="[('product_id', 'ilike', self)]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Type" name="type_order" domain="[]" context="{'group_by': 'type'}"/>
+                    <filter string="Demand Order" name="demand_order" domain="[]" context="{'group_by': 'demand_id'}"/>
+                    <filter string="Product" name="product" domain="[]" context="{'group_by': 'product_id'}"/>
+                    <filter string="Deadline Date" name="deadline" domain="[]" context="{'group_by': 'deadline_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <record model="ir.actions.act_window" id="mrp_forecast_order.dsn_action_mrp">
+        <field name="name">MRP</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">dsn.mrp</field>
+        <field name="domain">[]</field>
+        <field name="context">{'create': 0, 'copy': 0, 'delete':0, 'search_default_type_order': 1, 'search_default_demand_order': 1}</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="mrp_forecast_order.dsn_view_mrp_filter"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to start a new demand order for demand order detail process and generate mrp from demand order.
+            </p>
+            <p>
+                MRP of material.
+            </p>
+        </field>
+    </record>
+
+    <!--MRP WIZARD-->
+    <record id="eran_inherit_dsn_mrp_wizard_form_view" model="ir.ui.view">
+        <field name="name">eran.inherit.dsn.mrp.wizard.form.view</field>
+        <field name="model">dsn.mrp.wizard</field>
+        <field name="inherit_id" ref="mrp_forecast_order.dsn_mrp_wizard_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="before">
+                <group>
+                    <group>
+                        <field name="type" readonly="1"></field>
+                    </group>
+                    <group>
+                    </group>
+                </group>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='product_qty']" position="after">
+                <field name="allocation_percentage_mrp" readonly="1" attrs="{'column_invisible': [('parent.type', '!=', 'forecast_order')]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--MRP Non Material-->
+    <record id="eran_view_mrp_non_material_tree" model="ir.ui.view">
+        <field name="name">eran.view.mrp.non.material.tree</field>
+        <field name="model">eran.mrp.non.material</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <header>
+                    <button name="merge_create_pr" type="object" string="Create Purchase Request"/>
+                </header>
+                <field name="name" readonly="1"></field>
+                <field name="demand_id" invisible="1"></field>
+                <field name="product_id" options="{'no_create': True}" readonly="1" domain="[('sale_ok', '=', True)]" invisible="1"/>
+                <field name="default_code" readonly="1"/>
+                <field name="part_name" readonly="1"/>
+                <field name="uom_id" readonly="1"></field>
+                <field name="mrp_buffer_stock"></field>
+                <button icon="fa-info-circle" name="view_buffer_stock" type="object"/>
+                <field name="demand_qty" readonly="1"></field>
+                <field name="stock_on_hand" readonly="1"></field>
+                <field name="quantity_to_buy" readonly="1"></field>
+                <field name="quantity_pr" readonly="1"></field>
+                <button icon="fa-info-circle" name="view_pr" type="object"/>
+                <field name="quantity_po" readonly="1"></field>
+                <button icon="fa-info-circle" name="view_po" type="object"/>
+                <field name="received_qty" readonly="1"></field>
+                <field name="balance" readonly="1"></field>
+                <field name="deadline_date"></field>
+                <button name="create_buffer_stock" string="Generate Buffer Stock" type="object"/>
+                <field name="purchase_request_ids" widget="many2many_tags" optional="show"  readonly="1"></field>
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="show"  readonly="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_view_mrp_non_material_filter" model="ir.ui.view">
+        <field name="name">eran.view.mrp.non.material.filter</field>
+        <field name="model">eran.mrp.non.material</field>
+        <field name="arch" type="xml">
+            <search string="Search MRP Non Material">
+                <field name="name" string="Name" filter_domain="[('name', 'ilike', self)]"/>
+                <field name="demand_id" string="Demand Order" filter_domain="[('demand_id', 'ilike', self)]"/>
+                <field name="product_id" string="Product" filter_domain="[('product_id', 'ilike', self)]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Type" name="type_order" domain="[]" context="{'group_by': 'type'}"/>
+                    <filter string="Demand Order" name="demand_order" domain="[]" context="{'group_by': 'demand_id'}"/>
+                    <filter string="Product" name="product" domain="[]" context="{'group_by': 'product_id'}"/>
+                    <filter string="Deadline Date" name="deadline" domain="[]" context="{'group_by': 'deadline_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_mrp_non_material_pivot" model="ir.ui.view">
+        <field name="name">view.mrp.non.material.pivot</field>
+        <field name="model">eran.mrp.non.material</field>
+        <field name="arch" type="xml">
+            <pivot string="MRP Non Material" sample="1">
+                <field name="deadline_date" type="row"/>
+                <field name="balance" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_mrp_non_material_graph" model="ir.ui.view">
+        <field name="name">view.mrp.non.material.graph</field>
+        <field name="model">eran.mrp.non.material</field>
+        <field name="arch" type="xml">
+            <graph string="MRP Non Material" sample="1">
+                <field name="deadline_date"/>
+                <field name="balance" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="eran_action_mrp_non_material">
+        <field name="name">MRP Non Material</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.mrp.non.material</field>
+        <field name="domain">[]</field>
+        <field name="context">{'create': 0, 'copy': 0, 'delete':0, 'search_default_type_order': 1, 'search_default_demand_order': 1}}</field>
+        <field name="view_mode">tree,pivot,graph</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('eran_view_mrp_non_material_tree')}),
+                (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_mrp_non_material_pivot')}),
+                (0, 0, {'view_mode': 'graph', 'view_id': ref('view_mrp_non_material_graph')})]"/>
+        <field name="search_view_id" ref="eran_view_mrp_non_material_filter"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to start a new demand order for demand order detail process and generate mrp non material from demand order.
+            </p>
+            <p>
+                MRP  of non material.
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_action_set_mrp_non_material_from_list" model="ir.actions.server">
+        <field name="name">Set MRP Non Material</field>
+        <field name="model_id" ref="mrp_forecast_order.model_dsn_demand_planning"/>
+        <field name="binding_model_id" ref="mrp_forecast_order.model_dsn_demand_planning"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            if records:
+                action = records.set_mrp_non_material()
+        </field>
+    </record>
+
+    <!--Demand Forecast Order-->
+    <record id="eran_view_eran_demand_order_forecast_filter" model="ir.ui.view">
+        <field name="name">eran.view.eran.demand.order.forecast.filter</field>
+        <field name="model">eran.demand.order.forecast</field>
+        <field name="arch" type="xml">
+            <search string="Search Demand Forecast">
+                <field name="name" string="Name" filter_domain="[('name', 'ilike', self)]"/>
+                <field name="demand_id" string="Demand Order" filter_domain="[('demand_id', 'ilike', self)]"/>
+                <field name="product_id" string="Product" filter_domain="[('product_id', 'ilike', self)]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Type" name="type_order" domain="[]" context="{'group_by': 'type'}"/>
+                    <filter string="Demand Order" name="demand_order" domain="[]" context="{'group_by': 'demand_id'}"/>
+                    <filter string="Product" name="product" domain="[]" context="{'group_by': 'product_id'}"/>
+                    <filter string="Forecast Date" name="forecast_date" domain="[]" context="{'group_by': 'forecast_date'}"/>
+                    <filter string="Product Type" name="product_type_order" domain="[]" context="{'group_by': 'product_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_view_eran_demand_order_forecast_tree" model="ir.ui.view">
+        <field name="name">eran.view.eran.demand.order.forecast.tree</field>
+        <field name="model">eran.demand.order.forecast</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name" readonly="1"/>
+                <!-- <field name="type" readonly="1"/>
+                <field name="product_type" readonly="1"/> -->
+                <field name="demand_id" invisible="1"></field>
+                <field name="product_id" options="{'no_create': True}" readonly="1" domain="[('sale_ok', '=', True)]" invisible="1"/>
+                <field name="default_code" readonly="1"/>
+                <field name="part_name" readonly="1"/>
+                <field name="categ_group_id" readonly="1"/>
+                <field name="demand_qty" readonly="1"></field>
+                <field name="uom_id" readonly="1"></field>
+                <field name="bom_id" readonly="1"/>
+                <field name="bom_type" readonly="1"/>
+                <field name="parent_id" readonly="1"/>
+                <field name="forecast_date" readonly="1"></field>
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="show"  readonly="1"/>
+                <field name="ref" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--MPS WIZARD-->
+    <record id="eran_inherit_dsn_mps_wizard_form_view" model="ir.ui.view">
+        <field name="name">eran.inherit.dsn.mps.wizard.form.view</field>
+        <field name="model">dsn.mps.wizard</field>
+        <field name="inherit_id" ref="mrp_forecast_order.dsn_mps_wizard_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='demand_line_id']" position="after">
+                <field name="demand_line_ids" widget="many2many_tags" readonly="1" force_save="1" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_view_forecast_order_form_inherit" model="ir.ui.view">
+        <field name="name">eran.view.forecast.order.form.inherit</field>
+        <field name="model">dsn.forecast.order</field>
+        <field name="inherit_id" ref="mrp_forecast_order.dsn_view_forecast_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='create_date']" position="after">
+                <field name="department_to" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                <field name="department_from" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                <field name="deadline" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                <field name="is_created_demand" invisible="1"></field>
+            </xpath>
+            <xpath expr="//field[@name='forecast_line_ids']/tree/field[@name='product_id']" position="after">
+                <field name="product_code" optional="show"/>
+                <field name="product_name" optional="show"/>
+                <field name="is_created_demand" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--MPS BU-->
+    <record id="dsn_view_mps_bu_tree" model="ir.ui.view">
+        <field name="name">dsn.view.mps.bu.tree</field>
+        <field name="model">dsn.mps.bu</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="level"/>
+                <field name="demand_id" invisible="1"></field>
+                <field name="demand_line_id" readonly="1"></field>
+                <field name="product_id" options="{'no_create': True}" readonly="1" domain="[('sale_ok', '=', True)]"/>
+                <field name="uom_id" readonly="1"></field>
+                <field name="bom_id" readonly="1"></field>
+                <field name="production_qty" attrs="{'readonly': [('mo_ids', '!=', [])]}"></field>
+                <field name="balance" readonly="1"></field>
+                <field name="scheduled_date" attrs="{'readonly': [('mo_ids', '!=', [])]}"></field>
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="show" readonly="1"/>
+                <field name="mo_ids" widget="many2many_tags" readonly="1"></field>
+                <field name="state" readonly="1" decoration-success="state in ('done', 'to_close')" decoration-warning="state == 'progress'" decoration-info="state == 'confirmed'" decoration-danger="state == 'cancel'" decoration-muted="state == 'draft'" widget="badge" class="text-dark"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="dsn_view_mps_bu_filter" model="ir.ui.view">
+        <field name="name">dsn.view.mps.bu.filter</field>
+        <field name="model">dsn.mps.bu</field>
+        <field name="arch" type="xml">
+            <search string="Search MPS">
+                <field name="demand_id" string="Demand Order" filter_domain="[('demand_id', 'ilike', self)]"/>
+                <field name="product_id" string="Product" filter_domain="[('product_id', 'ilike', self)]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Demand Order" name="demand_order" domain="[]" context="{'group_by': 'demand_id'}"/>
+                    <filter string="Product" name="product" domain="[]" context="{'group_by': 'product_id'}"/>
+                    <filter string="Scheduled Date" name="scheduled_date" domain="[]" context="{'group_by': 'scheduled_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

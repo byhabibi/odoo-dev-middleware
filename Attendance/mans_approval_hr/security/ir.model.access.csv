@@ -1,0 +1,4 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_mans_approval_hr","access_mans_approval_hr","model_mans_approval_hr","dsn_approval.group_approval_user",1,1,1,1
+"access_mans_hr_approval_user_line","access_mans_hr_approval_user_line","model_mans_hr_approval_user_line","dsn_approval.group_approval_user",1,1,1,1
+"access_mans_hr__approval_job_line","access_mans_hr_approval_job_line","model_mans_hr_approval_job_line","dsn_approval.group_approval_user",1,1,1,1

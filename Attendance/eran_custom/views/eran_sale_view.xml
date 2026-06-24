@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_sale_order_inherit_form_view" model="ir.ui.view">
+        <field name="name">sale.order.view.form.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- <xpath expr="//field[@name='pricelist_id']" position="after">
+                <field name="expiration_date"/>
+            </xpath> -->
+            <xpath expr="//button[@name='action_draft']" position="attributes">
+                <attribute name="string">Reset to Draft</attribute>
+            </xpath>
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="order_date" invisible="1"/>
+                <field name="po_ref" attrs="{'readonly': [('state', 'in', ('sale', 'done', 'cancel'))]}"/>
+                <field name="start_date" attrs="{'readonly': [('state', 'in', ('sale', 'done', 'cancel'))]}"/>
+                <field name="check_osheet_so" invisible="1"/>
+                <!-- <field name="qty_os" invisible="1"/> -->
+            </xpath>
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="statusbar_visible">draft,sale</attribute>
+            </xpath>
+            <xpath expr="//div/button[@name='action_view_invoice']" position="before">
+                <button type="object"
+                    name="action_view_delivery_order_on_picking"
+                    class="oe_stat_button"
+                    icon="fa-truck" attrs="{'invisible':[('picking_count_delivery','=', 0)]}">
+                    <field name="picking_count_delivery" widget="statinfo" string="Delivery"/>
+                </button>
+            </xpath>
+            <xpath expr="//div/button[@name='action_view_invoice']" position="after">
+                <button type="object"
+                    name="action_view_order_sheet"
+                    class="oe_stat_button"
+                    icon="fa-pencil-square-o" attrs="{'invisible':[('order_sheet_count','=', 0)]}">
+                    <field name="order_sheet_count" widget="statinfo" string="Order Sheet"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook/page[@name='order_lines']/group/group[2]/field[@name='tax_totals']" position="before">
+                <button colspan="2" name="compute_global_discount" string="Discount" type="object" class="oe_right btn-secondary" attrs="{'invisible':['|','|', ('order_sheet_count','>', 0), ('picking_count_delivery','>',0), ('invoice_count','>',0)]}" />
+            </xpath>
+            <xpath expr="//page[@name='order_lines']/field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
+                <field name="order_sheet_line_qty" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
+                <field name="product_code" optional="show"/>
+                <field name="product_name" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='qty_delivered']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='qty_delivered']" position="after">
+                <field name="quantity_delivery" />
+            </xpath>
+
+            <xpath expr="//page/group[@name='note_group']/group/field[@name='tax_totals']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//page/group[@name='note_group']/group/field[@name='tax_totals']" position="after">
+                <field name="amount_untaxed" />
+                <field name="dpp"  widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="amount_tax" />
+                <field name="amount_total" class="oe_subtotal_footer_separator"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <record id="eran_view_order_form_inherit_sale_stock_inherit" model="ir.ui.view">
+        <field name="name">eran.view.order.form.inherit.sale.stock.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_stock.view_order_form_inherit_sale_stock"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_view_delivery']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="sale.action_orders" model="ir.actions.act_window">
+        <field name="domain">[('state', 'not in', ('sent', 'cancel'))]</field>
+    </record>
+
+    <record id="eran_sales_perfomance_view_tree" model="ir.ui.view">
+        <field name="name">eran.forecast.line.view.tree</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <tree string="Sales Perfomance" create="false" edit="false" delete="false">
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="price_so"/>
+                <field name="date_so"/>
+                <field name="qty_so"/>
+                <field name="price_subtotal_so"/>
+                <field name="date_os" widget="date"/>
+                <field name="qty_os"/>
+                <field name="price_subtotal_os"/>
+                <field name="date_picking_id"/>
+                <field name="quantity_done"/>
+                <field name="price_subtotal_picking"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_sales_perfomance_action" model="ir.actions.act_window">
+        <field name="name">Sales Perfomance</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.move</field>
+        <field name="view_mode">tree,pivot</field>
+        <field name="domain">[('picking_type_id', '=', 2)]</field>
+        <field name="context">{}</field>
+        <field name="view_id" ref="eran_sales_perfomance_view_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new order sheet
+            </p>
+        </field>
+    </record>
+    <record id="eran_sales_order_line_view_tree" model="ir.ui.view">
+        <field name="name">eran.sale.order.line.view.tree</field>
+        <field name="model">sale.order.line</field>
+        <field name="arch" type="xml">
+            <tree string="Sales Order Line" create="false" edit="false" delete="false">
+                <field name="currency_id" invisible="1"/>
+                <field name="product_code"/>
+                <field name="product_name"/>
+                <!-- <field name="product_template_id"/> -->
+                <!-- <field name="name"/> -->
+                <field name="product_uom_qty"/>
+                <field name="quantity_delivery"/>
+                <field name="qty_invoiced"/>
+                <field name="product_uom"/>
+                <field name="price_unit"/>
+                <field name="tax_id" widget="many2many_tags"/>
+                <field name="price_subtotal" widget="monetary"/>
+                <field name="delivery_amount" widget="monetary"/>
+                <field name="untaxed_amount_to_invoice" widget="monetary"/>
+                <field name="untaxed_amount_invoiced" widget="monetary"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_sales_order_line_action" model="ir.actions.act_window">
+        <field name="name">Sales Order Line</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sale.order.line</field>
+        <field name="view_mode">tree,pivot</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="view_id" ref="eran_sales_order_line_view_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new order sheet
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_forecast_line_view_tree" model="ir.ui.view">
+        <field name="name">eran.forecast.line.view.tree</field>
+        <field name="model">dsn.forecast.order.line</field>
+        <field name="arch" type="xml">
+            <tree string="Forecast Order Line" create="false" edit="false" delete="false">
+                <field name="product_id"/>
+                <field name="partner_id"/>
+                <field name="forecast_id"/>
+                <field name="forecast_date"/>
+                <field name="price"/>
+                <field name="quantity"/>
+                <field name="uom_id"/>
+                <field name="total"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_forecast_line_action" model="ir.actions.act_window">
+        <field name="name">Forecast Order Line</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">dsn.forecast.order.line</field>
+        <field name="view_mode">tree,pivot</field>
+        <field name="domain">[('type', '=', 'forecast_order')]</field>
+        <field name="context">{'default_type': 'forecast_order'}</field>
+        <field name="view_id" ref="eran_forecast_line_view_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new order sheet
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_fix_order_line_view_tree" model="ir.ui.view">
+        <field name="name">eran.forecast.line.view.tree</field>
+        <field name="model">dsn.forecast.order.line</field>
+        <field name="arch" type="xml">
+            <tree string="Fix Order Line" create="false" edit="false" delete="false">
+                <field name="product_id"/>
+                <field name="partner_id"/>
+                <field name="forecast_id"/>
+                <field name="forecast_date"/>
+                <field name="price"/>
+                <field name="quantity"/>
+                <field name="uom_id"/>
+                <field name="total"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="dsn_forecast_order_line_view_search" model="ir.ui.view">
+        <field name="name">dsn.forecast.order.line.view.search</field>
+        <field name="model">dsn.forecast.order.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <group expand="0" string="Group By">
+                    <filter string="Category Group" name="category_group" domain="[]" context="{'group_by':'category_group_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_fix_order_line_action" model="ir.actions.act_window">
+        <field name="name">Fix Order Line</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">dsn.forecast.order.line</field>
+        <field name="view_mode">tree,pivot</field>
+        <field name="domain">[('type', '=', 'fix_order')]</field>
+        <field name="context">{'default_type': 'fix_order'}</field>
+        <field name="view_id" ref="eran_fix_order_line_view_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new order sheet
+            </p>
+        </field>
+    </record>
+
+    <!-- Order Sheet Purchase Reporting -->
+    <record id="eran_os_vendor_line_tree_view" model="ir.ui.view">
+        <field name="name">eran.os.vendor.view.tree</field>
+        <field name="model">eran.order.sheet.line</field>
+        <field name="arch" type="xml">
+            <tree string="Report Order Sheet Line Vendor Reporting" create="false" edit="false" delete="false">
+                <field name="os_name" string="Order Sheet"/>
+                <field name="partner_id"/>
+                <field name="schedule_date"/>
+                <field name="no_order_sheet"/>
+                <field name="purchase_id" string="Purchase Order"/>
+                <field name="product_id"/>
+                <field name="picking_id"/>
+                <field name="qty_receipt" string="Transfer"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="eran_sale_os_vendor_line_action" model="ir.actions.act_window">
+        <field name="name">Report Order Sheet Line Vendor</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.order.sheet.line</field>
+        <field name="view_mode">tree,pivot,graph</field>   
+        <field name="view_id" ref="eran_os_vendor_line_tree_view"/>
+        <field name="context">{'create':False, 'delete':False}</field>
+        <field name="domain">[('order_sheet_id.type_order','=','purchase')]</field>
+    </record>
+
+    <!-- Order Delivery Sale Reporting -->
+    <record id="eran_os_customer_line_tree_view" model="ir.ui.view">
+        <field name="name">eran.os.customer.view.tree</field>
+        <field name="model">eran.order.sheet.line</field>
+        <field name="arch" type="xml">
+            <tree string="Report Order Delivery Customer Reporting" create="false" edit="false" delete="false">
+                <field name="partner_id" string="Customer Name"/>
+                <field name="picking_id" string="DO No"/>
+                <field name="effective_date" string="DO Date"/>
+                <field name="dn_back_date"/>
+                <field name="dn_out_date"/>
+                <field name="sale_id" string="SO No"/>
+                <field name="po_ref" string="No Reference"/>
+                <field name="product_id" string="Product Name"/>
+                <field name="qty_receipt" string="Order Sheet Qty"/>
+                <field name="quantity_done" />
+                <field name="sale_price_unit" />
+                <field name="sale_amount" />
+                <field name="amount_plan" />
+                <field name="invoice_id" />
+                <field name="os_name" string="Order Sheet"/> 
+                <field name="transfer_state" />               
+            </tree>
+        </field>
+    </record>
+    
+    <record id="eran_os_customer_line_tree_view_2" model="ir.ui.view">
+        <field name="name">eran.os.customer.view.tree.2</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <tree string="Report Order Delivery Customer Reporting 2" create="false" edit="false" delete="false">
+                <field name="partner_id" string="Customer Name"/>
+                <field name="picking_id" string="DO No"/>
+                <field name="effective_date" string="DO Date"/>
+                <field name="sale_id" string="SO No"/>
+                <field name="po_ref" string="No Reference"/>
+                <field name="product_id" string="Product Name"/>
+                <field name="qty_receipt" string="Order Sheet Qty"/>
+                <field name="quantity_done" />
+                <field name="quantity_after_returns" />
+                <field name="delivery_amount" />
+                <field name="sale_price_unit" />
+                <!-- <field name="sale_amount" /> -->
+                <field name="amount_plan" />
+                <field name="invoice_id" />
+                <field name="os_name" string="Order Sheet"/> 
+                <field name="transfer_state" />              
+                <field name="dn_back_date" />   
+                <field name="dn_out_date"/>           
+                <field name="ready_to_invoice_date" />              
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_data_entry_sto_line_tree_view" model="ir.ui.view">
+        <field name="name">eran.data.entry.sto.line</field>
+        <field name="model">eran.stock.move.opname.line</field>
+        <field name="arch" type="xml">
+            <tree string="Data Entry STO Line">
+                <field name="count_date"/>
+                <field name="no_tag"/>
+                <field name="tag_sto_id"/>
+                <field name="product_id"/>
+                <field name="locations"/>
+                <field name="quantity_done"/>
+                <field name="value"/>
+                <field name="categ_id"/>
+                <field name="category_group_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_data_entry_sto_line_form_view" model="ir.ui.view">
+        <field name="name">eran.data.entry.sto.line.form</field>
+        <field name="model">eran.stock.move.opname.line</field>
+        <field name="arch" type="xml">
+            <form string="Data Entry STO Line">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_id" readonly="1"/>
+                            <field name="stock_opname_id" readonly="1"/>
+                            <field name="locations" readonly="1"/>
+                            <field name="quantity_done_kg" readonly="1"/>
+                            <field name="product_uom" readonly="1"/>
+                            <field name="is_weight" readonly="1"/>
+                            <field name="no_tag" readonly="1"/>
+                            <field name="state" readonly="1"/>
+                            <field name="currency_id" readonly="1"/>
+                            <field name="stock_opname_line_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="company_id" readonly="1"/>
+                            <field name="lot_id" readonly="1"/>
+                            <field name="quantity_done" readonly="1"/>
+                            <field name="tracing" readonly="1"/>
+                            <field name="count_date" readonly="1"/>
+                            <field name="tag_sto_id" readonly="1"/>
+                            <field name="value" readonly="1"/>
+                            <field name="categ_id" readonly="1"/>
+                            <field name="category_group_id" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="eran_data_entry_sto_line_search_view" model="ir.ui.view">
+        <field name="name">eran.data.entry.sto.line.search</field>
+        <field name="model">eran.stock.move.opname.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <group expand="0" string="Group By">
+                    <filter string="Product" name="groupby_product_id" domain="[]" context="{'group_by': 'product_id'}"/>
+                    <filter string="Product Category" name="groupby_categ_id" domain="[]" context="{'group_by': 'categ_id'}"/>
+                    <filter string="Category Group" name="groupby_category_group_id" domain="[]" context="{'group_by': 'category_group_id'}"/>
+                    <filter string="State" name="groupby_state" domain="[]" context="{'group_by': 'state'}"/>
+                    <filter string="Tag STO" name="groupby_tag_sto_id" domain="[]" context="{'group_by': 'tag_sto_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- code baru -->
+    <record id="stock_view_move_search_inherit" model="ir.ui.view">
+        <field name="name">stock.view.move.search.inherit.dn.back</field>
+        <field name="model">stock.move</field>
+        <field name="inherit_id" ref="stock.view_move_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='groupby_date']/.." position="inside">
+                <filter string="DN Back" name="groupby_dn_back_date" domain="[]" context="{'group_by': 'dn_back_date'}"/>
+                <filter string="Ready to invoice date" name="groupby_ready_to_invoice_date" domain="[]" context="{'group_by': 'ready_to_invoice_date'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- code baru stock.valuation -->
+    <record id="eran_stock_valuation_layer_tree_inherit" model="ir.ui.view">
+        <field name="name">eran.stock.valuation.layer.treeinherit</field>
+        <field name="model">stock.valuation.layer</field>
+        <field name="inherit_id" ref="stock_account.stock_valuation_layer_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='value']" position="after">
+                <field name="product_category_id" force_save="1"/>
+                <field name="category_group_id" force_save="1"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <record id="view_inventory_valuation_search_inherit" model="ir.ui.view">
+        <field name="name">view.inventory.valuation.search.inherit</field>
+        <field name="model">stock.valuation.layer</field>
+        <field name="inherit_id" ref="stock_account.view_inventory_valuation_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='group_by_product_id']/.." position="inside">
+                <filter string="Product Category" name="groupby_product_category_id" domain="[]" context="{'group_by': 'product_category_id'}"/>
+                <filter string="Category Group" name="groupby_category_group_id" domain="[]" context="{'group_by': 'category_group_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    
+    <record id="eran_order_sheet_line_view_search" model="ir.ui.view">
+        <field name="name">eran.order.sheet.line.view.search</field>
+        <field name="model">eran.order.sheet.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <group expand="0" string="Group By">
+                    <filter string="Category Group" name="category_group" domain="[]" context="{'group_by':'category_group_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_order_sheet_line_view_pivot" model="ir.ui.view">
+        <field name="name">eran.order.sheet.line.view.pivot</field>
+        <field name="model">eran.order.sheet.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Order Sheet Line">
+                <field name="partner_id" type="row"/>
+                <field name="picking_id" type="row"/>
+                <field name="schedule_date" type="row"/>
+                <field name="effective_date" type="row"/>
+                <field name="qty_receipt" string="Order Sheet Qty" type="measure"/>
+                <field name="quantity_done" type="measure"/>
+                <field name="quantity_after_returns" type="measure"/>
+                <field name="sale_price_unit" type="measure"/>
+                <field name="sale_amount" type="measure"/>
+                <field name="amount_plan" type="measure"/>
+                <field name="delivery_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="eran_order_sheet_line_view_pivot_2" model="ir.ui.view">
+        <field name="name">eran.order.sheet.line.view.pivot.2</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <pivot string="Order Sheet Line">
+                <field name="partner_id" type="row"/>
+                <field name="picking_id" type="row"/>
+                <field name="date_os" type="row"/>
+                <field name="effective_date" type="row"/>
+                <field name="qty_receipt" string="Order Sheet Qty" type="measure"/>
+                <field name="quantity_done" type="measure"/>
+                <field name="quantity_after_returns" type="measure"/>
+                <field name="sale_price_unit" type="measure"/>
+                <field name="sale_amount" type="measure"/>
+                <field name="amount_plan" type="measure"/>
+                <field name="delivery_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <!-- <record id="eran_sale_os_customer_line_action" model="ir.actions.act_window">
+        <field name="name">Report Order Delivery Customer</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.order.sheet.line</field>
+        <field name="view_mode">tree,pivot,graph</field>   
+        <field name="view_id" ref="eran_os_customer_line_tree_view"/>
+        <field name="context">{'create':False, 'delete':False}</field>
+        <field name="domain">[('order_sheet_id.type_order','=','sale')]</field>
+    </record> -->
+    
+    <record id="eran_sale_os_customer_line_action_2" model="ir.actions.act_window">
+        <field name="name">Report Order Delivery Customer 2</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.move</field>
+        <field name="view_mode">tree,pivot,graph</field>   
+        <field name="view_id" ref="eran_os_customer_line_tree_view_2"/>
+        <field name="context">{'create':False, 'delete':False}</field>
+        <field name="domain">[('picking_id.picking_type_code','=','outgoing')]</field>
+    </record>
+    
+    <record id="eran_data_entry_sto_line_action" model="ir.actions.act_window">
+        <field name="name">Data Entry STO Line</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.stock.move.opname.line</field>
+        <field name="view_mode">tree,pivot,form</field>   
+        <field name="view_id" ref="eran_data_entry_sto_line_tree_view"/>
+        <field name="context">{'create':False, 'delete':False}</field>
+        <field name="domain">[]</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_paperformat_report_stock_opname" model="report.paperformat">
+        <field name="name">Label STO Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">custom</field>
+        <field name="page_height">140</field>
+        <field name="page_width">100</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">35</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="eran_action_report_stock_opname" model="ir.actions.report">
+        <field name="name">Label STO</field>
+        <field name="model">stock.quant</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_label_sto_report</field>
+        <field name="report_file">eran_custom.eran_label_sto_report</field>
+        <field name="print_report_name">'Label STO'</field>
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_stock_opname"/>
+    </record>
+
+    <template id="eran_label_sto_report">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page" style="font-size:14px; page-break-after:always;">
+                    <div class="row" style="border-bottom:2px solid;">
+                        <div class="col-12" style="text-align:center;">
+                            <span style="font-size:16px;" t-field="o.company_id"/><br/>
+                            <span>TAG STOCK OPNAME</span>
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="col-3">NO TAG</div>
+                                <div class="col-1">:</div>
+                                <div class="col-8"><t t-esc="o_index + 1"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3">LOCATION</div>
+                                <div class="col-1">:</div>
+                                <div class="col-8"><span t-field="o.location_id"/></div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="col-3">PRINT DATE</div>
+                                <div class="col-1">:</div>
+                                <div class="col-8"><span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3">COUNT DATE</div>
+                                <div class="col-1">:</div>
+                                <div class="col-8"><t t-foreach="data_date_counter" t-as="var">
+                                    <span t-esc="var" t-options="{&quot;widget&quot;: &quot;date&quot;,&quot;format&quot;: &quot;dd/MM/yyyy&quot;}"/>
+                                </t></div>
+                            </div>
+                        </div>
+                    </div><br/>
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-bordered table-borderless">
+                                <thead>
+                                    <tr style="text-align:center;">
+                                        <td style="border:1px solid; width:45%;">MATERIAL DESCRIPTION</td>
+                                        <td style="border:1px solid; width:15%;">COUNTED QTY</td>
+                                        <td style="border:1px solid; width:15%;">UOM</td>
+                                        <td style="border:1px solid; width:25%;">NOTE</td>
+                                    </tr>
+                                </thead>
+                                <tbody style="border-bottom:1px solid;">
+                                    <tr>
+                                        <td style="padding:1px; border-left:1px solid; border-right:1px solid; height:90px; width:45%; vertical-align:middle;">
+                                            <span t-field="o.product_id"/><br/>
+                                            <span t-field="o.lot_id"/>
+                                        </td>
+                                        <td style="padding:1px; border-right:1px solid; text-align:center; height:90px; width:15%; vertical-align:middle;">
+                                            <t t-if="o.inventory_quantity!=0">
+                                                <span t-field="o.inventory_quantity"/>
+                                            </t>
+                                        </td>
+                                        <td style="padding:1px; border-right:1px solid; text-align:center; height:90px; width:15%; vertical-align:middle;">
+                                            <span t-field="o.product_uom_id"/>
+                                        </td>
+                                        <td style="padding:1px; border-right:1px solid; height:90px; width:25%; vertical-align:middle;"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div><br/>
+                    <div class="row">
+                        <div class="col-8">
+                            <table class="table table-bordered table-borderless">
+                                <tr>
+                                    <td style="text-align:center; border:1px solid;" colspan="4">TANDA TANGAN</td>
+                                </tr>
+                                <tr>
+                                    <td style="border:1px solid; height:65px; width:25%;"/>
+                                    <td style="border:1px solid; height:65px; width:25%;"/>
+                                    <td style="border:1px solid; height:65px; width:25%;"/>
+                                    <td style="border:1px solid; height:65px; width:25%;"/>
+                                </tr>
+                                <tr style="text-align:center; font-size:12px;">
+                                    <td style="padding:1px; border:1px solid; height:20px; width:25%;"><t t-foreach="data_counter" t-as="var">
+                                        <span t-esc="var"/>
+                                    </t></td>
+                                    <td style="padding:1px; border:1px solid; height:20px; width:25%;"></td>
+                                    <td style="padding:1px; border:1px solid; height:20px; width:25%;"></td>
+                                    <td style="padding:1px; border:1px solid; height:20px; width:25%;"></td>
+                                </tr>
+                                <tr style="text-align:center;">
+                                    <td style="border:1px solid; width:25%;">COUNTER</td>
+                                    <td style="border:1px solid; width:25%;">CHECKER</td>
+                                    <td style="border:1px solid; width:25%;">DATA ENTRY</td>
+                                    <td style="border:1px solid; width:25%;">INV CONTROL</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div><br/>
+                    <div class="row">
+                        <div class="col-8"><span font-size="11px">Inv. Control 2, Warehouse/PIC Area 3 Barang</span></div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

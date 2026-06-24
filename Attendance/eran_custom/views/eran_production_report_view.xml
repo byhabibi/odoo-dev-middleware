@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_production_report_search" model="ir.ui.view">
+        <field name="name">eran.production.report.search</field>
+        <field name="model">eran.production.report</field>
+        <field name="arch" type="xml">
+            <search string="Search Production Report">
+                <field name="manufacture_id"/>
+                <field name="product_id"/>
+                <filter string="Category Group" name="groupby_category_group_id" domain="[]" context="{'group_by': 'category_group_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_production_report_tree_view" model="ir.ui.view">
+        <field name="name">eran.production.report.tree.view</field>
+        <field name="model">eran.production.report</field>
+        <field name="arch" type="xml">
+            <tree string="Laporan Hasil Produksi" create="false" delete="false">
+                <field name="manufacture_id" string="No. MO"/>
+                <field name="workorder_id" invisible="1"/>
+                <field name="date"/>
+                <field name="operation"/>
+                <field name="mesin"/>
+                <field name="time_cycle" widget="float_time"/>
+                <field name="qty_stroke"/>
+                <field name="product_id"/>
+                <field name="lot_id"/>
+                <field name="plan_qty"/>
+                <field name="shift_id"/>
+                <field name="operator_id"/>
+                <field name="operator_id2"/>
+                <field name="leader_id"/>
+                <field name="product_uom_id"/>
+                <field name="quantity_ok"/>
+                <field name="quantity_ng"/>
+                <field name="problem_ng_ids" widget="many2many_tags"/>
+                <field name="line_stop_ids" widget="many2many_tags"/>
+                <field name="workcenter_group_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_production_report_view_graph" model="ir.ui.view">
+        <field name="name">eran.production.report.view.graph</field>
+        <field name="model">eran.production.report</field>
+        <field name="arch" type="xml">
+            <graph string="Laporan Hasil Produksi" type="bar">
+                <field name="manufacture_id"/>
+                <field name="workorder_id"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="eran_production_report_pivot_view" model="ir.ui.view">
+        <field name="name">eran.production.report.pivot.view</field>
+        <field name="model">eran.production.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Laporan Hasil Produksi">
+                <field name="manufacture_id" type="row"/>
+                <field name="workorder_id" type="row"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="eran_production_report_action" model="ir.actions.act_window">
+        <field name="name">Laporan Hasil Produksi</field>
+        <field name="res_model">eran.production.report</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_id" ref="eran_production_report_tree_view"/>
+        <field name="view_mode">tree,graph,pivot</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('eran_production_report_tree_view')}),
+                (0, 0, {'view_mode': 'pivot', 'view_id': ref('eran_production_report_pivot_view')}),
+                (0, 0, {'view_mode': 'graph', 'view_id': ref('eran_production_report_view_graph')})]"/>
+        <field name="search_view_id" ref="eran_production_report_search"/>
+    </record>
+</odoo>

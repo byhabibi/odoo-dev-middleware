@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_paperformat_report_order_sheet_customer" model="report.paperformat">
+        <field name="name">Order Delivery Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">40</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">35</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="eran_action_report_order_sheet_customer" model="ir.actions.report">
+        <field name="name">Order Delivery</field>
+        <field name="model">eran.order.sheet</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_order_sheet_customer</field>
+        <field name="report_file">eran_custom.eran_template_order_sheet_customer</field>
+        <field name="print_report_name">'Order Delivery - %s' % object.name</field>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_order_sheet_customer"/>
+    </record>
+
+    <template id="eran_template_order_sheet_customer">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="header">
+                        <div class="row mt-3">
+                            <div class="col-5">
+                                <div>
+                                    <img t-att-src="image_data_uri(o.company_id.logo)" style="width:200px;height:100px;" alt="Logo"/>
+                                </div>
+                            </div>
+                            <div class="col-5 mt-5">
+                                <div style="font-size:24px;">
+                                    <span>ORDER SHEET</span>
+                                </div>
+                            </div>
+                            <div class="col-2 text-center">
+                                <table class="table-borderless">
+                                    <tr>
+                                        <td style="text-align:center;">
+                                            <div style="border:1px solid;width:110px;">
+                                                <span style="font-size:18px;">REQUEST</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:center; padding-top:10px;">
+                                            <div t-if="o.picking_id" t-field="o.picking_id.name" t-options="{'widget': 'barcode','symbology':'QR', 'width': 60, 'height': 60, 'img_style': 'max-height:50pt;max-width:100%;', 'img_align': 'center'}"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div class="page">
+                        <style type="text/css">
+                            table,
+                            table th,
+                            table td{
+                                font-size:14px;
+                                padding: 2px;
+                            }
+                        </style>
+                        <div class="row">
+                            <table class="table-borderless">
+                                <tr>
+                                    <td style="width:18%;">Customer Name</td>
+                                    <td style="width:2%;">:</td>
+                                    <td style="width:35%;"><span t-field="o.partner_id.name"/></td>
+                                    <td style="width:18%; padding-left:5px;">Order Sheet No</td>
+                                    <td style="width:2%;">:</td>
+                                    <td style="width:25%;"><span t-field="o.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td rowspan="3" style="vertical-align:top;">Deliver To</td>
+                                    <td rowspan="3" style="vertical-align:top;">:</td>
+                                    <td rowspan="3" style="vertical-align:top;"><span t-field="o.partner_id.street"/></td>
+                                    <td style="padding-left:5px;">Creation Date</td>
+                                    <td>:</td>
+                                    <td><span t-field="o.create_date" t-options="{'widget': 'date'}"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-left:5px;">Printed Date</td>
+                                    <td>:</td>
+                                    <!-- <td><span t-esc="datetime.datetime.now()" t-options="{'widget': 'datetime'}"/></td> -->
+                                    <td>
+                                        <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M:%S')"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-left:5px;">Last Updated Date</td>
+                                    <td>:</td>
+                                    <td><span t-field="o.write_date"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Schedule Delivery Date</td>
+                                    <td>:</td>
+                                    <td><span t-field="o.schedule_date"/></td>
+                                </tr>    
+                            </table>
+                        </div>
+                        <div class="row mt-3">
+                            <table class="table table-sm" style="vertical-align:middle; text-align:center; border:1px solid;">
+                                <thead>
+                                    <tr style="border:1px solid;">
+                                        <th style="border:1px solid;"><span>No</span></th>
+                                        <th style="border:1px solid;"><span>Material</span></th>
+                                        <th style="border:1px solid;"><span>Material Description</span></th>
+                                        <th style="border:1px solid;"><span>Qty</span></th>
+                                        <th style="border:1px solid;"><span>UOM</span></th>
+                                        <th style="border:1px solid;"><span>No. PO</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="no" t-value="1"/>
+                                    <tr t-foreach="o.sheet_line_ids" t-as="line" style="border:1px solid;">
+                                        <td style="border:1px solid;"><span t-esc="no"/></td>
+                                        <td style="border:1px solid;"><span t-field="line.product_code"/></td>
+                                        <td style="border:1px solid;"><span t-field="line.product_name"/></td>
+                                        <td style="border:1px solid;"><span t-field="line.qty_receipt"/></td>
+                                        <td style="border:1px solid;"><span t-field="line.uom_id.name"/></td>
+                                        <td style="border:1px solid;"><span t-field="line.sale_id.po_ref"/></td>
+                                        <t t-set="no" t-value="no + 1"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row mt-3" style="page-break-inside:avoid;">
+                            <div class="col-2">
+                            
+                            </div>
+                            <div class="col-10">
+                                <table class="table table-sm" style="border:1px solid; width:100%;">
+                                    <tr style="border:1px solid">
+                                        <td style="text-align:center; width:30%; border:1px solid; height:20px;">
+                                            CREATED BY
+                                        </td>
+                                        <td style="text-align:center; width:35%; border:1px solid; height:20px;">
+                                            PREPARED BY
+                                        </td>
+                                        <td style="text-align:center; width:35%; border:1px solid; height:20px;">
+                                            CHECKED BY
+                                        </td>
+                                    </tr>
+                                    <tr style="border:1px solid">
+                                        <td style="height:160px; vertical-align:top; text-align:center; border:1px solid">
+                                            
+                                        </td>
+                                        <td style="height:160px; vertical-align:top; text-align:center; border:1px solid">
+                                            <!-- <img class="img" src="/eran_custom/static/src/img/img-approved.jpeg" style="height:155px;width:130px;"/> -->
+                                        </td>
+                                        <td style="height:160px; vertical-align:top; text-align:center; border:1px solid">
+                                            <!-- <img class="img" src="/eran_custom/static/src/img/img-approved.jpeg" style="height:155px;width:130px;"/> -->
+                                        </td>
+                                    </tr>
+                                    <tr style="border:1px solid">
+                                        <td style="text-align:center; border:1px solid; height:20px;">
+                                            <span t-esc="o.create_uid.name" />
+                                        </td>
+                                        <td style="text-align:center; border:1px solid; height:20px;">
+                                            <span t-esc="o.prepared_by_uid.name" />
+                                        </td>
+                                        <td style="text-align:center; border:1px solid; height:20px;">
+                                            <span t-esc="o.checked_by_uid.name" />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <!-- <div class="page">
+                    <style type="text/css">
+                        table,
+                        table th,
+                        table td{
+                            font-size:14px;
+                            padding: 2px;
+                        }
+                    </style>
+                    <div class="row">
+                        <div class="col-8">
+                        </div>
+                        <div class="col-4">
+                            <img t-att-src="image_data_uri(o.company_id.logo)" style="width:200px;height:100px;" alt="Logo"/>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:40px;">
+                        <div class="col-2">
+                            <span>To</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: <span t-if="o.partner_id.company_type != 'company'" t-field="o.partner_id.parent_id.name"/> <span t-if="o.partner_id.company_type == 'company'" t-field="o.partner_id.name"/></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <span>Attn</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: <span t-if="o.partner_id.company_type != 'company'" t-field="o.partner_id.name"/></span>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:20px;">
+                        <div class="col-2">
+                            <span>Hal</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: Penawaran Harga</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <span>No</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: <span t-field="o.name"/></span>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:20px;">
+                        <span>Dengan hormat, <br/><![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]]>Bersama ini kami sampaikan penawaran harga part dibawah ini:</span>
+                    </div>
+                    <table class="" style="width:100%;border:1px solid;margin-top:20px;">
+                        <t t-set="nomor" t-value="1"/>
+                        <tr>
+                            <td style="text-align:center;width:12px;"><b>No</b></td>
+                            <td style="text-align:center;width:29px;"><b>Deskripsi</b></td>
+                            <td style="text-align:center;width:29px;"><b>Price / Pcs</b></td>
+                        </tr>
+                        <t t-foreach="o.quotation_line" t-as="line">
+                            <tr t-if="not line.display_type">
+                                <td style="width:10px;text-align:center;"><span t-esc="nomor"/></td>
+                                <td style=""><span t-field="line.product_id.name"/></td>
+                                <td style="text-align:right"><span t-field="line.price_unit"/></td>
+                                <t t-set="nomor" t-value="nomor+1"/>
+                            </tr>
+                            <tr t-else="">
+                                <td colspan="4">
+                                    <span t-field="line.name"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </table>
+                    <div class="row" style="margin-top:20px;">
+                        <div class="col-12">
+                            <span t-field="o.note"/>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:20px;">
+                        <div class="col-12">
+                            <span>Demikian penawaran harga ini kami sampaikan, atas perhatiannya kami ucapkan terima kasih.</span>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:20px;">
+                        <div class="col-12">
+                            <span>Hormat kami,</span>
+                            <br/><br/><br/><br/><br/>
+                            <span t-field="o.approve_uid" t-if="o.approve_uid.name"/>
+                        </div>
+                    </div>
+                </div> -->
+                <div t-attf-class="footer o_standard_footer o_company_#{o.company_id.id}_layout">
+                    <div class="text-center" style="border-top: 1px solid black;">
+                        <ul class="list-inline mb4">
+                            <div t-field="o.company_id.report_footer"/>
+                        </ul>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+    
+
+
+</odoo>

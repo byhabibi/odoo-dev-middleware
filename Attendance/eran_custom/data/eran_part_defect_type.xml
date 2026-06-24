@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+
+    <record id="eran_part_defect_type_visual" model="eran.part.defect.type">
+        <field name="name">Visual</field>
+    </record>
+
+    <record id="eran_part_defect_type_imensi" model="eran.part.defect.type">
+        <field name="name">Dimensi</field>
+    </record>
+
+    <record id="eran_part_defect_type_fungsi" model="eran.part.defect.type">
+        <field name="name">Fungsi</field>
+    </record>
+
+    <record id="eran_part_defect_type_material" model="eran.part.defect.type">
+        <field name="name">Material</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem 
+        id="sale.menu_sale_rfqs" 
+        parent="sale.sale_order_menu" 
+        action="eran_sale_rfq_action" 
+        groups="sales_team.group_sale_salesman" 
+        sequence="9"/>
+
+    <menuitem 
+        id="sale.menu_sale_quotations" 
+        parent="sale.sale_order_menu" 
+        action="eran_quotation_action" 
+        groups="sales_team.group_sale_salesman" 
+        sequence="10"/>
+
+    <menuitem
+        id="stock.eran_stock_opname_menu"
+        name="Data Entry STO"
+        action="eran_stock_opname_action"
+        parent="stock.menu_stock_warehouse_mgmt"
+        sequence="140"/>
+    
+    <menuitem
+        id="tag_sto_menu"
+        name="Tag STO"
+        action="eran_tag_sto_action"
+        parent="stock.menu_stock_warehouse_mgmt"
+        sequence="150"/>
+        
+    <menuitem 
+        id="menu_action_order_sheet_customer" 
+        name="Order Delivery" 
+        parent="stock.menu_stock_warehouse_mgmt" 
+        sequence="18" 
+        action="eran_custom.eran_order_sheet_customer_action" />
+
+    <menuitem 
+        id="menu_action_order_sheet_vendor" 
+        name="Order Sheet" 
+        parent="stock.menu_stock_warehouse_mgmt" 
+        sequence="19" 
+        action="eran_custom.eran_order_sheet_vendor_action" />
+
+    <menuitem
+        id="stock.all_picking"
+        name="Transfer Posting"
+        parent="stock.menu_stock_warehouse_mgmt"
+        sequence="20"
+        action="stock.action_picking_tree_all"
+        groups="stock.group_stock_manager,stock.group_stock_user"/>
+
+    <menuitem
+        id="menu_batch_transfer_normal"
+        name="Batch Transfer"
+        parent="stock.menu_stock_warehouse_mgmt"
+        action="eran_custom.eran_action_stock_picking_batch_normal"
+        sequence="98"/>
+
+    <menuitem
+        id="stock.menu_stock_scrap"
+        name="Disposal"
+        parent="stock.menu_stock_warehouse_mgmt"
+        action="stock.action_stock_scrap"
+        sequence="99"/>
+
+    <menuitem
+        id="hr.eran_master_shift_menu"
+        name="Shift"
+        action="eran_master_shift_action"
+        parent="hr.menu_human_resources_configuration"
+        sequence="2"/>
+
+    <menuitem 
+        id="menu_action_eran_no_good" 
+        name="Jenis NG" 
+        parent="quality_control.menu_quality_configuration" 
+        sequence="26" 
+        action="eran_custom.eran_no_good_action" />
+
+    <menuitem
+        id="quality_control.menu_quality_checks"
+        name="Quality Inspection"
+        action="quality_control.quality_check_action_main"
+        parent="quality_control.menu_quality_control"
+        sequence="18"/>
+
+    <menuitem 
+        id="menu_action_eran_check_no_good" 
+        name="Reporting Incoming Inspection" 
+        parent="quality_control.menu_quality_control" 
+        sequence="26" 
+        action="eran_custom.eran_check_no_good_action" />
+
+    <menuitem 
+        id="menu_eran_ng_line_production_action" 
+        name="Report Production Inspection" 
+        parent="quality_control.menu_quality_control" 
+        sequence="27" 
+        action="eran_custom.eran_ng_line_production_action" />
+    
+    <menuitem 
+        id="menu_eran_lembar_masalah_kualitas_action" 
+        name="Lembar Masalah Kualitas" 
+        parent="quality_control.menu_quality_control" 
+        sequence="28" 
+        action="eran_custom.eran_lembar_masalah_kualitas_action" />
+
+    <menuitem 
+        id="menu_eran_pica_customer" 
+        name="PICA Customer"
+        parent="quality_control.menu_quality_control" 
+        sequence="29" 
+        action="eran_pica_customer_action" />
+
+    <menuitem 
+        id="menu_eran_pica_vendor" 
+        name="PICA Vendor"
+        parent="quality_control.menu_quality_control" 
+        sequence="30" 
+        action="eran_pica_vendor_action" /> 
+
+    <menuitem 
+        id="menu_eran_disposal" 
+        name="Disposal"
+        parent="quality_control.menu_quality_control" 
+        sequence="31" 
+        action="eran_disposal_action" /> 
+
+    <menuitem 
+        id="menu_eran_return_order_line_action" 
+        name="Return Order Line" 
+        parent="quality_control.menu_quality_reporting" 
+        sequence="27" 
+        action="eran_custom.eran_return_order_line_action_serv" />
+    
+    <menuitem 
+        id="menu_eran_lmk_line_action" 
+        name="LMK Details" 
+        parent="quality_control.menu_quality_reporting" 
+        sequence="28" 
+        action="eran_custom.eran_lembar_masalah_kualitas_line_action" />
+
+    <menuitem 
+        id="menu_eran_quality_dashboard" 
+        name="Dashboard" 
+        parent="quality_control.menu_quality_reporting" 
+        />
+
+    <menuitem 
+        id="menu_eran_quality_dashboard_claim_rate" 
+        name="Claim Rate" 
+        parent="eran_custom.menu_eran_quality_dashboard" 
+        sequence="1" 
+        action="eran_custom.eran_claim_rate_action" />
+
+    <menuitem 
+        id="menu_eran_quality_dashboard_complaint" 
+        name="Complaint" 
+        parent="eran_custom.menu_eran_quality_dashboard" 
+        sequence="2" 
+        action="eran_custom.eran_complaint_action" />
+
+    <menuitem 
+        id="menu_eran_quality_dashboard_disposal" 
+        name="Disposal to Sales" 
+        parent="eran_custom.menu_eran_quality_dashboard" 
+        sequence="3" 
+        action="eran_custom.eran_disposal_to_sales_action" />
+
+    <menuitem 
+        id="dsn_menu_sale_forecast_fix_order" 
+        name="Fix Order" 
+        parent="mrp_forecast_order.dsn_menu_sale_forecast" 
+        action="dsn_action_sale_forecast_fix_order" 
+        sequence="20"
+        groups="sales_team.group_sale_salesman"
+    />
+
+    <menuitem 
+        id="mrp_mps.mrp_mps_report_menu" 
+        name="Master Production Schedule" 
+        action="mrp_mps.action_mrp_mps" 
+        groups="mrp.group_mrp_manager" 
+        sequence="1" 
+        parent="mrp_mps.mrp_mps_menu_planning" 
+        active="False"/>
+
+    <menuitem
+        id="production_report_menu"
+        name="Laporan Hasil Produksi"
+        action="eran_production_report_action"
+        parent="mrp.menu_mrp_reporting"
+        sequence="11"/>
+
+    <menuitem
+        id="eran_sale_os_vendor_line"
+        name="Report Order Sheet Line Vendor"
+        action="eran_sale_os_vendor_line_action"
+        parent="purchase.purchase_report_main"
+        sequence="0"/>
+        
+    <menuitem
+        id="kpi_vendor_report_menu"
+        name="List KPI Vendor"
+        action="eran_kpi_vendor_report_action"
+        parent="purchase.purchase_report_main"
+        sequence="2"/>
+
+    <!-- <menuitem id="purchase.purchase_order_line_report" 
+        name="Purchase Order Line" 
+        parent="purchase.purchase_report_main" 
+        sequence="1" 
+        groups="purchase.group_purchase_manager" 
+        action="action_purchase_order_line_report_all"/> -->
+        
+    <menuitem 
+        id="eran_purchase_receipt_order_menu" 
+        name="Receipt Order" 
+        action="action_receipt" 
+        parent="purchase.menu_procurement_management" 
+        sequence="16"/>
+
+    <menuitem 
+        id="eran_cost_vendor_pricelist_menu" 
+        name="Cost Vendor Pricelist" 
+        action="eran_cost_vendor_pricelist_action" 
+        parent="purchase.menu_procurement_management" 
+        sequence="20"/>
+
+    <menuitem id="menu_rfq_order_line_report" 
+        name="RFQ Order Line" 
+        action="action_rfq_order_line_report" 
+        parent="sale.menu_sale_report"
+        sequence="0"/>
+
+    <menuitem id="menu_loi_line_report" 
+        name="LOI Line" 
+        action="action_quotation_loi_line_report" 
+        parent="sale.menu_sale_report"
+        sequence="2"/>
+
+    <menuitem id="menu_quotation_order_line_report" 
+        name="Quotation Order Line" 
+        action="action_quotation_order_line_report" 
+        parent="sale.menu_sale_report"
+        sequence="1"/>
+
+    <menuitem
+        id="eran_sale_os_customer_line"
+        name="Report Order Delivery Customer"
+        action="eran_sale_os_customer_line_action_2"
+        parent="sale.menu_sale_report"
+        sequence="0"/>
+
+    <menuitem
+        id="stock.eran_sale_delivery_menu"
+        name="Delivery Order Line"
+        action="eran_sale_delivery_report"
+        parent="sale.menu_sale_report"
+        sequence="3"/>
+
+    <menuitem
+        id="eran_purchase_receipt_menu"
+        name="Receipt Line"
+        action="eran_purchase_receipt_report"
+        parent="purchase.purchase_report_main"
+        sequence="0"/>
+        
+    <menuitem
+        id="eran_sale_loi_menu"
+        name="LOI"
+        action="eran_sale_loi_action"
+        parent="sale.sale_order_menu"
+        sequence="11"
+        groups="sales_team.group_sale_salesman"
+    />
+
+    <menuitem
+        id="eran_sale_os_customer_menu"
+        name="Order Delivery"
+        action="eran_order_sheet_customer_action"
+        parent="sale.sale_order_menu"
+        sequence="12"
+        groups="sales_team.group_sale_salesman"
+    />
+
+    <menuitem
+        id="mrp_forecast_order.dsn_menu_sale_forecast_order"
+        name="Forecast Order"
+        parent="mrp_forecast_order.dsn_menu_sale_forecast"
+        action="mrp_forecast_order.dsn_action_sale_forecast_order"
+        sequence="10"
+        groups="sales_team.group_sale_salesman"
+    />
+    <!-- ================ ERAN QUOTATION & LOI APPROVAL MENUITEM ================ -->
+    <!-- This code more than your fokin tought about -->
+    
+    <!-- Action Window To Approve -->
+    <record id="action_dsn_to_approve_quotation" model="ir.actions.act_window">
+      <field name="name">Quotation</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">eran.quotation</field>
+      <field name="domain">[('state', '=', 'to_approve')]</field>
+      <field name="view_mode">tree,form</field>
+      <field name="context">{'search_default_assigned_to_ids': 1, 'create':False, 'delete':False}</field>
+      <field name="search_view_id" ref="eran_custom.eran_quotation_view_search"/>
+    </record>
+    <!-- Action Window To Approve -->
+    <record id="action_dsn_to_approve_loi" model="ir.actions.act_window">
+      <field name="name">LOI</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">eran.quotation.loi</field>
+      <field name="domain">[('state', '=', 'to_approve')]</field>
+      <field name="view_mode">tree,form</field>
+      <field name="context">{'search_default_assigned_to_ids': 1, 'create':False, 'delete':False}</field>
+      <field name="search_view_id" ref="eran_custom.eran_loi_view_search"/>
+    </record>
+    <!-- Action Window To Approve -->
+    <record id="action_dsn_to_approve_stock" model="ir.actions.act_window">
+      <field name="name">Stock</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">stock.picking</field>
+      <field name="domain">[('state_approval', '=', 'to_approve')]</field>
+      <field name="view_mode">tree,form</field>
+      <field name="context">{'search_default_assigned_to_ids': 1, 'create':False, 'delete':False}</field>
+      <field name="search_view_id" ref="eran_custom.eran_stock_view_search"/>
+    </record>
+    <!-- To Approve Menuitem -->
+    <menuitem id="menu_item_dsn_to_approve_quotation"
+            name="Quotation"
+            sequence="1"
+            parent="dsn_approval_sale.menu_item_dsn_to_approve_sale"
+            groups="base.group_system"
+            action="action_dsn_to_approve_quotation"/>
+            
+    <menuitem id="menu_item_dsn_to_approve_loi"
+            name="LOI"
+            sequence="2"
+            parent="dsn_approval_sale.menu_item_dsn_to_approve_sale"
+            groups="base.group_system"
+            action="action_dsn_to_approve_loi"/>
+
+    <menuitem id="menu_item_dsn_to_approve_material"
+            name="Stock"
+            sequence="1"
+            parent="dsn_approval_stock.menu_item_dsn_to_approve_stock"
+            groups="base.group_system"
+            action="action_dsn_to_approve_stock"/>
+
+
+    <menuitem
+        id="eran_details_forecast_line_menu"
+        name="Details Forecast Line"
+        action="eran_forecast_line_action"
+        parent="sale.menu_sale_report"
+        sequence="4"/>
+    <menuitem
+        id="eran_fix_order_line_menu"
+        name="Fix Order Line"
+        action="eran_fix_order_line_action"
+        parent="sale.menu_sale_report"
+        sequence="3"/>
+    <menuitem
+        id="eran_sales_perfomance_menu"
+        name="Sales Perfomance"
+        action="eran_sales_perfomance_action"
+        parent="sale.menu_sale_report"
+        sequence="3"/>
+    <menuitem
+        id="eran_sales_order_line_menu"
+        name="Sales Order Line"
+        action="eran_sales_order_line_action"
+        parent="sale.menu_sale_report"
+        sequence="4"/>
+    <menuitem
+        id="mrp.menu_mrp_scrap"
+        name="NG"
+        parent="mrp.menu_mrp_manufacturing"
+        action="eran_custom.eran_mrp_ng_action"
+        sequence="25"/>
+
+    <menuitem
+        id="production_performance_menu"
+        name="Production Performance"
+        action="eran_production_performance_report_action"
+        parent="mrp.menu_mrp_reporting"
+        sequence="99"/>
+
+    <menuitem
+        id="eran_category_group_menu"
+        name="Category Group"
+        action="eran_category_group_action"
+        parent="stock.menu_stock_inventory_control"
+        sequence="110"
+    />
+
+    <menuitem id="dsn_menu_mrp_non_material_planning" name="MRP Non Material" parent="mrp_mps.mrp_mps_menu_planning" action="eran_action_mrp_non_material" sequence="45"/>
+
+    <menuitem
+        id="eran_outstanding_delivery_menu"
+        name="Outstanding Delivery"
+        action="eran_custom.eran_outstanding_delivery_action"
+        parent="stock.menu_warehouse_report"
+        sequence="1"/>
+
+    <menuitem
+        id="stock.menu_product_stock"
+        name="Reporting Stock by Product"
+        action="stock.action_product_stock_view"
+        parent="stock.menu_warehouse_report"
+        sequence="5"/>
+
+    <menuitem
+        id="stock.menu_valuation"
+        name="Reporting Stock by Location"
+        parent="stock.menu_warehouse_report"
+        sequence="150"
+        action="stock.action_view_quants"
+        groups="stock.group_stock_multi_locations,stock.group_tracking_owner,base.group_no_one"/>
+
+    <menuitem
+        id="eran_sale_os_vendor_line_inventory"
+        name="Report Order Sheet Line Vendor"
+        action="eran_sale_os_vendor_line_action"
+        parent="stock.menu_warehouse_report"
+        sequence="310"/>
+
+    <!-- <menuitem
+        id="eran_sale_os_customer_line_inventory"
+        name="Report Order Delivery Customer"
+        action="eran_sale_os_customer_line_action"
+        parent="stock.menu_warehouse_report"
+        sequence="320"/> -->
+    
+    <menuitem
+        id="eran_sale_os_customer_line_inventory_2"
+        name="Report Order Delivery Customer"
+        action="eran_sale_os_customer_line_action_2"
+        parent="stock.menu_warehouse_report"
+        sequence="330"/>
+
+    <menuitem
+        id="eran_data_entry_sto_line"
+        name="Data Entry STO Line"
+        action="eran_data_entry_sto_line_action"
+        parent="stock.menu_warehouse_report"
+        sequence="329"/>
+
+    <menuitem id="sale_dashboard_id"
+          name="Dashboard"
+          parent="sale.menu_sale_report"
+          sequence="5"/>
+    
+    <menuitem id="master_loss_opportunity_menu"
+          name="Loss Opportunity"
+          parent="eran_custom.sale_dashboard_id"
+          action="eran_custom.action_master_loss_opportunity"
+          sequence="1"/>
+    
+    <menuitem id="master_vendor_performance_customer_menu"
+          name="Vendor Performance by Customer"
+          parent="eran_custom.sale_dashboard_id"
+          action="eran_custom.action_master_vendor_performance_customer"
+          sequence="2"/>
+
+    
+    <menuitem id="inventory_dashboard_id"
+          name="Dashboard"
+          parent="stock.menu_warehouse_report"
+          sequence="331"/>
+
+    <menuitem id="master_delivery_achivement_rate_menu"
+          name="Delivery Achievement Rate"
+          parent="eran_custom.inventory_dashboard_id"
+          action="eran_custom.action_master_delivery_achivement_rate"
+          sequence="1"/>
+    
+    <menuitem id="master_delivery_order_customer_menu"
+          name=" Control Surat Jalan Customer"
+          parent="eran_custom.inventory_dashboard_id"
+          action="eran_custom.action_control_delivery_order"
+          sequence="2"/>
+    
+    <menuitem id="master_inventory_control_menu"
+          name="Inventory Control"
+          parent="eran_custom.inventory_dashboard_id"
+          action="eran_custom.action_master_inventory_control"
+          sequence="3"/>
+
+
+    <menuitem
+        id="production_dashboard_id"
+        name="Dashboard"
+        parent="mrp.menu_mrp_reporting"
+        sequence="100"/>
+
+    <menuitem id="master_production_achivement_rate_menu"
+          name="Production Achievement Rate"
+          parent="eran_custom.production_dashboard_id"
+          action="eran_custom.action_master_production_achivement_rate"
+          sequence="1"/>
+
+    <menuitem id="master_production_achivement_rate_line_menu"
+          name="Production Achievement Rate Line"
+          parent="eran_custom.production_dashboard_id"
+          action="eran_custom.action_master_production_achivement_rate_line"
+          sequence="2"/>
+    
+    <menuitem id="master_line_stop_menu"
+          name="Line Stop"
+          parent="eran_custom.production_dashboard_id"
+          action="eran_custom.action_master_line_stop"
+          sequence="3"/>
+
+    <menuitem id="master_rejection_rate_menu"
+          name="Rejection Rate"
+          parent="eran_custom.production_dashboard_id"
+          action="eran_custom.action_master_rejection_rate"
+          sequence="4"/>
+
+
+    <menuitem
+        id="eran_date_menu"
+        name="Date"
+        parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_configuration"
+        action="eran_custom.action_master_date"
+        sequence="11"/>
+
+
+    <menuitem id="menu_mrp_workorder_activity_menu" name="Workorder Activity Loss" parent="mrp.menu_mrp_configuration"
+            sequence="50" action="eran_custom.action_mrp_workcenter_productivity" groups="base.group_system"/>
+    
+
+    <!-- Attendance -->
+    <record id="hr_attendance.menu_hr_attendance_view_attendances" model="ir.ui.menu">
+        <field name="action" eval="False"/>
+    </record>
+
+    <menuitem id="menu_attendance_sub"
+              name="Attendance"
+              parent="hr_attendance.menu_hr_attendance_view_attendances"
+              action="hr_attendance.hr_attendance_action"
+              sequence="1"/>
+    
+    <menuitem id="eran_menu_hr_attendance_lembur"
+              name="Attendance Overtime"
+              parent="hr_attendance.menu_hr_attendance_view_attendances"
+              action="eran_custom.eran_action_attendance_lembur"
+              sequence="2"/>
+
+    <!-- Attendance Reporting -->
+    <record id="hr_attendance.menu_hr_attendance_report" model="ir.ui.menu">
+        <field name="action" eval="False"/>
+    </record>
+
+    <menuitem id="menu_attendance_reporting_sub"
+              name="Reporting"
+              parent="hr_attendance.menu_hr_attendance_report"
+              action="hr_attendance.hr_attendance_report_action"
+              sequence="1"/>
+
+    <menuitem id="eran_attendance_reporting_rekap_absen_detail"
+              name="Rekap Absensi Detail"
+              parent="hr_attendance.menu_hr_attendance_report"
+              action="eran_custom.eran_action_attendance_rekap_absensi_detail"
+              sequence="2"/>
+    
+    <menuitem id="eran_attendance_reporting_rekap_absen_global"
+              name="Rekap Absensi Global"
+              parent="hr_attendance.menu_hr_attendance_report"
+              action="eran_custom.eran_action_attendance_rekap_absensi_global"
+              sequence="3"/>
+
+    <!-- Attendance Setting -->
+    <record id="hr_attendance.menu_hr_attendance_settings" model="ir.ui.menu">
+        <field name="action" eval="False"/>
+    </record>
+
+    <menuitem id="menu_attendance_sub_settings"
+              name="Settings"
+              parent="hr_attendance.menu_hr_attendance_settings"
+              action="hr_attendance.action_hr_attendance_settings"
+              sequence="1"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+
+    <menuitem id="eran_menu_hr_attendance_machine_config"
+              name="Machine Configuration"
+              parent="hr_attendance.menu_hr_attendance_settings"
+              action="eran_action_attendance_machine_config"
+              sequence="2"/>
+
+    <menuitem id="eran_menu_hr_attendance_log_transaction"
+              name="Transaction Logs"
+              parent="hr_attendance.menu_hr_attendance_settings"
+              action="eran_action_attendance_log_transaction"
+              sequence="3"/>
+
+</odoo>

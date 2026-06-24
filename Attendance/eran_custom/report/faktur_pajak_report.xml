@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_paperformat_report_faktur_invoice" model="report.paperformat">
+        <field name="name">Invoice Faktur Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="eran_action_report_invoice_faktur_pajak" model="ir.actions.report">
+        <field name="name">Faktur Pajak</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_invoice_faktur_pajak</field>
+        <field name="report_file">eran_custom.eran_template_report_invoice_faktur_pajak</field>
+        <field name="print_report_name">'Faktur Pajak - %s' % object.name</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_faktur_invoice"/>
+    </record>
+
+    <record id="eran_action_report_invoice_export_excel" model="ir.actions.report">
+        <field name="name">Journal Entry</field>
+        <field name="model">account.move</field>
+        <field name="report_type">xlsx</field>
+        <field name="report_name">eran_custom.report_invoice_export_excel</field>
+        <field name="report_file">eran_custom.report_invoice_export_excel</field>
+        <field name="print_report_name">'Journal Entry - %s' % object.name</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="eran_template_report_invoice_faktur_pajak">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <style type="text/css">
+                        table,
+                        table th,
+                        table td{
+                            border : 1px solid black;
+                        }
+                        table th,
+                        table td{
+                            padding: 2px 5px;
+                        }
+                        table.borderless,
+                        table.borderless tr,
+                        table.borderless th,
+                        table.borderless td{
+                            border : transparent;
+                        }
+                        .text-left-right {
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                    </style>
+                    <span style="display:block;text-align:center;font-size:20px;letter-spacing: 10px;">FAKTUR PAJAK STANDAR</span>
+                    <div style="display:block;border: 1px solid black;">
+                        <table style="width:100%;" class="borderless">
+                            <tr>
+                                <td style="width:55%;">Kode dan Nomor Seri Faktur Pajak : <span t-field="o.l10n_id_tax_number"/></td>
+                                <td style="">No. Inv : <span t-field="o.name"/></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="display:block;border-width:0px 1px;border-color:transparent black;border-style:solid;">
+                        <table style="width:100%;" class="borderless">
+                            
+                            <tr>
+                                <td colspan="3">PENGUSAHA KENA PAJAK</td>
+                            </tr>
+                            <tr>
+                                <td style="width:200px;">Nama</td>
+                                <td style="width:10px;">:</td>
+                                <td><span t-field="o.company_id"/></td>
+                            </tr>
+                            <tr>
+                                <td style="width:200px;">Alamat</td>
+                                <td style="width:10px;">:</td>
+                                <td>
+                                    <span t-field="o.company_id.street"/> <span t-field="o.company_id.street2"/><br/>
+                                    <span t-field="o.company_id.city"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width:200px;">NPWP</td>
+                                <td style="width:10px;">:</td>
+                                <td><span t-field="o.company_id.vat"/></td>
+                            </tr>
+                            <tr>
+                                <td style="width:200px;">Tanggal Pengukuhan PKP</td>
+                                <td style="width:10px;">:</td>
+                                <!-- <td><span t-field="o."/></td> -->
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="display:block;border: 1px solid black;">
+                        <table style="width:100%;" class="borderless">
+                            <tr>
+                                <td colspan="6">Pembeli Barang Kena Paiak/Peneria Jasa Kena Pajak</td>
+                            </tr>
+                            <tr>
+                                <td>Name</td>
+                                <td style="width:10px;">:</td>
+                                <td colspan="4"><span t-field="o.partner_id"/></td>
+                            </tr>
+                            <tr>
+                                <td>Alamat</td>
+                                <td style="width:10px;">:</td>
+                                <td colspan="4">
+                                    <span t-field="o.partner_id.street"/> <span t-field="o.partner_id.street2"/><br/>
+                                    <span t-field="o.partner_id.city"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>NPWP</td>
+                                <td style="width:10px;">:</td>
+                                <td style="width:30%;"><span t-field="o.partner_id.vat"/></td>
+                                <td>NPPKP</td>
+                                <td style="width:10px;">:</td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="display:block;border: 0px solid transparent;">
+                        <table style="width:100%;border:0px solid transparent">
+                            <tr>
+                                <td style="text-align:center;border-top:0px;">No</td>
+                                <td style="text-align:center;border-top:0px;">Item Description</td>
+                                <td style="text-align:center;border-top:0px;">Unit Price</td>
+                                <td style="text-align:center;border-top:0px;">Qty</td>
+                                <td style="text-align:center;border-top:0px;">Item Unit</td>
+                                <td style="text-align:center;border-top:0px;">Amount</td>
+                            </tr>
+                            <t t-set="nomor" t-value="1"/>
+                            <t t-set="dp_product_id" t-value="o.get_downpayment_product()"/>
+                            <t t-set="faktur_pajak_line" t-value="json.loads(o.get_faktur_pajak_grouped_line())"/>
+                            <!-- <t t-esc="faktur_pajak_line"/> -->
+                            <tr t-foreach="faktur_pajak_line" t-as="invoice_line">
+                                <td style="border-bottom:0px;"><span t-esc="invoice_line['nomor']"/></td>
+                                <td style="border-bottom:0px;"><span t-esc="invoice_line['product_id']"/></td>
+                                <td style="border-bottom:0px; text-align: right;"><span t-esc="'{:,}'.format(invoice_line['price_unit'])"/></td>
+                                <td style="border-bottom:0px;"><span t-esc="'{:,}'.format(invoice_line['quantity'])"/></td>
+                                <td style="border-bottom:0px;"><span t-esc="invoice_line['product_uom_id']"/></td>
+                                <td style="border-bottom:0px; text-align: right;"><span t-esc="'{:,}'.format(invoice_line['price_subtotal'])"/></td>
+                            </tr>
+                            <!-- <tr t-foreach="o.invoice_line_ids.filtered(lambda l: l.display_type not in ['line_section','line_note'] and l.product_id.id != dp_product_id and l.product_id.is_global_discount == False).sorted(key=lambda x:x.product_id.name)" t-as="invoice_line">
+                                <td style="border-bottom:0px;"><span t-esc="nomor"/></td>
+                                <td style="border-bottom:0px;"><span t-field="invoice_line.product_id.name"/></td>
+                                <td style="border-bottom:0px; text-align: right;"><span t-esc="'{:,}'.format(invoice_line.price_unit)"/></td>
+                                <td style="border-bottom:0px;"><span t-esc="'{:,}'.format(invoice_line.quantity)"/></td>
+                                <td style="border-bottom:0px;"><span t-field="invoice_line.product_uom_id"/></td>
+                                <td style="border-bottom:0px; text-align: right;"><span t-esc="'{:,}'.format(invoice_line.price_subtotal)"/></td>
+                                <t t-set="nomor" t-value="nomor+1"/>
+                            </tr> -->
+                            <tr><td style="border:0px transparent;border-top:1px solid black" colspan="6"></td></tr>
+                            <t t-set="data" t-value="json.loads(o.eran_get_faktur_pajak_data_reports())"/>
+                            <tfoot>
+                                <tr>
+                                    <td style="" colspan="5">Harga Jual / Penggantian / Uang Muka / Termin</td>
+                                    <td style="text-align: right;"></td>
+                                </tr>
+                                <tr>
+                                    <td style="" colspan="5">Dikurangi potongan harga</td>
+                                    <t t-set="disc" t-value="0"/>
+                                    <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.display_type not in ['line_section','line_note'] and l.product_id.id != dp_product_id and l.product_id.is_global_discount == False).sorted(key=lambda x:x.product_id.name)" t-as="invoice_line">
+                                        <t t-set="disc" t-value="disc + ((invoice_line.quantity*invoice_line.price_unit)*(invoice_line.discount/100))"/>
+                                    </t>
+                                    <td style="text-align: right;"><span t-esc="disc" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                </tr>
+                                <tr>
+                                    <td style="" colspan="5">Dikurangi uang muka yang telah diterima</td>
+                                    <td style="text-align: right;"><span t-esc="data['down_payment']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                </tr>
+                                <tr>
+                                    <td style="" colspan="5">Dasar Pengenaan Pajak</td>
+                                    <td style="text-align: right;"><span t-field="o.amount_untaxed"/></td>
+                                </tr>
+                                <t t-set="tax_nom" t-value="0"/>
+                                <tr t-foreach="data['tax_groups']" t-as="group">
+                                    <t t-set="tax_nom" t-value="tax_nom + group[1]"/>
+                                    <td colspan="5"><span t-esc="group[0]"/></td>
+                                    <td style="text-align: right;"><span t-esc="group[1]" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                </tr>
+                                <tr>
+                                    <td style="" colspan="5">Amount</td>
+                                    <td style="text-align: right;"><span t-esc="o.amount_untaxed + tax_nom" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+<!--  t-options='{"widget": "monetary", "display_currency": o.currency_id}' -->
+</odoo>

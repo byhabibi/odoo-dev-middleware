@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="stock_barcode.LineComponent" owl="1">
+        <div t-on-click="select"
+            class="o_barcode_line list-group-item d-flex flex-row flex-nowrap"
+            t-att-data-virtual-id="line.virtual_id" t-attf-class="{{componentClasses}}"
+            t-att-data-barcode="line.product_id.barcode">
+            <div class="o_barcode_line_details flex-grow-1 flex-column flex-nowrap">
+                <t t-call="stock_barcode.LineSourceLocation"/>
+                <!-- Hides product's name if it's a subline, as it is already on the parent line. -->
+                <t t-if="!props.subline" t-call="stock_barcode.LineTitle"/>
+                <div t-if="isTracked and requireLotNumber" name="lot">
+                    <i class="fa fa-fw fa-barcode" t-attf-class="{{nextExpected === 'lot' ? 'o_next_expected' : ''}}"/>
+                    <span class="o_line_lot_name" t-esc="lotName"/>
+                </div>
+                <t t-call="stock_barcode.LineQuantity"/>
+                <div t-if="line.package_id || line.result_package_id" name="package">
+                    <i class="fa fa-fw fa-archive"/>
+                    <span t-if="line.package_id" class="package" t-esc="line.package_id.name"/>
+                    <i t-if="displayResultPackage" class="fa fa-long-arrow-right mx-1"/>
+                    <span t-if="line.result_package_id" class="result-package" t-esc="line.result_package_id.name"/>
+                    <span t-if="line.result_package_id &amp;&amp; line.result_package_id.package_type_id"
+                        class="fst-italic text-muted">
+                        (<t t-esc="line.result_package_id.package_type_id.name"/>)
+                    </span>
+                </div>
+                <t t-call="stock_barcode.LineOwner"/>
+                <t t-call="stock_barcode.LineDestinationLocation"/>
+            </div>
+            <div class="o_line_buttons">
+                <button t-on-click="edit" class="o_line_button o_edit btn">
+                    <i class="fa fa-2x fa-pencil"/>
+                </button>
+                <button t-if="env.model.displaySetButton" t-on-click="setOnHandQuantity"
+                    class="o_line_button o_set btn ms-2 ms-sm-4"
+                    t-attf-class="{{quantityIsSet &amp;&amp; qtyDone != qtyDemand ? 'o_difference' : ''}}">
+                    <i t-if="quantityIsSet" class="fa fa-2x"
+                        t-attf-class="{{qtyDone == qtyDemand ? 'fa-check' : 'fa-times'}}"/>
+                </button>
+                <span t-attf-class="{{env.model.incrementButtonsDisplayStyle}}">
+                    <button t-if="env.model.getDisplayDecrementBtn(line)" name="decrementButton" t-on-click="(ev) => this.addQuantity(-1, ev)"
+                        class="o_line_button o_remove_unit btn btn-primary ms-2 ms-sm-4"
+                        t-attf-disabled="{{qtyDone &lt;= 0 || qtyDone == '?'}}">-1</button>
+                    <button t-if="env.model.getDisplayIncrementBtn(line)" name="incrementButton"
+                        t-on-click="(ev) => this.addQuantity(incrementQty, ev)" t-esc="'+' + incrementQty"
+                        t-att-disabled="!this.env.model.lineCanBeEdited(line)"
+                        class="o_line_button o_add_quantity btn btn-primary ms-2 ms-sm-4"/>
+                </span>
+                <button t-if="isSelected and env.model.getDisplayIncrementPackagingBtn(line)" name="incrementPackagingButton"
+                    t-on-click="(ev) => this.addQuantity(line.product_packaging_uom_qty, ev)"
+                    class="o_line_button w-100 btn btn-primary my-3 d-block">
+                    <div class="text-capitalize">
+                        + <t t-esc="line.product_packaging_id.name"/>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </t>
+</template>

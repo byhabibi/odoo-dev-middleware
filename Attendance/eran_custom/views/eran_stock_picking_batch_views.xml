@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_stock_picking_batch_form_inherit" model="ir.ui.view">
+        <field name="name">eran.stock.picking.batch.form.inherit</field>
+        <field name="model">stock.picking.batch</field>
+        <field name="inherit_id" ref="stock_picking_batch.stock_picking_batch_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_set_quantities_to_reservation']" position="before">
+                <button name="action_create_move_lines" string="Generate Operation" type="object" attrs="{'invisible': [('state', 'in', ('done', 'cancel'))],}"/>
+            </xpath>
+            <xpath expr="//notebook" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//notebook" position="after">
+                <notebook>
+                        <page string="Detailed Operations" attrs="{'invisible': [('state', '=', 'draft')]}">
+                            <field name="move_line_ids">
+                                <tree string="stock_move.line_batch" editable="bottom">
+                                    <field name="product_id" />
+
+                                    <field name="finish_product_ids" widget="many2many_tags" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="show"/>
+                                    <field name="picking_id" optional="show"/>
+                                    <field name="lot_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="hide"/>
+                                    <field name="location_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="hide"/>
+                                    <field name="location_dest_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="hide"/>
+                                    <field name="package_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="hide"/>
+                                    <field name="result_package_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="hide"/>
+                                    <field name="reserved_uom_qty" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="show"/>
+                                    <field name="product_uom_qty" string="Demand Outstanding" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}"  optional="show"/>
+                                    <field name="product_uom_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}"  optional="show"/>
+                                    <field name="alt_qty_demand" string="Alt Outstanding" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="show"/>
+                                    <field name="product_additional_uom_id" string="Alt UoM" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="show"/>
+                                    <field name="good_qty" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="show"/>
+                                    <field name="qty_done" string="Actual Delivery" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="show"/>
+                                    <field name="qty_done_uom_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="show"/>
+                                    <field name="alternative_qty_done" string="Alt Actual Delivery" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="show"/>
+                                    <field name="alt_qty_done_uom_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}" optional="show"/>
+
+                                    <field name="lot_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="location_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="location_dest_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="reserved_uom_qty" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="product_uom_qty" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="qty_done" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="company_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="product_uom_category_id" invisible="1"/>
+                                </tree>
+                            </field>
+                            <button class="oe_highlight" name="action_put_in_pack" type="object" string="Put in Pack" attrs="{'invisible': [('state', 'in', ('draft', 'done', 'cancel'))]}" groups="stock.group_tracking_lot"/>
+                        </page>
+                        <page string="Operations" attrs="{'invisible': [('state', '=', 'draft')]}">
+                            <field name="move_ids">
+                                <tree string="stock_move_batch">
+                                    <field name="product_id" />
+                                    <field name="picking_id" />
+                                    <field name="product_uom_qty" string="Demand" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="product_uom_qty" string="Outstanding" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}"/>
+                                    <field name="reserved_availability" string="Reserved" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}"/>
+                                    <field name="reserved_availability" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="quantity_done" string="Actual Delivery" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}"/>
+                                    <field name="quantity_done" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="product_uom" string="Unit of Measure" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}"/>
+                                    <field name="product_uom" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="location_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'normal')]}"/>
+                                    <field name="state" invisible="1"/>
+                                    <field name="company_id" invisible="1"/>
+                                    <field name="product_uom_category_id" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Transfers">
+                            <field name="allowed_picking_ids" invisible="1"/>
+                            <field name="picking_ids" widget="many2many" mode="tree,kanban" context="{'tree_view_ref': 'stock_picking_batch.view_picking_tree_batch'}">
+                                <tree string="stock_picking_batch" editable="bottom">
+                                    <field name="purchase_order_id" attrs="{'column_invisible': [('parent.batch_type', '!=', 'subcont')]}"/>
+                                    <field name="name"/>
+                                    <field name="scheduled_date"/>
+                                    <field name="location_id"/>
+                                    <field name="backorder_id"/>
+                                    <field name="origin"/>
+                                    <field name="state"/>
+                                    <field name="company_id" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="batch_type" readonly="1" invisible="1"/>
+                <field name="partner_id" attrs="{'invisible': [('batch_type', '!=', 'subcont')], 'required': [('batch_type', '=', 'subcont')]}"/>
+                <field name="purchase_ids" domain="[('partner_id', '=', partner_id),('state', 'in', ['purchase','done'])]" widget="many2many_tags" attrs="{'invisible': [('batch_type', '!=', 'subcont')]}"/>
+                <field name="order_sheet_ids" domain="[('partner_id', '=', partner_id), ('state', 'in', ['done']), ('id','in', order_sheet_ids_domain)]" widget="many2many_tags" attrs="{'invisible': [('batch_type', '!=', 'subcont')]}"/>
+                <field name="order_sheet_ids_domain" widget="many2many_tags" invisible="1"/>
+                <field name="product_ids" widget="many2many_tags" domain="[('id','in', product_ids_domain)]" attrs="{'invisible': [('batch_type', '!=', 'subcont')]}"/>
+                <field name="product_ids_domain" widget="many2many_tags" invisible="1"/>
+                <field name="no_mobil" attrs="{'invisible': [('batch_type', '!=', 'subcont')]}"/>
+            </xpath>
+            <!-- <xpath expr="//sheet/notebook/page[1]" position="attributes">
+                <attribute name="attrs">{}</attribute>
+            </xpath> -->
+            <xpath expr="//field[@name='scheduled_date']" position="attributes">
+                <attribute name="string">Supply Date</attribute>
+            </xpath>
+            <xpath expr="//field[@name='scheduled_date']" position="after">
+                <field name="request_date" attrs="{'invisible': [('batch_type', '!=', 'subcont')], 'required': [('batch_type', '=', 'subcont')], 'readonly': [('state', 'in', ('done', 'cancel'))],}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_stock_picking_batch_tree_inherit" model="ir.ui.view">
+        <field name="name">eran.stock.picking.batch.tree.inherit</field>
+        <field name="model">stock.picking.batch</field>
+        <field name="inherit_id" ref="stock_picking_batch.stock_picking_batch_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="partner_id"/>
+                <field name="purchase_ids" widget="many2many_tags"/>
+            </xpath>
+            <xpath expr="//field[@name='scheduled_date']" position="attributes">
+                <attribute name="string">Supply Date</attribute>
+            </xpath>
+            <xpath expr="//field[@name='scheduled_date']" position="after">
+                <field name="request_date"></field>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_stock_picking_batch_filter" model="ir.ui.view">
+        <field name="name">eran.stock.picking.batch.filter</field>
+        <field name="model">stock.picking.batch</field>
+        <field name="inherit_id" ref="stock_picking_batch.stock_picking_batch_filter"></field>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='my_transfers']" position="after">
+                <filter name="filter_request_date" string="Request Date" date="request_date"/>
+            </xpath>
+            <xpath expr="//group/filter[@name='user']" position="before">
+                <filter name="request_date" string="Request Date" domain="[]" context="{'group_by': 'request_date'}" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_stock_move_tree_inherit" model="ir.ui.view">
+        <field name="name">eran.stock.move.view.tree.inherit</field>
+        <field name="model">stock.move</field>
+        <field name="inherit_id" ref="stock_picking_batch.view_picking_move_tree_inherited"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_uom_qty']" position="attributes">
+                <attribute name="string">Outstanding</attribute>
+            </xpath>
+            <xpath expr="//field[@name='quantity_done']" position="attributes">
+                <attribute name="string">Actual Delivery</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_view_move_line_tree_inherit" model="ir.ui.view">
+        <field name="name">eran.view.move.line.tree.inherite</field>
+        <field name="model">stock.move.line</field>
+        <field name="inherit_id" ref="stock_picking_batch.view_move_line_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="finish_product_ids" widget="many2many_tags" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='product_uom_id']" position="after">
+                <field name="alt_qty_demand" string="Alt Outstanding" optional="show"/>
+                <field name="product_additional_uom_id" string="Alt UoM" optional="show"/>
+                <field name="good_qty" optional="show"/>
+                <!-- <field name="product_additional_qty_2" optional="show"/>
+                <field name="product_additional_uom_id_2" optional="show"/> -->
+            </xpath>
+            <xpath expr="//field[@name='product_uom_id']" position="before">
+                <field name="product_uom_qty" string="Demand Outstanding" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='qty_done']" position="attributes">
+                <attribute name="string">Actual Delivery</attribute>
+                <attribute name="optional">show</attribute>
+            </xpath>
+            <xpath expr="//field[@name='qty_done']" position="after">
+                <field name="qty_done_uom_id" string="UoM" optional="show"/>
+                <field name="alternative_qty_done" string="Alt Actual Delivery" optional="show"/>
+                <field name="alt_qty_done_uom_id" string="UoM" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="attributes">
+                <attribute name="optional">show</attribute>
+            </xpath>
+            <xpath expr="//field[@name='picking_id']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_uom_id']" position="attributes">
+                <attribute name="optional">show</attribute>
+                <attribute name="string">UoM</attribute>
+            </xpath>
+            <xpath expr="//field[@name='lot_id']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='location_id']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='location_dest_id']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='package_id']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='result_package_id']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='reserved_uom_qty']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+        </field>
+    </record>
+    
+    <record id="eran_view_picking_tree_batch_inherit" model="ir.ui.view">
+        <field name="name">eran.view.picking.tree.batch.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock_picking_batch.view_picking_tree_batch" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="purchase_order_id" force_save="1"/>
+                <field name="run_purchase_order_id_compute" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="stock_picking_batch_normal_tree_view" model="ir.ui.view">
+        <field name="name">stock.picking.batch.tree</field>
+        <field name="model">stock.picking.batch</field>
+        <field name="arch" type="xml">
+            <tree string="Stock Batch Transfer" multi_edit="1" sample="1">
+                <field name="company_id" invisible="1"/>
+                <field name="name" decoration-bf="1"/>
+                <field name="partner_id"/>
+                <field name="scheduled_date"/>
+                <field name="request_date" />
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="picking_type_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('draft', 'in_progress')"/>
+                <field name="activity_exception_decoration" widget="activity_exception"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_action_stock_picking_batch_normal" model="ir.actions.act_window">
+        <field name="name">Batch Transfers</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.picking.batch</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_id" ref="eran_custom.stock_picking_batch_normal_tree_view"/>
+        <field name="domain">[('batch_type', '=', 'normal'), ('is_wave', '=', False)]</field>
+        <field name="context">{'default_batch_type': 'normal', 'search_default_draft': True, 'search_default_in_progress': True}</field>
+        <field name="search_view_id" ref="stock_picking_batch.stock_picking_batch_filter"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create a new batch transfer
+          </p><p>
+            The goal of the batch transfer is to group operations that may
+            (needs to) be done together in order to increase their efficiency.
+            It may also be useful to assign jobs (one person = one batch) or
+            help the timing management of operations (tasks to be done at 1pm).
+          </p>
+        </field>
+    </record>
+
+    <record id="stock_picking_batch.stock_picking_batch_action" model="ir.actions.act_window">
+        <field name="name">Delivery Subcont</field>
+        <field name="context">{'default_batch_type': 'subcont'}</field>
+        <field name="domain">[('batch_type', '=', 'subcont')]</field>
+    </record>
+
+    <menuitem action="stock_picking_batch.stock_picking_batch_action" id="stock_picking_batch.stock_picking_batch_menu" parent="stock.menu_stock_warehouse_mgmt" name="Delivery Subcont" sequence="21"/>
+</odoo>

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_mrp_production_form_view_inherit" model="ir.ui.view">
+        <field name="name">eran.mrp.production.form.view</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <!-- Tombol Start Custom -->
+                <button name="action_start_all_workorders" 
+                        string="Start Production" 
+                        type="object" 
+                        class="oe_highlight" 
+                        attrs="{'invisible': ['|', ('state', 'in', ['draft']), ('eran_is_finished', 'in', [1,2])]}"/>
+                
+                <!-- Tombol Stop/Pending Custom -->
+                <button name="action_stop_all_workorders" 
+                        string="Stop Production" 
+                        type="object" 
+                        class="btn-danger" 
+                        attrs="{'invisible': [('eran_is_finished', 'in', [0,2])]}"/>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="eran_is_finished" invisible="1"/>
+            </xpath>
+            <xpath expr="//page[@name='miscellaneous']/group/group/field[@name='picking_type_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//page[@name='miscellaneous']/group/group/field[@name='location_src_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//label[@for='product_qty']" position="attributes">
+                <attribute name="attrs">{'invisible': [('state', '=', 'draft')]}</attribute>
+            </xpath>
+            <xpath expr="//div/field[@name='product_qty']" position="attributes">
+                <attribute name="attrs">{'invisible': [('state', '!=', 'done')]}</attribute>
+            </xpath>
+            <xpath expr="//label[@for='product_qty']" position="after">
+                <label for="quantity_plan" string="Quantity" attrs="{'invisible': [('state', '!=', 'draft')]}" />
+            </xpath>
+            <xpath expr="//div/field[@name='product_qty']" position="after">
+                <field name="quantity_plan" attrs="{'invisible': [('state', '!=', 'draft')]}" />
+            </xpath>
+            <xpath expr="//page[@name='miscellaneous']/group/group/field[@name='location_dest_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//label[@for='lot_producing_id']" position="before">
+                <field name="ng_total"/>
+                <field name="good_total" attrs="{'readonly': [('state', 'in', ('draft','done','cancel'))]}"/>
+                <field name="state_approval" string="Approval State" invisible="1"/>
+                <field name="mrp_workcenter_group_id" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='qty_producing']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_view_reception_report']" position="before">
+                <button
+                    type="object"
+                    name="action_open_stock_picking"
+                    class="oe_stat_button"
+                    attrs="{'invisible':[('material_request_count', '=', 0)]}"
+                    icon="fa-list"
+                >
+                    <field name="material_request_count" widget="statinfo" string="Request Material" />
+                </button>
+            </xpath>
+            <xpath expr="//button[@name='button_plan']" position="after">
+                <button name="action_request_material" type="object" string="Request Material" data-hotkey="r" attrs="{'invisible': [('state', 'in', ('done', 'cancel'))]}"/>
+                <!-- <button name="overall_equipment_effectiveness" string="Overall Equipment Effectiveness" type="object"/> -->
+                <!-- <button name="btn_req_approval_material" type="object" string="Request Approval Material" data-hotkey="r" attrs="{'invisible': [('state', 'in', ('done', 'cancel'))]}"/>
+                <button name="btn_approve_req_material" type="object" string="Approve Request Material" data-hotkey="r" attrs="{'invisible': [('state', 'in', ('done', 'cancel'))]}"/> -->
+
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="shift_id"/>
+                <field name="leader_id"/>
+                <field name="operator_id"/>
+                <field name="operator_id2"/>
+                <field name="picking_type_id" attrs="{'readonly': [('state', 'in', ('progress','to_close','done','cancel'))]}"/>
+                <field name="need_approval" invisible="1"/>
+                <!-- <field name="need_approval_req_mat" invisible="1"/> -->
+                <field name="user_in_assigned_to" invisible="1"/>
+                <!-- <field name="state_request_material" attrs="{'invisible': [('backorder_sequence', '=', 0)]}"/> -->
+            </xpath>
+            <!-- <xpath expr="//header/field[@name='state']" position="after">
+                <field name="state_approval" statusbar_visible="confirmed,to_approve,done" widget="statusbar" attrs="{'invisible': ['|', ('need_approval', '=', False), ('state_approval', 'in', ['done','cancel'])]}"/>
+            </xpath> -->
+            <xpath expr="//page[@name='miscellaneous']" position="after">
+                <page string="NG" name="ng">
+                    <field name="ng_ids" mode="tree" attrs="{'readonly': [('state', 'in', ('draft','done','cancel'))]}">
+                        <tree string="Input Data" editable="bottom">
+                            <field name="no_good_id" string="NG Type" required="1"/>
+                            <field name="workcenter_ids" widget="many2many_tags" invisible="1"/>
+                            <field name="workcenter_id" domain="[('id', 'in', workcenter_ids)]" required="1"/>
+                            <field name="quantity" required="1"/>
+                        </tree>
+                    </field>
+                </page>
+                <page name="approver" string="Approver" attrs="{'invisible': [('need_approval', '=', False)]}">
+                    <group>
+                        <group>
+                            <field name="approval_mrp_id"/>
+                            <field name="approval_rule"/>
+                            <field name="approval_type"/>
+                            <field name="assigned_to_ids" widget="many2many_tags" invisible="1"/>
+                            <field name="user_in_assigned_to" />
+                        </group>
+                    </group>
+                    <field name="approval_line_ids" mode="tree" readonly="1">
+                        <tree string="Approval Line" name="approval_line" editable="bottom">
+                            <field name="user_id"/>
+                            <field name="is_approved"/>
+                            <field name="date_approved"/>
+                        </tree>
+                    </field>
+                </page>
+                <!-- <page name="approver_req_material" string="Request Material Approver" attrs="{'invisible': [('need_approval_req_mat', '=', False)]}">
+                    <group>
+                        <group>
+                            <field name="approval_mrp_req_mat_id"/>
+                            <field name="approval_req_mat_rule"/>
+                            <field name="approval_req_mat_type"/>
+                        </group>
+                    </group>
+                    <field name="approval_req_mat_line_ids" mode="tree" readonly="1">
+                        <tree string="Approval Line" name="approval_line" editable="bottom">
+                            <field name="user_id"/>
+                            <field name="is_approved"/>
+                            <field name="date_approved"/>
+                        </tree>
+                    </field>
+                </page> -->
+            </xpath>
+            <xpath expr="//button[@name='button_mark_done']" position="attributes">
+                <attribute name="attrs">{'invisible': ['|', '|', '|', ('state', 'in', ('draft', 'cancel', 'done', 'to_close')), ('qty_producing', '=', 0), ('move_raw_ids', '!=', []), ('need_approval', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//button[@name='button_mark_done'][2]" position="attributes">
+                <attribute name="attrs">{'invisible': ['|', '|', '|', ('state', 'in', ('draft', 'cancel', 'done', 'to_close')), ('qty_producing', '=', 0), ('move_raw_ids', '=', []), ('need_approval', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//button[@name='button_mark_done']" position="before">
+                <button name="btn_waiting_approval" attrs="{'invisible': ['|', ('need_approval', '=', False), ('state_approval', '!=', 'confirmed')]}" string="Request Approval" type="object" class="oe_highlight" groups="base.group_user" data-hotkey="a"/>
+                <button name="btn_approved" string="Approve" type="object" class="btn btn-primary" attrs="{'invisible': ['|', '|',('user_in_assigned_to', '=', False),('state_approval', '!=', 'to_approve'), ('state', 'in', ['done', 'cancel'])]}"/>
+            </xpath>
+            <xpath expr="//page[@name='miscellaneous']/group/group[2]/field[@name='origin']" position="after">
+                <field name="qty_plan" readonly="1" force_save="1"/>
+                <field name="qty_keppin"/>
+            </xpath>
+            <xpath expr="//page[@name='miscellaneous']/group/group/field[@name='location_dest_id']" position="after">
+                <field name="ng_location_id" readonly="1" attrs="{'invisible':[('ng_ids', '=', [])]}"/>
+            </xpath>
+            <xpath expr="//page[@name='operations']//field[@name='workorder_ids']" position="before">
+                <group>
+                    <group>
+                        <label for="start_time" string="Productivity Periode"/>
+                        <div class="o_row">
+                            <field name="start_time" widget="daterange" options='{"related_end_date": "end_time"}'
+                                attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                            <i class="fa fa-long-arrow-right mx-1" aria-label="Arrow icon" title="Arrow"/>
+                            <field name="end_time" widget="daterange" options='{"related_start_date": "start_time"}'
+                                attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                        </div>
+                    </group>
+                     <group>
+                    </group>
+                </group>
+            </xpath>
+            <xpath expr="//field[@name='move_raw_ids']/tree/field[@name='product_id']" position="after">
+                <field name="component_type"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

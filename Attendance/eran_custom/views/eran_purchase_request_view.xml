@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record
+        id="action_purchase_request_line_make_purchase_order"
+        model="ir.actions.act_window"
+    >
+        <field name="name">Create RFQ</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">purchase.request.line.make.purchase.order</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="purchase_request.view_purchase_request_line_make_purchase_order" />
+        <field name="target">new</field>
+        <field
+            name="binding_model_id"
+            ref="purchase_request.model_purchase_request_line"
+        />
+    </record>
+    <record id="eran_purchase_request_from_inherti" model="ir.ui.view">
+        <field name="name">eran.purchase.request.form.inherit</field>
+        <field name="model">purchase.request</field>
+        <field name="inherit_id" ref="purchase_request.view_purchase_request_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='group_id']" position="after">
+                <field name="po_creations" invisible="1"/>
+                <field name="qty_request" invisible="1"/>
+                <field name="is_all_create_po" invisible="1"/>
+            </xpath>
+            <xpath expr="//button[@name='%(purchase_request.action_purchase_request_line_make_purchase_order)d']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//button[@name='%(purchase_request.action_purchase_request_line_make_purchase_order)d']" position="after">
+                <button
+                        name="%(purchase_request.action_purchase_request_line_make_purchase_order)d"
+                        attrs="{'invisible': ['|', ('is_all_create_po', '=', True), ('state', '!=', 'approved')]}"
+                        string="Create PO"
+                        type="action"
+                    />
+            </xpath>
+            <!-- <xpath expr="//button[@name='button_draft']" position="attributes">
+                <attribute name="attrs">{'invisible':[('state', '!=', 'to_approve')]}</attribute>
+            </xpath> -->
+            <!-- <xpath expr="//button[@name='button_draft']" position="attributes">
+                <attribute name="states">to_approve</attribute>
+            </xpath> -->
+        </field>
+    </record>
+
+    <record id="eran_inherit_view_purchase_request_form" model="ir.ui.view">
+        <field name="name">eran.inherit.view.purchase.request.form</field>
+        <field name="model">purchase.request</field>
+        <field name="inherit_id" ref="purchase_request.view_purchase_request_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='line_ids']" position="attributes">
+                <attribute name="attrs">
+                    {'readonly': [
+                        ('state', '!=', 'draft'), 
+                        ('state', '!=', 'to_approve')
+                    ]}
+                </attribute>
+            </xpath>
+            <xpath expr="//field[@name='requested_by']" position="after">
+                <field name="department_id"/>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='purchase_state']" position="after">
+                <field name="mrp_non_material_id" force_save="1" optional="hide" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='estimated_cost']" position="after">
+                <field name="vendor_price" optional="show" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='product_uom_id']" position="after">
+                <field name="additional_qty" force_save="1" optional="show" readonly="0"/>
+                <field name="additional_uom_id" optional="hide"/>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='purchased_qty']" position="after">
+                <field name="po_additional_qty" optional="show"/>
+            </xpath>
+            <!-- <xpath expr="//field[@name='line_ids']/tree/field[@name='estimated_cost']" position="attributes">
+                <attribute name="attrs">{'required':[('vendor_price','&lt;=',0)]}</attribute>
+            </xpath> -->
+            <xpath expr="//notebook/page/group" position="inside">
+                <div class="oe_subtotal_footer_separator oe_inline">
+                    <label for="total_vendor_price" />
+                </div>
+                <field
+                    name="total_vendor_price"
+                    nolabel="1"
+                    class="oe_subtotal_footer_separator"
+                    widget="monetary"
+                    options="{'currency_field': 'currency_id'}"
+                />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_inherit_view_purchase_request_tree" model="ir.ui.view">
+        <field name="name">eran.inherit.view.purchase.request.tree</field>
+        <field name="model">purchase.request</field>
+        <field name="inherit_id" ref="purchase_request.view_purchase_request_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="purchase_order_ids" widget="many2many_tags"/>
+            </xpath>
+            <xpath expr="//field[@name='requested_by']" position="after">
+                <field name="department_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- KANBAN PURCHASE REQUEST -->
+    <record id="eran_purchase_request_kanban" model="ir.ui.view">
+        <field name="name">purchase.request.kanban.custom</field>
+        <field name="model">purchase.request</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="requested_by"/>
+                <field name="estimated_cost"/>
+                <field name="total_vendor_price"/>
+                <field name="name"/>
+                <field name="state"/>
+                <field name="date_start"/>
+                <field name="state"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="row mb4">
+                                <strong class="col-12">
+                                    <field name="department_id"/>
+                                </strong>
+                            </div>
+                            <div class="row mb4">
+                                <strong class="col-12">
+                                    <span t-esc="record.requested_by.value"/>
+                                </strong>
+                            </div>
+                            <div class="row mb4">
+                                <div class="col-6">
+                                    <span> Estimasi Cost:</span>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <strong><field name="estimated_cost" widget="monetary" 
+                                            options="{'currency_field': 'currency_id'}"/>
+                                    </strong>
+                                </div>
+                                <div class="col-6">
+                                    <span> Total Vendor Cost:</span>
+                                </div>
+                                <div class="col-6 text-start">
+                                    <strong><field name="total_vendor_price" widget="monetary"/></strong>
+                                </div>
+                            </div>
+                            <div class="row mb4">
+                                <div class="col-5">
+                                    <span t-esc="record.name.value"/>
+                                </div>
+                                <div class="col-3 text-center">
+                                    <span t-esc="record.date_start.value"/>
+                                </div>
+                                <div class="col-4 text-start">
+                                    <span t-attf-class="badge #{ ['draft', 'to_approve', 'approved', 'rejected', 'done'].includes(record.state.raw_value) ? 'bg-200' : 'bg-info' }">
+                                        <t t-esc="record.state.raw_value"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--  -->
+
+    <record id="eran_purchase_request_search_inherit" model="ir.ui.view">
+        <field name="name">eran.purchase.request.form.inherit</field>
+        <field name="model">purchase.request</field>
+        <field name="inherit_id" ref="purchase_request.view_purchase_request_search" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='requested_by']" position="after">
+                <field name="department_id"/>
+            </xpath>
+            <xpath expr="//filter[@name='requested_by']" position="after">
+                <filter
+                    name="department_by"
+                    string="Department"
+                    domain="[]"
+                    context="{'group_by':'department_id'}"
+                />
+            </xpath>
+        </field>
+    </record>
+    
+    <record id="eran_purchase_request_line_tree" model="ir.ui.view">
+        <field name="name">purchase.request.line.tree</field>
+        <field name="model">purchase.request.line</field>
+        <field name="priority">1000</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="request_id" readonly="1"/>
+                <field
+                    name="request_state"
+                    widget="badge"
+                    decoration-success="request_state in ('done', 'approved')"
+                    decoration-info="request_state in ('draft', 'to_approve')"
+                    decoration-danger="request_state == 'rejected'"
+                    readonly="1"
+                />
+                <field name="requested_by" widget="many2one_avatar_user" readonly="1"/>
+                <field name="department_id" readonly="1"/>
+                <field name="assigned_to" widget="many2one_avatar_user" readonly="1"/>
+                <field name="date_required" readonly="1"/>
+                <field name="estimated_cost" widget="monetary" readonly="1"/>
+                <field name="vendor_price" readonly="1"/>
+                <field name="currency_id" invisible="1" readonly="1"/>
+                <field name="purchased_qty" readonly="1"/>
+                <field
+                    name="purchase_state"
+                    widget="badge"
+                    decoration-success="purchase_state == 'done'"
+                    decoration-muted="purchase_state == 'draft'"
+                    decoration-info="purchase_state in ('sent', 'purchase')"
+                    decoration-warning="purchase_state == 'to_approve'"
+                    decoration-danger="purchase_state == 'cancelled'"
+                    readonly="1"
+                />
+                <field name="product_id" readonly="1"/>
+                <field name="name" readonly="1"/>
+                <field name="product_qty" readonly="1"/>
+                <field name="product_uom_category_id" invisible="1" />
+                <field name="product_uom_id" groups="uom.group_uom" readonly="1"/>
+                <field
+                    name="analytic_distribution"
+                    widget="analytic_distribution"
+                    optional="hide"
+                    groups="analytic.group_analytic_accounting"
+                    options="{'product_field': 'product_id', 'business_domain': 'purchase_order'}"
+                    readonly="1"
+                />
+                <field name="supplier_id" readonly="1"/>
+                <field
+                    name="company_id"
+                    groups="base.group_multi_company"
+                    widget="selection"
+                    readonly="1"
+                />
+                <field name="cancelled" invisible="1" />
+                <field name="qty_in_progress" invisible="1" />
+                <field name="qty_done" invisible="1" />
+                <field name="qty_cancelled" invisible="1" />
+                <field name="outstanding_pr" sum="outstanding_pr"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_purchase_request_line_tree_inherit" model="ir.ui.view">
+        <field name="name">eran.purchase.request.line.tree.inherit</field>
+        <field name="model">purchase.request.line</field>
+        <field name="inherit_id" ref="purchase_request.purchase_request_line_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='requested_by']" position="after">
+                <field name="department_id"/>
+            </xpath>
+            <xpath expr="//field[@name='estimated_cost']" position="after">
+                <field name="vendor_price" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="category_group_id"/>
+            </xpath>
+            <xpath expr="//field[@name='estimated_cost']" position="after">
+                <field name="cost" widget="monetary"/>
+                <field name="cost_amount" widget="monetary"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_purchase_request_line_form_inherit" model="ir.ui.view">
+        <field name="name">eran.purchase.request.line.form.inherit</field>
+        <field name="model">purchase.request.line</field>
+        <field name="inherit_id" ref="purchase_request.purchase_request_line_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='requested_by']" position="after">
+                <field name="department_id"/>
+            </xpath>
+            <xpath expr="//field[@name='estimated_cost']" position="after">
+                <field name="vendor_price" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_purchase_request_line_search_inherit" model="ir.ui.view">
+        <field name="name">eran.purchase.request.line.search.inherit</field>
+        <field name="model">purchase.request.line</field>
+        <field name="inherit_id" ref="purchase_request.purchase_request_line_search" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='requested_by']" position="after">
+                <field name="department_id"/>
+            </xpath>
+            <xpath expr="//filter[@name='requested_by']" position="after">
+                <filter
+                    name="department_by"
+                    string="Department"
+                    domain="[]"
+                    context="{'group_by':'department_id'}"
+                />
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="category_group_id" />
+            </xpath>
+            <xpath expr="//filter[@name='purchase_state_none']" position="before">
+                <filter name="category_group_id" string="Category Group"/>
+            </xpath>
+            <xpath expr="//group/filter[@name='product']" position="after">
+                <filter name="category_group_id" string="Category Group" domain="[]" context="{'group_by' : 'category_group_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

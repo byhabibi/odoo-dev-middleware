@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="paperformat_cover_letter_attachment" model="report.paperformat">
+        <field name="name">Cover Letter Attachment</field>
+        <field name="default" eval="True" />
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">15</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">5</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="eran_action_report_cover_letter_attachment" model="ir.actions.report">
+        <field name="name">Cover Letter Attachment</field>
+        <field name="model">dsn.demand.planning</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.report_eran_cover_letter_attachment</field>
+        <field name="report_file">eran_custom.report_eran_cover_letter_attachment</field>
+        <field name="print_report_name">'Cover Letter Attachment - %s' % (object.name)</field>
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_cover_letter_attachment"/>
+    </record>
+
+
+    <template id="report_eran_cover_letter_attachment">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="page">
+                        <div class="row">
+                            <div class="col-6">
+                                <h4 style="font-weight:bold;">Cover Letter Attachment MRP-2 Sep 2023</h4>
+                                <p style="font-size:12px;">in Million</p>
+                            </div>
+                            <div class="col-6"></div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div class="col-12" style="font-size:12px;">
+                                <h6 style="font-weight:bold;">Sales Amount by Customer</h6>
+                                <table class="table table-bordered table-borderless">
+                                    <tr>
+                                        <th style="width: 16%; border: 1px solid; text-align:center;">Customer</th>
+                                        <th style="width: 16%; border: 1px solid; text-align:center;">Outlook</th>
+                                        <th style="width: 16%; border: 1px solid; text-align:center;">Order</th>
+                                        <th style="width: 50%;"/>
+                                    </tr>
+                                    <t t-set="forecast_list" t-value="[]"/>
+                                    <t t-foreach="o.line_ids" t-as="forct">
+                                        <t t-if="len(forct.forecast_ids)!=0">
+                                            <t t-foreach="forct.forecast_ids" t-as="forc_order">
+                                                <t t-set="forecast_list" t-value="forecast_list + [forc_order]"/>
+                                            </t>
+                                        </t>
+                                    </t>
+                                    
+                                    <t t-set="customer" t-value="[]"/>
+                                    <t t-set="forecast_order_line" t-value="[]"/>
+                                    <t t-foreach="set(forecast_list)" t-as="data">
+                                        <t t-set="forecast_order_line" t-value="o.env['dsn.forecast.order.line'].search([('forecast_id', '=', data.id)])"/>
+                                        <t t-foreach="forecast_order_line" t-as="cust">
+                                            <t t-set="customer" t-value="customer + [cust.partner_id]"/>
+                                        </t>
+                                    </t>
+
+                                    <t t-set="total_order" t-value="0"/>
+                                    <t t-foreach="set(customer)" t-as="forc_cust">
+                                        <t t-set="order" t-value="0"/>
+                                        <t t-foreach="forecast_order_line.filtered(lambda x:x.partner_id.id == forc_cust.id)" t-as="line">
+                                            <t t-set="order" t-value="order + line.quantity"/>
+                                        </t>
+                                        <t t-set="order_qty" t-value="order * (o.percen_forecast/100)"/>
+                                        <t t-set="total_order" t-value="total_order + order_qty"/>
+                                        <tr>
+                                            <td style="padding: 3px; border: 1px solid;"><t t-esc="forc_cust.name"/></td>
+                                            <td style="padding: 3px; border: 1px solid; text-align: right;"></td>
+                                            <td style="padding: 3px; border: 1px solid; text-align: right;"><t t-esc="order_qty" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                            <td/>
+                                        </tr>
+                                    </t>
+
+                                    <tr>
+                                        <td style="padding: 3px; border: 1px solid;">Total</td>
+                                        <td style="padding: 3px; border: 1px solid;"></td>
+                                        <td style="padding: 3px; border: 1px solid; text-align: right;"><t t-esc="total_order" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                        <td/>
+                                    </tr>
+                                </table>
+                                <br/>
+                                <h6 style="font-weight:bold;">Sales Amount by Product Group</h6>
+                                <table class="table table-bordered table-borderless">
+                                    <tr>
+                                        <th style="width: 16%; border: 1px solid; text-align:center;">Product Group</th>
+                                        <th style="width: 16%; border: 1px solid; text-align:center;">Outlook</th>
+                                        <th style="width: 16%; border: 1px solid; text-align:center;">Order</th>
+                                        <th style="width: 50%;"/>
+                                    </tr>
+
+                                    <t t-set="forecast_list" t-value="[]"/>
+                                    <t t-foreach="o.line_ids" t-as="forct">
+                                        <t t-if="len(forct.forecast_ids)!=0">
+                                            <t t-foreach="forct.forecast_ids" t-as="forc_order">
+                                                <t t-set="forecast_list" t-value="forecast_list + [forc_order]"/>
+                                            </t>
+                                        </t>
+                                    </t>
+
+                                    <t t-set="categ_group" t-value="[]"/>
+                                    <t t-set="forecast_order_line" t-value="[]"/>
+                                    <t t-foreach="set(forecast_list)" t-as="data">
+                                        <t t-set="forecast_order_line" t-value="o.env['dsn.forecast.order.line'].search([('forecast_id', '=', data.id)])"/>
+                                        <t t-foreach="forecast_order_line" t-as="categ">
+                                            <t t-set="categ_group" t-value="categ_group + [categ.product_id.category_group_id]"/>
+                                        </t>
+                                    </t>
+
+                                    <t t-set="total_order_qty" t-value="0"/>
+                                    <t t-foreach="set(categ_group)" t-as="categ_grp">
+                                        <t t-set="order_frcs" t-value="0"/>
+                                        <t t-foreach="forecast_order_line.filtered(lambda x:x.product_id.category_group_id.id == categ_grp.id)" t-as="line_grp">
+                                            <t t-set="order_frcs" t-value="order_frcs + line_grp.quantity"/>
+                                        </t>
+                                        <t t-set="order_qty_grp" t-value="order_frcs * (o.percen_forecast/100)"/>
+                                        <t t-set="total_order_qty" t-value="total_order_qty + order_qty_grp"/>
+                                        <tr>
+                                            <td style="padding: 3px; border: 1px solid;"><t t-esc="categ_grp.name"/></td>
+                                            <td style="padding: 3px; border: 1px solid;"></td>
+                                            <td style="padding: 3px; border: 1px solid; text-align: right;"><t t-esc="order_qty_grp" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                            <td/>
+                                        </tr>
+                                    </t>
+                                    <tr>
+                                        <td style="padding: 3px; border: 1px solid;">Total</td>
+                                        <td style="padding: 3px; border: 1px solid;"></td>
+                                        <td style="padding: 3px; border: 1px solid; text-align: right;"><t t-esc="total_order_qty" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                        <td/>
+                                    </tr>
+                                </table>
+                                <br/>
+                                <h6 style="font-weight:bold;">MRP Cost</h6>
+                                <table class="table table-bordered table-borderless">
+                                    <tr>
+                                        <th style="width: 15%; border: 1px solid; text-align:center;">Valuation Class</th>
+                                        <th style="width: 15%; border: 1px solid; text-align:center;">MPR Total</th>
+                                        <th style="width: 15%; border: 1px solid; text-align:center;">% tage to Sales</th>
+                                        <th style="width: 1%;"/>
+                                        <th style="width: 15%; border: 1px solid; text-align:center;">Purch. Cost MRP-1</th>
+                                        <th style="width: 1%;"/>
+                                        <th style="width: 15%; border: 1px solid; text-align:center;">Purch. Cost MRP-2</th>
+                                        <th style="width: 12%;"/>
+                                    </tr>
+                                    <t t-set="start_date" t-value="o.start_date"/>
+                                    <t t-set="end_date" t-value="o.end_date"/>
+
+                                    <!-- cari mrp fix order dan forcast order -->
+                                    <t t-set="list_forecast" t-value="o.search([('type', '=', 'forecast_order'), ('start_date', '&gt;=', start_date), ('end_date', '&lt;=', end_date), ('id', '!=', o.id)])"/>
+                                    <t t-set="mrp_forecast_ids" t-value="o.env['dsn.mrp'].search([('demand_id', '=', max([x.id for x in list_forecast]))])"/>
+                                    <t t-set="mrp_fix_order_ids" t-value="o.env['dsn.mrp'].search([('demand_id', '=', o.id)])"/>
+                                    
+                                    <t t-set="group" t-value="[]"/>
+                                    <t t-foreach="mrp_fix_order_ids" t-as="mrp_fix_order">
+                                        <t t-set="group" t-value="group + [mrp_fix_order.product_id.category_group_id]"/>
+                                    </t>
+                                    <t t-foreach="mrp_forecast_ids" t-as="mrp_forecast">
+                                        <t t-set="group" t-value="group + [mrp_forecast.product_id.category_group_id]"/>
+                                    </t>
+                                    
+                                    <t t-set="grand_total_mrp1" t-value="0"/>
+                                    <t t-set="grand_total_mrp2" t-value="0"/>
+                                    <t t-set="grand_total_mrp" t-value="0"/>
+                                    <t t-foreach="set(group)" t-as="data">
+                                        <t t-set="cost_mrp1" t-value="0"/>
+                                        <t t-foreach="mrp_forecast_ids.filtered(lambda x:x.product_id.category_group_id.id == data.id)" t-as="cost">
+                                            <t t-set="cost_mrp1" t-value="cost_mrp1 + cost._compute_cost_mrp()"/>
+                                        </t>
+
+                                        <t t-set="cost_mrp2" t-value="0"/>
+                                        <t t-foreach="mrp_fix_order_ids.filtered(lambda x:x.product_id.category_group_id.id == data.id)" t-as="cost2">
+                                            <t t-set="cost_mrp2" t-value="cost_mrp2 + cost2._compute_cost_mrp()"/>
+                                        </t>
+
+                                        <t t-set="mrp_total" t-value="cost_mrp1 + cost_mrp2"/>
+                                        <t t-set="tage2sales" t-value="(mrp_total/total_order) * 100"/>
+
+                                        <t t-set="grand_total_mrp1" t-value="grand_total_mrp1 + cost_mrp1"/>
+                                        <t t-set="grand_total_mrp2" t-value="grand_total_mrp2 + cost_mrp2"/>
+                                        <t t-set="grand_total_mrp" t-value="grand_total_mrp + mrp_total"/>
+
+                                        <tr>
+                                            <td style="padding: 3px; border: 1px solid;"><t t-esc="data.name"/></td>
+                                            <td style="padding: 3px; border: 1px solid; text-align: right;"><t t-esc="mrp_total" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                            <td style="padding: 3px; border: 1px solid; text-align: right;"><t t-esc="tage2sales" t-options="{'widget': 'float', 'precision': 1}"/> %</td>
+                                            <td/>
+                                            <td style="padding: 3px; border: 1px solid; text-align: right;"><t t-esc="cost_mrp1" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                            <td/>
+                                            <td style="padding: 3px; border: 1px solid; text-align: right;"><t t-esc="cost_mrp2" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                            <td/>
+                                        </tr>
+                                    </t>
+                                    <tr>
+                                        <td style="padding:0px; height:4px;" colspan="3"/>
+                                        <td style="padding:0px; height:4px;"/>
+                                        <td style="padding:0px; height:4px;"/>
+                                        <td style="padding:0px; height:4px;"/>
+                                        <td style="padding:0px; height:4px;"/>
+                                        <td style="padding:0px; height:4px;"/>
+                                    </tr>
+                                    <tr style="font-weight: bold;">
+                                        <td style="padding: 3px; width: 15%;border: 1px solid;">Target Sales</td>
+                                        <td style="padding: 3px; width: 15%;border: 1px solid; text-align:right;"><t t-esc="total_order" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                        <td style="padding: 3px; width: 15%;border: 1px solid; text-align:right;"></td>
+                                        <td style="padding: 3px; width: 1%;"/>
+                                        <td style="padding: 3px; width: 15%;border: 1px solid; text-align:right;"></td>
+                                        <td style="padding: 3px; width: 1%;"/>
+                                        <td style="padding: 3px; width: 15%;border: 1px solid; text-align:right;"></td>
+                                        <td style="padding: 3px; width: 12%;"/>
+                                    </tr>
+                                    <t t-set="total_purc_cost" t-value="grand_total_mrp * 0.97"/>
+                                    <t t-set="purc_tage2sales" t-value="(total_purc_cost/total_order) * 100"/>
+                                    <tr style="font-weight: bold;">
+                                        <td style="padding: 3px; border: 1px solid;">Purchase Cost</td>
+                                        <td style="padding: 3px; border: 1px solid; text-align:right;"><t t-esc="total_purc_cost" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                        <td style="padding: 3px; border: 1px solid; text-align:right;"><t t-esc="purc_tage2sales" t-options="{'widget': 'float', 'precision': 1}"/> %</td>
+                                        <td/>
+                                        <td style="padding: 3px; border: 1px solid; text-align:right;"><t t-esc="grand_total_mrp1" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                        <td/>
+                                        <td style="padding: 3px; border: 1px solid; text-align:right;"><t t-esc="grand_total_mrp2" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                        <td/>
+                                    </tr>
+                                    <tr style="font-weight: bold;">
+                                        <t t-set="purc_cost_percent_mrp1" t-value="0"/>
+                                        <t t-set="purc_cost_percent_mrp2" t-value="0"/>
+                                        <t t-if="grand_total_mrp1!=0 and total_purc_cost!=0">
+                                            <t t-set="purc_cost_percent_mrp1" t-value="(grand_total_mrp1/total_purc_cost) * 100"/>
+                                        </t>
+                                        <t t-if="grand_total_mrp2!=0 and total_purc_cost!=0">
+                                            <t t-set="purc_cost_percent_mrp2" t-value="(grand_total_mrp2/total_purc_cost) * 100"/>
+                                        </t>
+                                        <td style="padding: 3px; border: 1px solid;">Purchase Cost to Sales</td>
+                                        <td style="padding: 3px; border: 1px solid; text-align:right;"><t t-esc="purc_tage2sales" t-options="{'widget': 'float', 'precision': 1}"/> %</td>
+                                        <td style="padding: 3px; border: 1px solid; text-align:right;"></td>
+                                        <td/>
+                                        <td style="padding: 3px; border: 1px solid; text-align:right;"><t t-esc="purc_cost_percent_mrp1" t-options="{'widget': 'float', 'precision': 1}"/> %</td>
+                                        <td/>
+                                        <td style="padding: 3px; border: 1px solid; text-align:right;"><t t-esc="purc_cost_percent_mrp2" t-options="{'widget': 'float', 'precision': 1}"/> %</td>
+                                        <td/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div class="col-9" style="font-size:12px;">
+                                <table class="table table-bordered table-borderless">
+                                    <tr>
+                                        <th style="background-color: black; color:white; border-left:1px solid #000000; width:20%;">Dibuat</th>
+                                        <th style="background-color: black; color:white; border-left:1px solid #808080; width:20%;">Diperiksa</th>
+                                        <th style="background-color: black; color:white; border-left:1px solid #808080; width:20%;">Diketahui</th>
+                                        <th style="background-color: black; color:white; border-left:1px solid #808080; border-right:1px solid  #000000; width:40%;" colspan="2">Disetujui</th>
+                                    </tr>
+                                    <tr>
+                                        <td style="height:60px; width:20%; border:1px solid #808080;"/>
+                                        <td style="height:60px; width:20%; border:1px solid #808080;"/>
+                                        <td style="height:60px; width:20%; border:1px solid #808080;"/>
+                                        <td style="height:60px; width:20%; border:1px solid #808080;"/>
+                                        <td style="height:60px; width:20%; border:1px solid #808080;"/>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 3px; height:12px; border:1px solid #808080;"/>
+                                        <td style="padding: 3px; height:12px; border:1px solid #808080;"/>
+                                        <td style="padding: 3px; height:12px; border:1px solid #808080;"/>
+                                        <td style="padding: 3px; height:12px; border:1px solid #808080;"/>
+                                        <td style="padding: 3px; height:12px; border:1px solid #808080;"/>
+                                    </tr>
+                                    <tr style="text-align:center;">
+                                        <td style="padding: 3px; height:12px; border:1px solid #808080;">PPIC Spv</td>
+                                        <td style="padding: 3px; height:12px; border:1px solid #808080;">Plant Manager</td>
+                                        <td style="padding: 3px; height:12px; border:1px solid #808080;">General Manager</td>
+                                        <td style="padding: 3px; height:12px; border:1px solid #808080;">Direktur</td>
+                                        <td style="padding: 3px; height:12px; border:1px solid #808080;">Direktur Utama</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-3"/>
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <hr/>
+                        <div class="row">
+                          <div class="col" style="text-align:center;">
+                            Page <span class="page"/> of <span class="topage"/>
+                          </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

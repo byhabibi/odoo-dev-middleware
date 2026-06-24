@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="eran_account_asset_form_inherit" model="ir.ui.view">
+        <field name="name">eran.account.asset.form.inherit</field>
+        <field name="model">account.asset</field>
+        <field name="inherit_id" ref="account_asset.view_account_asset_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="asset_jig" invisible="1"/>
+            </xpath>
+            <!-- HIDE BUTTON CONFIRM -->
+            <xpath expr="//button[@name='validate']" position="attributes">
+                <attribute name="states"/>
+                <attribute name="attrs">
+                    {'invisible': ['|',
+                        ('asset_jig', '=', True),
+                        ('state', '!=', 'draft')
+                    ]}
+                </attribute>
+            </xpath>
+
+            <!-- HIDE BUTTON COMPUTE DEPRECIATION -->
+            <xpath expr="//button[@name='compute_depreciation_board']" position="attributes">
+                <attribute name="states"/>
+                <attribute name="attrs">
+                    {'invisible': ['|',
+                        ('asset_jig', '=', True),
+                        ('state', '!=', 'draft')
+                    ]}
+                </attribute>
+            </xpath>
+            <xpath expr="//group[field[@name='already_depreciated_amount_import']]/.." position="inside">
+                <group string="Additional Information">
+                    <field name="location_asset"/>
+                    <field name="asset_jig" attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

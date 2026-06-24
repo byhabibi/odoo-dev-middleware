@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_auto_reminder_bom" model="ir.cron">
+        <field name="name">BOM: Show reminder if today is almost close to the end date of tooling</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="nextcall" eval="(DateTime.now().replace(hour=2, minute=0) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')" />
+        <field name="doall" eval="False"/>
+        <field name="model_id" ref="model_mrp_bom"/>
+        <field name="code">model.check_bom_end_date()</field>
+        <field name="state">code</field>
+    </record>
+
+    <record id="ir_cron_quotation_expiration_notification" model="ir.cron">
+        <field name="name">Quotation Expiration Notification</field>
+        <field name="model_id" ref="model_eran_quotation"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_remind_3_day_expire_notif()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="nextcall" eval="(DateTime.now().replace(hour=1, minute=0) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')" />
+        <field eval="False" name="doall"/>
+    </record>
+
+    <record id="ir_cron_update_expired_quotations" model="ir.cron">
+        <field name="name">Update Expired Quotations</field>
+        <field name="model_id" ref="model_eran_quotation"/>
+        <field name="state">code</field>
+        <field name="code">model.update_expired_quotations()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="nextcall" eval="(DateTime.now().replace(hour=1, minute=0) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')" />
+    </record>
+
+    <record id="ir_cron_run_purchase_order_id" model="ir.cron">
+        <field name="name">Update Purchase Order Picking</field>
+        <field name="model_id" ref="model_stock_picking"/>
+        <field name="state">code</field>
+        <field name="code">model.run_purchase_order_id_all()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+    </record>
+
+    <record id="ir_cron_master_date" model="ir.cron">
+        <field name="name">Create Master Date</field>
+        <field name="model_id" ref="model_master_date"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_date()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+    </record>
+
+    <!-- <record id="ir_cron_tarik_data_zkteco" model="ir.cron">
+        <field name="name">Tarik Data Mesin Absensi</field>
+        <field name="model_id" ref="model_eran_attendance_machine_config"/>
+        <field name="state">code</field>
+        <field name="code">model.action_sync_attendance()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+    </record> -->
+
+    <record id="ir_cron_sync_attendance_log" model="ir.cron">
+        <field name="name">Attendance: Sync From Log Transaction</field>
+        <field name="model_id" ref="model_hr_attendance"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_attendance_from_log()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+    </record>
+
+    <record id="reminder_attendance_overtime_approval" model="mail.activity.type">
+        <field name="name">Attendance Overtime Approval</field>
+        <field name="icon">fa-users</field>
+        <field name="sequence">3</field>
+    </record>
+
+    <!-- <record id="ir_cron_update_expired_sale_order" model="ir.cron">
+        <field name="name">Update Expired Sale</field>
+        <field name="model_id" ref="model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">model.update_expired_sale_order()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="nextcall" eval="(DateTime.now().replace(hour=1, minute=0) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')" />
+    </record> -->
+
+    <record id="reminder_quotation_expiration" model="mail.activity.type">
+        <field name="name">Quotation Expire</field>
+        <field name="icon">fa-users</field>
+        <field name="sequence">9</field>
+    </record>
+
+    <record id="reminder_quotation_approval" model="mail.activity.type">
+        <field name="name">Quotation Approval</field>
+        <field name="icon">fa-users</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="reminder_loi_approval" model="mail.activity.type">
+        <field name="name">LOI Approval</field>
+        <field name="icon">fa-users</field>
+        <field name="sequence">11</field>
+    </record>
+    <record id="reminder_stock_approval" model="mail.activity.type">
+        <field name="name">Stock Approval</field>
+        <field name="icon">fa-users</field>
+        <field name="sequence">12</field>
+    </record>
+    <record id="reminder_mrp_approval" model="mail.activity.type">
+        <field name="name">Mrp Approval</field>
+        <field name="icon">fa-users</field>
+        <field name="sequence">13</field>
+    </record>
+    
+</odoo>

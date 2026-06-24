@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="eran_login_layout" inherit_id="web.login_layout" name="eran_Custom_Login_Footer">
+        <!-- Hapus link "Mengelola Database" -->
+        <xpath expr="//a[contains(@href, '/web/database/manager')]" position="replace"/>
+        <xpath expr="//div[hasclass('text-center')]" position="replace"/>
+
+        <!--  Hapus teks "Disajikan oleh Odoo" -->
+        <!-- <xpath expr="//*[contains(normalize-space(.), 'Disajikan oleh Odoo')]" position="replace"/> -->
+
+        <!-- Replace footer text -->
+        <!-- <xpath expr="//div[hasclass('text-center')]" position="inside">
+            <p class="text-center text-muted mt-2 mb-0">
+                © 2025 Eran App — Dikembangkan oleh MBG
+            </p>
+        </xpath> -->
+    </template>
+
+</odoo>

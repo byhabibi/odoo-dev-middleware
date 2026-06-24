@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_paperformat_report_invoice" model="report.paperformat">
+        <field name="name">Eran Invoice Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">50</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">50</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="account.account_invoices" model="ir.actions.report">
+        <field name="report_name">eran_custom.eran_template_report_invoice</field>
+        <field name="report_file">eran_custom.eran_template_report_invoice</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_invoice"/>
+    </record>
+
+    <template id="eran_template_report_invoice">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="header">
+                        <div class="row mb-3">
+                            <div style="width:65%;">
+                            </div>
+                            <div style="width:35%;">
+                                <img t-att-src="image_data_uri(o.company_id.logo)" style="max-width:300px;width:500px;" alt="Logo"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-auto col-6">
+                            </div>
+                            <div class="col-auto col-3">
+                                <h3>INVOICE</h3>
+                            </div>
+                            <div class="col-auto col-6">
+                            </div>
+                        </div>
+                        <div class="row" style="font-size:12px;">
+                            <div class="col-auto col-6">
+                                <table class="table table-sm o_main_table table-borderless" style="width:400px;">
+                                  <tr>
+                                    <td style="width:50px;"><b>Date</b></td>
+                                    <td style="width:5px;"><b>:</b></td>
+                                    <td><b><span t-esc="o.invoice_date.strftime('%d %B %Y')"/></b></td>
+                                  </tr>
+                                  <tr>
+                                    <td><b>No.</b></td>
+                                    <td><b>:</b></td>
+                                    <td><b><span t-field="o.name"/></b></td>
+                                  </tr>
+                                  <tr>
+                                    <td><b>To.</b></td>
+                                    <td><b>:</b></td>
+                                    <td><b><span t-field="o.partner_id.name"/></b></td>
+                                  </tr>
+                                </table>
+                            </div>
+                            <div class="col-auto col-3">
+                            </div>
+                            <div class="col-auto col-6">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page" style="font-size:12px;">
+                        <div class="row">
+                            <table class="table table-bordered table-borderless">
+                                <tr>
+                                    <td class="text-center" style="border:1px solid; width: 3%" scope="col"><b>No</b></td>
+                                    <td class="text-center" style="border:1px solid; width: 30%" scope="col"><b>Item Description</b></td>
+                                    <td class="text-center" style="border:1px solid; width: 20%" scope="col"><b>No. Surat Jalan</b></td>
+                                    <td class="text-center" style="border:1px solid; width: 15%" scope="col"><b>Order Sheet</b></td>
+                                    <td class="text-center" style="border:1px solid; width: 7%" scope="col"><b>Qty/Pcs</b></td>
+                                    <td class="text-center" style="border:1px solid; width: 10%" scope="col"><b>Unit Price</b></td>
+                                    <td class="text-center" style="border:1px solid; width: 15%" scope="col"><b>Total</b></td>
+                                </tr>
+                                <!-- Done -->
+                                <t t-if="o.move_type=='out_invoice'">
+                                    <t t-set="no" t-value="1"/>
+                                    <t t-set="product" t-value="[]"/> 
+                                    <t t-set="sale_id" t-value="[]"/>
+                                    <t t-foreach="o.invoice_line_ids" t-as="prd">
+                                        <t t-set="product" t-value="product + [prd]"/> 
+                                        <t t-set="sale_id" t-value="sale_id + [prd.sale_line_id]"/>
+                                    </t>
+
+                                    <t t-set="po_ref" t-value="False"/>
+                                    <t t-set="product_name" t-value="False"/>
+                                    <t t-set="qty_pcs" t-value="0"/>
+                                    <t t-set="total_po" t-value="0"/>
+                                    
+                                    <!-- Kelompokkan data dan mengurutkan berdasarkan product name dan po_ref -->
+                                    <t t-set="grouped_lines" t-value="{}"/>
+                                    <t t-foreach="o.invoice_line_ids.filtered(lambda x: x.product_id.is_global_discount != True)" t-as="line">
+                                        <t t-set="key" t-value="(line.product_id.name, line.picking_id.po_ref)"/>
+                                        <t t-if="key not in grouped_lines">
+                                            <t t-set="grouped_lines" t-value="grouped_lines.update({key: {'lines': [], 'qty': 0, 'total': 0}}) or grouped_lines"/>
+                                        </t>
+                                        <t t-set="_" t-value="grouped_lines[key]['lines'].append(line)"/>
+                                        <t t-set="_" t-value="grouped_lines[key].update({                                             'qty': grouped_lines[key]['qty'] + line.quantity,                                             'total': grouped_lines[key]['total'] + line.price_subtotal                                         })"/>
+                                    </t>
+                                    
+                                    <!-- Menampilkan hasil yang sudah dikelompokkan dan diurutkan -->
+                                    <t t-foreach="sorted(grouped_lines.items(), key=lambda x: x[0][0])" t-as="group">
+                                        <t t-set="product_name" t-value="group[0][0]"/>
+                                        <t t-set="current_po_ref" t-value="group[0][1]"/>
+                                        
+                                        <!-- Selalu tampilkan PO Ref, baik berbeda maupun sama dengan sebelumnya -->
+                                        <tr style="font-weight:bold;">
+                                            <td style="padding:2px; border:1px solid;" colspan="7">
+                                                <span t-esc="current_po_ref"/>
+                                            </td>
+                                        </tr>
+                                        <t t-set="po_ref" t-value="current_po_ref"/>
+                                        
+                                        <t t-if="po_ref != current_po_ref">
+                                            <tr style="font-weight:bold;">
+                                                <td style="padding:2px; border:1px solid;" colspan="7">
+                                                    <span t-esc="current_po_ref"/>
+                                                </td>
+                                            </tr>
+                                            <t t-set="po_ref" t-value="current_po_ref"/>
+                                        </t>
+                                        
+                                        <t t-foreach="group[1]['lines']" t-as="line">
+                                            <tr>
+                                                <td class="text-center" style="border-left:1px solid; width: 3%; padding:2px;" scope="col"><span t-esc="no"/></td>
+                                                <td style="border-left:1px solid; width: 30%; padding:2px;" scope="col"><span t-field="line.product_id.name"/></td>
+                                                <td class="text-center" style="border-left:1px solid; width: 20%; padding:2px;" scope="col"><span t-field="line.stock_move_id.picking_id.name"/></td>
+                                                <td class="text-center" style="border-left:1px solid; width: 15%; padding:2px;" scope="col"><span t-field="line.stock_move_id.picking_id.no_order_sheet"/></td>
+                                                <td style="border-left:1px solid; width: 7%; padding:2px; text-align:right;" scope="col"><span t-field="line.quantity"/></td>
+                                                <td style="border-left:1px solid; width: 10%; padding:2px; text-align:right;" scope="col"><span t-field="line.price_unit" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: currency}"/></td>
+                                                <td style="border-left:1px solid; border-right:1px solid; width: 15%; padding:2px; text-align:right;" scope="col"><span t-field="line.price_subtotal"/></td>
+                                                <t t-set="no" t-value="no + 1"/>
+                                            </tr>
+                                        </t>
+                                        
+                                        <tr style="font-weight:bold;">
+                                            <td style="padding:2px; border-left:1px solid; border-right:1px solid;"/>
+                                            <td style="padding:2px; border-right:1px solid;"/>
+                                            <td style="padding:2px; border-right:1px solid;"/>
+                                            <td style="padding:2px; border-right:1px solid;"/>
+                                            <td style="border-left:1px solid; text-align:right; padding:2px"><span t-esc="group[1]['qty']" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/></td>
+                                            <td style="border-left:1px solid; padding:2px;"/>
+                                            <td style="border-left:1px solid; border-right:1px solid; text-align:right; padding:2px"><span t-esc="group[1]['total']" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                                        </tr>
+                                    </t>
+                                </t>
+                                <t t-if="o.move_type=='in_invoice'">
+                                    <t t-set="no" t-value="1"/>
+                                    <t t-set="product" t-value="[]"/> 
+                                    <t t-set="purchase_id" t-value="[]"/>
+                                    <t t-foreach="o.invoice_line_ids" t-as="prd">
+                                        <t t-set="product" t-value="product + [prd]"/> 
+                                        <t t-set="purchase_id" t-value="purchase_id + [prd.purchase_order_id]"/>
+                                    </t>
+                                    <t t-foreach="set(purchase_id)" t-as="purchase_order">
+                                        <t t-set="qty_pcs" t-value="0"/>
+                                        <t t-set="total_po" t-value="0"/>
+                                        <tr style="font-weight:bold;">
+                                            <td style="padding:2px;" colspan="7"><span t-esc="purchase_order.name"/></td>
+                                        </tr>
+                                        <t t-foreach="o.invoice_line_ids.sorted(key=lambda x:x.product_id.name)" t-as="line">
+                                            <t t-if="line.purchase_order_id.id==purchase_order.id">
+                                                <t t-if="line.product_id.is_global_discount != True">
+                                                    <t t-set="qty_pcs" t-value="qty_pcs + line.quantity"/>
+                                                    <t t-set="total_po" t-value="total_po + line.price_subtotal"/>
+                                                    <tr>
+                                                        <td class="text-center" style="border-left:1px solid; width: 3%; padding:2px;" scope="col"><span t-esc="no"/></td>
+                                                        <td style="border-left:1px solid; width: 30%; padding:2px;" scope="col"><span t-field="line.product_id.name"/></td>
+                                                        <td class="text-center" style="border-left:1px solid; width: 20%; padding:2px;" scope="col"><span t-field="line.stock_move_id.picking_id.name"/></td>
+                                                        <td class="text-center" style="border-left:1px solid; width: 15%; padding:2px;" scope="col"><span t-field="line.stock_move_id.picking_id.no_order_sheet"/></td>
+                                                        <td style="border-left:1px solid; width: 7%; padding:2px; text-align:right;" scope="col"><span t-field="line.quantity"/></td>
+                                                        <td style="border-left:1px solid; width: 10%; padding:2px; text-align:right;" scope="col"><span t-field="line.price_unit" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: currency}"/></td>
+                                                        <td style="border-left:1px solid; border-right:1px solid; width: 15%; padding:2px; text-align:right;" scope="col"><span t-field="line.price_subtotal"/></td>
+                                                        <t t-set="no" t-value="no + 1"/>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                        </t> 
+                                        <tr style="font-weight:bold;">
+                                            <td style="border-left:1px solid; padding:2px"/>
+                                            <td style="border-left:1px solid; padding:2px"/>
+                                            <td style="border-left:1px solid; padding:2px"/>
+                                            <td style="border-left:1px solid; padding:2px"/>
+                                            <td style="border-left:1px solid; text-align:right; padding:2px"><span t-esc="qty_pcs" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/></td>
+                                            <td style="border-left:1px solid; padding:2px; "/>
+                                            <td style="border-left:1px solid; border-right:1px solid; text-align:right; padding:2px" colspan="2"><t t-if="o.currency_id"><span t-field="o.currency_id.symbol"/></t> <span t-esc="total_po" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/></td>
+                                        </tr>
+                                    </t>
+                                </t>
+                                <tr style="font-weight:bold;">
+                                    <td style="width: 3%; padding:2px; border:1px solid;"/>
+                                    <td colspan="5" style="padding:2px; border:1px solid;">Total</td>
+                                    <td style="padding:2px; text-align:right; border:1px solid; border-right:1px solid;"><span t-field="o.amount_untaxed"/></td>
+                                </tr>
+                                <tr style="font-weight:bold;" t-if="o.dpp_print">
+                                    <td style="width: 3%; padding:2px; border:1px solid;"/>
+                                    <td colspan="5" style="padding:2px; border:1px solid;">DPP Nilai Lain</td>
+                                    <td style="padding:2px; text-align:right; border:1px solid;"><span t-field="o.dpp" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                                </tr>
+                                <tr style="font-weight:bold;">
+                                    <td style="width: 3%; padding:2px; border:1px solid;"/>
+                                    <td colspan="5" style="padding:2px; border:1px solid;">PPN</td>
+                                    <td style="padding:2px; text-align:right; border:1px solid;">Rp <span t-field="o.ppn_amount" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/></td>
+                                </tr>
+                                <t t-if="o.partner_id.id==1304 and o.pph23_amount != 0">
+                                  <t t-set="pph23" t-value="o.extract_remote_id * o.pph23_amount"/>
+                                  <tr style="font-weight:bold;">
+                                      <td style="width: 3%; padding:2px; border:1px solid;"/>
+                                      <td colspan="5" style="padding:2px; border:1px solid;">PPH 23</td>
+                                      <td style="padding:2px; text-align:right; border:1px solid;">Rp <span t-esc="pph23" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/></td>
+                                  </tr>
+                                </t>
+                                <tr style="font-weight:bold;">
+                                    <td style="width: 3%; padding:2px; border:1px solid;"/>
+                                    <td colspan="5" style="border:1px solid; padding:2px;">G. Total</td>
+                                    <td style="padding:2px; text-align:right; border:1px solid;"><span t-field="o.amount_total"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="row" style="page-break-inside: avoid;">
+                            <div class="col-auto col-6">
+                                <b>Please Transfer To:</b>
+                                <div class="col" style="margin:7px;">
+                                    <span t-field="o.partner_bank_id.acc_holder_name"/><br/>
+                                    <span t-field="o.partner_bank_id.bank_id"/><br/>
+                                    ACC : <span t-field="o.partner_bank_id.acc_number"/><br/>
+                                </div>
+                                <div class="col" style="margin:7px;">
+                                    <br/>
+                                    <br/>
+                                    <br/>
+                                    <span t-field="o.narration"/>
+                                </div>
+                            </div>
+                            <div class="col-auto col-3"/>
+                            <div class="col-auto col-6 text-center" style="height:150px;">
+                                <b>Thank You</b>
+                                <div class="col" style="height:150px;">
+                                </div>
+                                <b>R. AGUNG NUGRAHA</b>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="footer" style="font-size:12px;">
+                        <div class="text-center" style="border-top: 1px solid black;">
+                            <ul class="list-inline">
+                                <li>Page: <span class="page"/> / <span class="topage"/></li>
+                            </ul>
+                        </div>
+                    </div>    
+                </t>
+            </t>   
+        </t>
+    </template>
+
+    <record id="eran_paperformat_report_tanda_terima_faktur" model="report.paperformat">
+        <field name="name">Eran Tanda Terima Faktur Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">30</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">25</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="eran_action_report_tanda_terima_faktur_bill" model="ir.actions.report">
+        <field name="name">Tanda Terima Faktur Bill</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_tanda_terima_faktur_bill</field>
+        <field name="report_file">eran_custom.eran_template_report_tanda_terima_faktur_bill</field>
+        <field name="print_report_name">'Tanda Terima Faktur %s' % object.name</field>
+        <field name="binding_model_id" ref="model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_tanda_terima_faktur"/>
+    </record>
+
+    <record id="eran_action_report_tanda_terima_faktur_invoice" model="ir.actions.report">
+        <field name="name">Tanda Terima Faktur Invoice</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_tanda_terima_faktur_invoice</field>
+        <field name="report_file">eran_custom.eran_template_report_tanda_terima_faktur_invoice</field>
+        <field name="print_report_name">'Tanda Terima Faktur %s' % object.name</field>
+        <field name="binding_model_id" ref="model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_tanda_terima_faktur"/>
+    </record>
+
+    <template id="eran_template_report_tanda_terima_faktur_bill">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="header">
+                        <div style="border-bottom: 2px solid #000; padding-bottom: 2px;">
+                            <div class="row" style="border-bottom: 2px solid #000;">
+                                <div class="col-6">
+                                    <div style="width:35%;">
+                                        <img t-att-src="image_data_uri(o.company_id.logo)" style="max-width:300px;" alt="Logo"/>
+                                    </div>
+                                </div>
+                                <div class="col-6" style="text-align: right;">
+                                    No. Dokumen : <span t-field="o.name" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>    
+                    <div class="page">
+                        <style type="text/css">
+                            thead th,
+                            thead td,
+                            
+                            {
+                                text-align:center;
+                                vertical-align: middle;
+                            }
+                            table,
+                            table th,
+                            table td{
+                                border : 1px solid black;
+                            }
+                            table th,
+                            table td{
+                                padding: 2px 5px;
+                            }
+                            table.borderless,
+                            table.borderless tr,
+                            table.borderless th,
+                            table.borderless td{
+                                border : transparent;
+                            }
+                            .text-left-right {
+                                display: flex;
+                                justify-content: space-between;
+                            }
+                        </style>
+                        <center><h5>TANDA TERIMA INVOICE</h5></center>
+                        <!-- <table class="borderless" style="width:50%;">
+                            <tr>
+                                <td style="width:50px;"><b>Date</b></td>
+                                <td>:</td>
+                                <td><span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d %B %Y')"/></td>
+                            </tr>
+                            <tr>
+                                <td><b>For</b></td>
+                                <td>:</td>
+                                <td><t t-if="o.partner_id.company_type != 'company'"><span t-field="o.partner_id.parent_id"/></t><t t-else=""><span t-field="o.partner_id"/></t></td>
+                            </tr>
+                            <tr>
+                                <td><b>Attn</b></td>
+                                <td>:</td>
+                                <td><t t-if="o.partner_id.company_type != 'company'"><span t-field="o.partner_id.name"/></t></td>
+                            </tr>
+                        </table> -->
+                        <br/>
+                        <span>Telah terima Invoice / Faktur dari PT / CV : 
+                            <t t-if="o.partner_id.company_type != 'company'">
+                                <span t-field="o.partner_id.parent_id"/>
+                            </t>
+                            <t t-else="">
+                                <span t-field="o.partner_id"/>
+                            </t>
+                        </span>
+                        <br/>
+                        <table class="" style="width:100%;border:0;">
+                            <thead>
+                                <tr>
+                                    <td class="text-center"><b>Invoice / Faktur No.</b></td>
+                                    <td class="text-center"><b>Tanggal</b></td>
+                                    <td class="text-center"><b>Total</b></td>
+                                </tr>
+                            </thead>
+                            <tbody style="border: 0;">
+                                <tr>
+                                    <td class="text-center"><span t-field="o.payment_reference"/></td>
+                                    <td class="text-center"><span t-esc="o.invoice_exchange_date.strftime('%d %b %Y')" /></td>
+                                    <td style="text-align:right !important;"><span t-field="o.amount_total"/></td>
+                                </tr>
+                                <tr style="border: 0;">
+                                    <td style="border: 0;"></td>
+                                    <td style="border: 0;">Total seluruhnya:</td>
+                                    <td style="text-align:right !important;border:0;"><span t-field="o.amount_total"/></td>
+                                </tr>
+                                <tr style="border: 0;">
+                                    <td style="border:0;">Jatuh Tempo Pembayaran Tgl:</td>
+                                    <td style="border:0;"></td>
+                                    <td style="border:0;">Bogor, <span t-esc="o.invoice_exchange_date.strftime('%d %b %Y')" /> </td>
+                                </tr>
+                                <tr style="border: 0;">
+                                    <td style="border:0;" colspan="3"></td>
+                                </tr>
+                                <tr style="border: 0;">
+                                    <td style="border:0;" colspan="2"></td>
+                                    <td style="border:0;text-align:center"> 
+                                        Diterima Oleh,
+                                        <br/><br/><br/><br/><br/><br/><br/>
+                                        <span t-field="o.create_uid" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        
+
+                        <!-- <table class="" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <td class="text-center" style="width:180px;">PENGIRIM</td>
+                                    <td style="border-top:hidden;border-bottom:hidden;"></td>
+                                    <td class="text-center" style="width:180px;">PENERIMA</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="height:75px;"></td>
+                                    <td style="height:75px;border-top:hidden;border-bottom:hidden;"></td>
+                                    <td style="height:75px;"></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td><![CDATA[&nbsp;]]></td>
+                                    <td style="border-top:hidden;border-bottom:hidden;"><![CDATA[&nbsp;]]></td>
+                                    <td><![CDATA[&nbsp;]]></td>
+                                </tr>
+                            </tfoot>
+                        </table> -->
+                        <!-- <br/><br/>
+                        <b>Note : <span t-field="o.note"/></b> -->
+                    </div>
+                </t>
+            </t>   
+        </t>
+    </template>
+
+    <template id="eran_template_report_tanda_terima_faktur_invoice">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="header">
+                        <div class="row">
+                            <div style="width:35%;">
+                                <img t-att-src="image_data_uri(o.company_id.logo)" style="max-width:300px;" alt="Logo"/>
+                            </div>
+                        </div>
+                    </div>    
+                    <div class="page">
+                        <style type="text/css">
+                            thead th,
+                            thead td,
+                            
+                            {
+                                text-align:center;
+                                vertical-align: middle;
+                            }
+                            table,
+                            table th,
+                            table td{
+                                border : 1px solid black;
+                            }
+                            table th,
+                            table td{
+                                padding: 2px 5px;
+                            }
+                            table.borderless,
+                            table.borderless tr,
+                            table.borderless th,
+                            table.borderless td{
+                                border : transparent;
+                            }
+                            .text-left-right {
+                                display: flex;
+                                justify-content: space-between;
+                            }
+                        </style>
+                        <center><h5>TANDA TERIMA INVOICE</h5></center>
+                        <table class="borderless" style="width:50%;">
+                            <tr>
+                                <td style="width:50px;"><b>Date</b></td>
+                                <td>:</td>
+                                <td><span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d %B %Y')"/></td>
+                            </tr>
+                            <tr>
+                                <td><b>For</b></td>
+                                <td>:</td>
+                                <td><t t-if="o.partner_id.company_type != 'company'"><span t-field="o.partner_id.parent_id"/></t><t t-else=""><span t-field="o.partner_id"/></t></td>
+                            </tr>
+                            <tr>
+                                <td><b>Attn</b></td>
+                                <td>:</td>
+                                <td><t t-if="o.partner_id.company_type != 'company'"><span t-field="o.partner_id.name"/></t></td>
+                            </tr>
+                        </table>
+                        <br/>
+                        Berikut Kami Kirimkan INVOICE Sebagai Berikut:
+                        <br/>
+                        <table class="" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <td class="text-center">NO. INVOICE</td>
+                                    <td class="text-center">NO. FAKTUR PAJAK</td>
+                                    <td class="text-center">AMOUNT</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center"><span t-field="o.name"/></td>
+                                    <td class="text-center"><span t-field="o.l10n_id_tax_number"/></td>
+                                    <td style="text-align:right !important;"><span t-field="o.amount_total"/></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"></td>
+                                    <td style="text-align:right !important;"><span t-field="o.amount_total"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br/>
+                        <table class="" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <td class="text-center" style="width:180px;">PENGIRIM</td>
+                                    <td style="border-top:hidden;border-bottom:hidden;"></td>
+                                    <td class="text-center" style="width:180px;">PENERIMA</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="height:75px;"></td>
+                                    <td style="height:75px;border-top:hidden;border-bottom:hidden;"></td>
+                                    <td style="height:75px;"></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td><![CDATA[&nbsp;]]></td>
+                                    <td style="border-top:hidden;border-bottom:hidden;"><![CDATA[&nbsp;]]></td>
+                                    <td><![CDATA[&nbsp;]]></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <br/><br/>
+                        <b>Note : <span t-field="o.note"/></b>
+                    </div>
+                </t>
+            </t>   
+        </t>
+    </template>
+
+    <record id="eran_action_report_jurnal_entri" model="ir.actions.report">
+        <field name="name">Jurnal Entri</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_jurnal_entri</field>
+        <field name="report_file">eran_custom.eran_template_report_jurnal_entri</field>
+        <field name="print_report_name">'Jurnal Entri %s' % object.name</field>
+        <field name="binding_model_id" ref="model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_tanda_terima_faktur"/>
+    </record>
+
+    <template id="eran_template_report_jurnal_entri">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="header">
+                        <div class="row">
+                            <div style="width:35%;">
+                                <img t-att-src="image_data_uri(o.company_id.logo)" style="max-width:300px;" alt="Logo"/>
+                            </div>
+                        </div>
+                    </div>    
+                    <div class="page">
+                        <style type="text/css">
+                            thead th,
+                            thead td,
+                            
+                            {
+                                text-align:center;
+                                vertical-align: middle;
+                            }
+                            table,
+                            table th,
+                            table td{
+                                border : 1px solid black;
+                            }
+                            table th,
+                            table td{
+                                padding: 2px 5px;
+                            }
+                            table.borderless,
+                            table.borderless tr,
+                            table.borderless th,
+                            table.borderless td{
+                                border : transparent;
+                            }
+                            .text-left-right {
+                                display: flex;
+                                justify-content: space-between;
+                            }
+                        </style>
+                        <t t-if="'BKK' in o.name">
+                            <center><h5>BUKTI KAS/BANK KELUAR</h5></center>
+                        </t>
+                        <t t-elif="'BKM' in o.name">
+                            <center><h5>BUKTI KAS/BANK MASUK</h5></center>
+                        </t>
+                        <t t-else="">
+                            <center><h5>BUKTI JURNAL</h5></center>
+                        </t>
+                        <br/>
+                        <table class="" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <td class="text-center">NO. VOUCHER</td>
+                                    <td class="text-center">Tanggal</td>
+                                    <td class="text-center">AMOUNT</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center"><span t-field="o.name"/></td>
+                                    <td class="text-center"><span t-field="o.date"/></td>
+                                    <td style="text-align:right !important;"><span t-field="o.amount_total"/></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"/>
+                                    <td style="text-align:right !important;"><span t-field="o.amount_total"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br/>
+                        <br/><br/>
+                        <br/><br/>
+                        <div class="row">
+                          <div class="col-9"> </div>
+                          <div class="col-3">
+                              <span>Print Date : </span><span t-esc="time.strftime('%d %B %Y')"/><br/>
+                          </div>
+                        </div>
+                    </div>
+                </t>
+            </t>   
+        </t>
+    </template>
+
+</odoo>

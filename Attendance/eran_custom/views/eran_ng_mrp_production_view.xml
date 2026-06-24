@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_ng_line_production_tree_view" model="ir.ui.view">
+        <field name="name">eran.ng_line_production_tree_view</field>
+        <field name="model">eran.ng.mrp.production</field>
+        <field name="arch" type="xml">
+            <tree string="NG Line Production" create="false" edit="false">
+                <field name="production_id" string="No MO"/>
+                <field name="schedule_date"/>
+                <field name="product_id"/>
+                <field name="no_good_id"/>
+                <field name="workcenter_id"/>
+                <field name="quantity"/>
+                <field name="shift_id"/>
+                <field name="operator_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_ng_line_production_pivot_view" model="ir.ui.view">
+        <field name="name">eran_ng_line_production.pivot_view</field>
+        <field name="model">eran.ng.mrp.production</field>
+        <field name="arch" type="xml">
+            <pivot string="Pivot NG Production">
+                <field name="production_id" type="row"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="eran_ng_line_production_search_view" model="ir.ui.view">
+        <field name="name">eran.ng_line_production_search_view</field>
+        <field name="model">eran.ng.mrp.production</field>
+        <field name="arch" type="xml">
+            <search string="search ng line production">
+                <field name="production_id"/>
+                <field name="product_id"/>
+                <field name="workcenter_id"/>
+                <field name="shift_id"/>
+                <field name="operator_id"/>
+                <group expand="0" string="Group By">
+                    <filter string="Category Group" name="category_group" domain="[]" context="{'group_by':'category_group_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_ng_line_production_action" model="ir.actions.act_window">
+        <field name="name">Report Production Inspection</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.ng.mrp.production</field>
+        <field name="view_mode">tree,pivot</field>
+        <field name="search_view_id" ref="eran_ng_line_production_search_view"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Nothing Eran NG Line Production
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_mrp_production_workorder_tree_editable_view_inherit" model="ir.ui.view">
+        <field name="name">eran.mrp.production.workorder.tree.editable.view.inherit</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_production_workorder_tree_editable_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="problem_ng_ids" widget="many2many_tags" invisible="1"/>
+                <field name="ng_qty" invisible="1"/>
+                <field name="activity_ids" widget="many2many_tags" invisible="1"/>
+                <field name="time_cycle" invisible="1"/>
+                <field name="default_capacity" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_mrp_production_workorder_form_view_inherit" model="ir.ui.view">
+        <field name="name">eran.mrp.production.workorder.form.view.inherit</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_production_workorder_form_view_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='time_ids']" position="before">
+                <group>
+                    <group>
+                        <label for="start_time" string="Productivity Periode"/>
+                        <div class="o_row">
+                            <field name="start_time" widget="daterange" options='{"related_end_date": "end_time"}' required="1"
+                                attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                            <i class="fa fa-long-arrow-right mx-1" aria-label="Arrow icon" title="Arrow"/>
+                            <field name="end_time" widget="daterange" options='{"related_start_date": "start_time"}' required="1"
+                                attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                        </div>
+                        <field name="eran_duration"  widget="float_time"/>
+                    </group>
+                     <group>
+                    </group>
+                </group>
+            </xpath>
+            <xpath expr="//field[@name='time_ids']" position="replace">
+                <field name="time_ids" nolabel="1" context="{'default_workcenter_id': workcenter_id, 'default_workorder_id': id,
+                    'default_start_date': start_time, 'default_end_date': end_time}" attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}">
+                    <tree editable="bottom">
+                        <field name="user_id"/>
+                        <field name="duration" widget="float_time" sum="Total duration"/>
+                        <field name="date_start" invisible="1"/>
+                        <field name="date_end" invisible="1"/>
+                        <field name="workcenter_id" invisible="1"/>
+                        <field name="company_id" invisible="1"/>
+                        <field name="start_date" required="1"/>
+                        <field name="end_date" required="1"/>
+                        <field name="start_time" widget="float_time"/>
+                        <field name="end_time" widget="float_time"/>
+                        <field name="loss_id" string="Productivity" options="{'no_open':True,'no_create': True}" optional="show" domain="[('sequence', '!=', 0)]"/>
+                    </tree>
+                    <form>
+                        <group>
+                            <group>
+                                <field name="date_start"/>
+                                <field name="date_end"/>
+                                <field name="duration" widget="float_time"/>
+                                <field name="company_id" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="user_id"/>
+                                <field name="workcenter_id"/>
+                                <field name="company_id" invisible="1"/>
+                                <field name="loss_id"/>
+                            </group>
+                        </group>
+                    </form>
+                </field>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_mrp_workorder_view_gantt_inherit" model="ir.ui.view">
+        <field name="name">mrp.workorder.view.gantt.inherit</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_workorder_view_gantt"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <!-- Add fields to the gantt so they are available in the popover -->
+            <xpath expr="//gantt/field[@name='json_popover']" position="before">
+                <field name="shift_id"/>
+                <field name="leader_id"/>
+                <field name="operator_id"/>
+                <field name="operator_id2"/>
+                <field name="quantity_plan"/>
+                <field name="ng_qty"/>
+                <field name="quantity_good"/>
+            </xpath>
+
+            <!-- Inject entries into the gantt-popover template to show Shift, Leader and Operator -->
+            <xpath expr="//gantt/templates/div[@t-name='gantt-popover']/div/div/ul" position="inside">
+                <li t-if="shift_id"><strong>Shift: </strong> <t t-out="shift_id[1]"/></li>
+                <li t-if="leader_id"><strong>Leader: </strong> <t t-out="leader_id[1]"/></li>
+                <li t-if="operator_id"><strong>Operator: </strong> <t t-out="operator_id[1]"/></li>
+                <li t-if="operator_id2"><strong>Operator 2: </strong> <t t-out="operator_id2[1]"/></li>
+                <li t-if="quantity_plan"><strong>Quantity Plan: </strong> <t t-out="quantity_plan"/></li>
+                <li t-if="ng_qty"><strong>Qty NG: </strong> <t t-out="ng_qty"/></li>
+                <li t-if="quantity_good"><strong>Good Total: </strong> <t t-out="quantity_good"/></li>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_mrp_production_workorder_tree_view" model="ir.ui.view">
+        <field name="name">eran.mrp.production.work.order.tree</field>
+        <field name="model">mrp.workorder</field>
+        <field name="mode">primary</field>
+        <field name="priority" eval="10"/>
+        <field name="inherit_id" ref="mrp.mrp_production_workorder_tree_editable_view"/>
+        <field name="arch" type="xml">
+            <!-- Tambahkan field di tree view -->
+            <xpath expr="//tree" position="inside">
+                <field name="workcenter_group_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_mrp_workorder_buttons_inherit" model="ir.ui.view">
+        <field name="name">mrp.workorder.buttons.inherit</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_production_workorder_tree_editable_view"/> 
+        <field name="arch" type="xml">
+            <!-- Tambahkan field is_user_working agar tersedia untuk dicek di attrs -->
+            <xpath expr="//tree" position="inside">
+                <field name="is_user_working" invisible="1"/>
+            </xpath>
+
+            <!-- 1. Modifikasi tombol Finish (Done) -->
+            <xpath expr="//button[@name='button_finish']" position="attributes">
+                <attribute name="attrs">
+                    {'invisible': ['|', '|', ('production_state', 'in', ('draft', 'done', 'cancel')), ('working_state', '=', 'blocked'), ('is_user_working', '!=', False)]}
+                </attribute>
+                <attribute name="string">Stop</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='%(mrp.act_mrp_block_workcenter_wo)d']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='button_unblock']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action untuk NG -->
+    <record id="eran_mrp_ng_action" model="ir.actions.act_window">
+        <field name="name">NG</field>
+        <field name="res_model">stock.scrap</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('scrap_location_id.name', '=', 'NG')]</field> 
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create NG</p>
+        </field>
+    </record>
+
+    <!-- <record id="eran_ng_view_tree" model="ir.ui.view">
+        <field name="name">eran.ng.view.tree</field>
+        <field name="model">stock.scrap</field>
+        <field name="inherit_id" ref="stock.stock_scrap_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="product_category_group_id"/>
+            </xpath>
+        </field>
+    </record> -->
+</odoo>

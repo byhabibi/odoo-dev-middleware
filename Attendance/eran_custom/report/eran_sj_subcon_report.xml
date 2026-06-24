@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_paperformat_report_sj_subcon" model="report.paperformat">
+        <field name="name">SJ Subcon Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+    
+    <record id="action_report_sj_subcon" model="ir.actions.report">
+        <field name="name">SJ Subcon</field>
+        <field name="model">stock.picking.batch</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.report_sj_subcon</field>
+        <field name="report_file">eran_custom.report_sj_subcon</field>
+        <field name="print_report_name">'SJ Subcon'</field>
+        <field name="binding_model_id" ref="model_stock_picking_batch"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_sj_subcon"/>
+    </record>
+
+    <template id="report_sj_subcon">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+
+                    <div class="row" style="border-bottom:2px solid; font-size:14px;">
+                        <div class="col-7">
+                            <t t-if="o.company_id.logo">
+                                <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 80px;max-width:300px;"/>
+                            </t>
+                        </div>
+                        <div class="col-5">
+                            <span t-esc="o.env.user.company_id.city"/>
+                            <span>, &amp;nbsp;</span>
+                            <t t-if="o.scheduled_date">
+                                <span t-esc="o.scheduled_date.strftime('%d %B %Y')"/>
+                            </t>
+                            <br/>
+                            <span>Kepada YTH</span><br/>
+                            <span t-esc="o.partner_id.name"/>
+                        </div>
+                    </div>
+
+                    <br/>
+                    <div class="row" style="font-size:14px;">
+                        <div class="col-2">No Surat Jalan</div>
+                        <div class="col-10">: <span t-field="o.name"/></div>
+                    </div>
+                    <div class="row" style="font-size:14px;">
+                        <div class="col-2">No Mobil</div>
+                        <div class="col-10">: <span t-field="o.no_mobil"/></div>
+                    </div>
+                    <div class="row" style="font-size:14px;">
+                        <span>Kami Kirimkan Barang-barang sebagai berikut :</span>
+                    </div>
+                    <br/>
+                    <div class="row justify-content-end mb16">
+                        <div class="row">
+                            <table class="table table-bordered" style="border-color:black;">
+                                <thead>
+                                    <tr>
+                                        <td class="text-center" width="5%" scope="col"><b>No</b></td>
+                                        <td class="text-center" width="10%" scope="col"><b>Qty KG</b></td>
+                                        <td class="text-center" width="10%" scope="col"><b>Qty PCS</b></td>
+                                        <!-- <td class="text-center" width="6%" scope="col"><b>Stn</b></td> -->
+                                        <td class="text-center" width="44%" scope="col"><b>Nama Part</b></td>
+                                        <td class="text-center" width="10%" scope="col"><b>Keterangan</b></td>
+                                        <td class="text-center" width="15%" scope="col"><b>NO PO</b></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="no" t-value="1"/>
+                                    <tr t-foreach="o.move_ids.filtered(lambda x: x.quantity_done &gt; 0)" t-as="line">
+                                        <t t-set="picking" t-value="line.env['stock.picking'].search([('name', '=', line.group_id.name)])[0]"/>
+                                        <t t-set="move_line" t-value="line.env['stock.move.line'].search([('move_id', '=', line.id)])[0]"/>
+                                        <t t-set="po_name" t-value="picking.purchase_id.name"/>
+                                        <td class="text-center" style="padding:1px;" scope="col"><span t-esc="no"/></td>
+                                        <td class="text-center" style="padding:1px;" scope="col"><span t-if="move_line.alternative_qty_done" t-field="move_line.alternative_qty_done" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/></td>
+                                        <td class="text-center" style="padding:1px;" scope="col"><span t-if="line.quantity_done" t-field="line.quantity_done" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 0}"/></td>
+                                        <!-- <td class="text-center" style="padding:1px;" scope="col"><span t-field="line.alternative_uom_id.name"/></td> -->
+                                        <td class="text-left" style="padding:1px;" scope="col"><span t-field="line.product_id.name"/></td>
+                                        <td class="text-center" style="padding:1px;" scope="col"><span t-field="line.product_id.description"/></td>
+                                        <td class="text-center" style="padding:1px;" scope="col"><span t-if="po_name" t-esc="po_name"/></td>
+                                        <t t-set="no" t-value="no + 1"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                   <div class="row" style="font-size:14px;">
+                        <div class="col-3" style="text-align:center;">Dibuat,</div>
+                        <div class="col-3" style="text-align:center;">Disetujui,</div>
+                        <div class="col-2" style="text-align:center;">Security</div>
+                        <div class="col-2" style="text-align:center;">Pengirim,</div>
+                        <div class="col-2" style="text-align:center;">Diterima Oleh,</div>
+                    </div>
+                    <div class="row" style="font-size:14px;">
+                        <div class="col-3" style="height:70px;"/>
+                        <div class="col-3" style="height:70px;"/>
+                        <div class="col-2" style="height:70px;"/>
+                        <div class="col-2" style="height:70px;"/>
+                        <div class="col-2" style="height:70px;"/>
+                    </div>
+                    <div class="row" style="font-size:14px;">
+                        <!-- <t t-if="o.user_id">
+                            <div class="col-3" style="text-align:center;">(&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;)</div>
+                        </t>
+                        <t t-else=""> -->
+                            <div class="col-3" style="text-align:center;">(<span t-field="o.user_id"/>)</div>
+                        <!-- </t> -->
+
+                        <div class="col-3" style="text-align:center;">
+                          <t t-set="sign_ids" t-value="o.env['hr.employee'].sudo().search([('user_id', '=', 69)])"/>
+                          (&amp;emsp;<span t-esc="sign_ids.user_id.name" style="font-size:12px;"/>&amp;emsp;)
+                        </div>
+                        <div class="col-2" style="text-align:center;">(&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;)</div>
+                        <div class="col-2" style="text-align:center;">(&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;)</div>
+                        <div class="col-2" style="text-align:center;">(&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;)</div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <div class="row" style="font-size:14px;">
+                        <div class="col-12">
+                            <i>Lbr 1 2 (Acc), 3 (Gudang), 4 (Customer), 5 (Security)</i>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

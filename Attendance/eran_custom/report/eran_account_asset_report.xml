@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_paperformat_barcode_asset" model="report.paperformat">
+        <field name="name">Barcode Asset</field>
+        <field name="default" eval="True" />
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">3</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">10</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="eran_action_report_eran_account_asset" model="ir.actions.report">
+        <field name="name">Barcode Asset</field>
+        <field name="model">account.asset</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_barcode_asset</field>
+        <field name="report_file">eran_custom.eran_barcode_asset</field>
+        <field name="print_report_name">'Barcode Asset'</field>
+        <field name="binding_model_id" ref="account_asset.model_account_asset"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_barcode_asset"/>
+    </record>
+
+    <template id="eran_barcode_asset">
+        <t t-call="web.basic_layout">
+            <t t-foreach="range(0, len(docs), 4)" t-as="idx">
+                <div class="row">
+
+                    <t t-foreach="docs[idx:idx+4]" t-as="o">
+                        <div class="col-3" style="border:2px solid black; padding:5px;">
+    
+                            <div class="row">
+                            
+                            <div class="col-9">
+                                <t t-if="o.company_id.logo">
+                                    <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 70px;max-width:250px;"/>
+                                </t>
+                            </div>
+                            <div class="col-3">
+                                <div t-if="o.name" t-esc="'%s | %s' % (o.name, o.acquisition_date)" t-options="{'widget':'barcode','symbology':'QR','width':70,'height':70,'img_style':'max-height:50pt;max-width:100%;','img_align':'center'}"/>
+                            </div>
+                            </div>
+                            
+
+                            <div class="row">
+                                <div class="col-4">Name Asset</div>
+                                <div class="col-1">:</div>
+                                <div class="col-7"><span t-field="o.name"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-4">Acquisition Date</div>
+                                <div class="col-1">:</div>
+                                <div class="col-7"><span t-field="o.acquisition_date"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-4">STO Date</div>
+                                <div class="col-1">:</div>
+                                <div class="col-7">
+                                    <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
+                                </div>
+                            </div>
+
+                        </div>
+                    </t>
+
+                </div>
+
+                <!-- PAGE BREAK SETIAP 5 BARIS -->
+                <t t-if="((idx / 4 + 1) % 5 == 0)">
+                    <div style="page-break-after: always;"/>
+                </t>
+
+            </t>
+        </t>
+    </template>
+</odoo>

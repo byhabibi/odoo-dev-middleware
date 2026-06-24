@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_order_sheet_vendor_view_tree" model="ir.ui.view">
+        <field name="name">eran.order.sheet.vendor.view.tree</field>
+        <field name="model">eran.order.sheet</field>
+        <field name="arch" type="xml">
+            <tree string="Order Sheet">
+                <field name="name" string="Reference"/>
+                <field name="partner_id" string="Contact"/>
+                <field name="type_order" invisible="1"/>
+                <field name="purchase_ids" widget="many2many_tags"/>
+                <!-- <field name="picking_id" readonly="1"/> -->
+                <field name="is_manual" invisible="1"/>
+                <field name="partner_ref"/>
+                <field name="create_date" string="Create On" widget="date"/>
+                <field name="schedule_date" widget="date"/>
+                <field name="state" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_order_sheet_customer_view_tree" model="ir.ui.view">
+        <field name="name">eran.order.sheet.customer.view.tree</field>
+        <field name="model">eran.order.sheet</field>
+        <field name="arch" type="xml">
+            <tree string="Order Delivery">
+                <field name="name" string="Reference"/>
+                <field name="partner_id" string="Customer"/>
+                <field name="type_order" invisible="1"/>
+                <field name="sale_ids" widget="many2many_tags"/>
+                <!-- <field name="picking_id" readonly="1"/> -->
+                <field name="is_manual" invisible="1"/>
+                <field name="partner_ref" invisible="1"/>
+                <field name="delivery_preparation" />
+                <field name="truck_number" />
+                <field name="create_date" string="Create On" widget="date"/>
+                <field name="schedule_date" string="Delivery Date"/>
+                <field name="state" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_sheet_vendor_view_form" model="ir.ui.view">
+        <field name="name">eran.order.sheet.vendor.view_form</field>
+        <field name="model">eran.order.sheet</field>
+        <field name="arch" type="xml">
+            <form string="Order Sheet" class="o_sale_order">
+            <header>
+                <field name="order_qty_line" invisible="1"/>
+                <field name="qty_return_line" invisible="1"/>
+                <button name="create_transfer_os" string="Process" attrs="{'invisible': [('state', '!=', 'draft')]}" type="object" class="btn btn-primary"/>
+                <!-- <button name="create_next_order_sheet" string="Create Another OS" attrs="{'invisible': ['|',('order_qty_line', '=', True), ('state', '=', 'cancel')]}" type="object" class="btn btn-primary"/> -->
+                <button name="create_next_order_sheet" string="Create Another OS" attrs="{'invisible': ['|',('order_qty_line', '=', True), ('state', '=', 'cancel'), ('qty_return_line', '=', False)]}" type="object" class="btn btn-primary"/>
+                <button name="cancel_order_sheet" string="Cancel" attrs="{'invisible': [('state', '=', 'cancel')]}" type="object"/>
+                <button name="btn_print_order_sheet_vendor" string="Print Order Sheet" attrs="{'invisible': [('type_order', '!=', 'purchase')]}" type="object"/>
+                <button name="btn_print_order_sheet_customer" string="Print Order Sheet" attrs="{'invisible': [('type_order', '!=', 'sale')]}" type="object"/>
+                <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+            </header>
+            <sheet>
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_history"
+                        string="History"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-pencil-square-o"
+                        attrs="{'invisible': [('order_sheet_count', '=', 0)]}">
+                        <field name="order_sheet_count" widget="statinfo" string="History"/>
+                    </button> 
+                </div>
+                <div class="oe_title">
+                    <h1>
+                        <field name="name" readonly="1"/>
+                    </h1>
+                </div>
+                <group name="sheet_header">
+                    <group name="partner_details">
+                        <field name="type_order" invisible="1"/>
+                        <field name="is_manual" invisible="1"/>
+                        <field name="revision_order_sheet_id" attrs="{'invisible': [('revision_order_sheet_id', '=', False), ]}" readonly="1" force_save="1"/>
+                        <field name="revision_picking_id" attrs="{'invisible': [('revision_order_sheet_id', '=', False), ]}" readonly="1" force_save="1"/>
+                        <field name="partner_id" string="Contact" widget="res_partner_many2one" context="{'show_address': 1, 'show_vat': True}" attrs="{'invisible': [('type_order', '!=', 'purchase')], 'readonly': [('state', '!=', 'draft')]}" options='{"always_reload": True}' force_save="1"/>
+                        <field name="partner_id" string="Customer" widget="res_partner_many2one" context="{'show_address': 1, 'show_vat': True}" attrs="{'invisible': [('type_order', '!=', 'sale')], 'readonly': [('state', '!=', 'draft')]}" options='{"always_reload": True}' force_save="1"/>
+                        <field name="sale_ids" domain="[('partner_id', '=', partner_id), ('state', '=', 'sale'), ('check_osheet_so', '=', False)]" widget="many2many_tags" attrs="{'invisible': [('type_order', '!=', 'sale')], 'readonly': ['|', ('state', '!=', 'draft'), ('partner_id', '=', False)]}" options="{'no_create': True}"/>
+                        <field name="purchase_ids" domain="[('partner_id', '=', partner_id), ('state', '=', 'purchase'), ('check_osv', '=', False)]" widget="many2many_tags" attrs="{'invisible': [('type_order', '!=', 'purchase')], 'readonly': ['|', ('state', '!=', 'draft'), ('partner_id', '=', False)]}" options="{'no_create': True}"/>
+                        <field name="partner_ref" attrs="{'invisible': [('type_order', '!=', 'purchase')], 'readonly': [('state', '!=', 'draft'), ]}"/>
+                        <field name="no_order_sheet" attrs="{'readonly': [('state', '!=', 'draft'), ]}"/>
+                        <field name="truck_number" attrs="{'invisible': [('type_order', '!=', 'sale')], 'readonly': [('state', '!=', 'draft')]}"/>
+                    </group>
+                    <group name="sheet_details">
+                        <field name="schedule_date" required="1" attrs="{'invisible': [('type_order', '!=', 'purchase')], 'readonly': [('state', '!=', 'draft')]}"/>
+                        <field name="schedule_date" string="Delivery Date" required="1" attrs="{'invisible': [('type_order', '!=', 'sale')], 'readonly': [('state', '!=', 'draft')]}"/>
+                        <field name="remark" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        <field name="create_uid" readonly="1"/>
+                        <field name="delivery_preparation" attrs="{'invisible': [('type_order', '!=', 'sale')], 'readonly': [('state', '!=', 'draft')]}"/>
+                        <field name="prepared_by_uid" attrs="{'invisible': [('type_order', '!=', 'sale')], 'readonly': [('state', '!=', 'draft')]}"/>
+                        <field name="checked_by_uid" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        <field name="approved_by_uid" attrs="{'invisible': [('type_order', '!=', 'purchase')], 'readonly': [('state', '!=', 'draft')]}"/>
+                    </group>
+                </group>
+                <notebook>
+                    <page string="Items" name="sheet_lines">
+                        <field name="sheet_line_ids">
+                            <tree string="Items" create="false" editable="bottom" delete="false">
+                                <field name="sale_id" force_save="1" readonly="1" attrs="{'column_invisible': [('parent.type_order', '!=', 'sale')]}"/>
+                                <field name="purchase_id" force_save="1" readonly="1" attrs="{'column_invisible': [('parent.type_order', '!=', 'purchase')]}"/>
+                                <!-- <field name="po_ref" attrs="{'column_invisible': [('parent.type_order', '!=', 'purchase')]}" force_save="1" readonly="1" /> -->
+                                <field name="po_ref" attrs="{'column_invisible': [('parent.type_order', '!=', 'sale')]}" force_save="1" readonly="1" />
+                                <field name="sale_line_id"  force_save="1" invisible="1"/>
+                                <field name="purchase_line_id"  force_save="1" invisible="1"/>
+                                <field name="product_id" attrs="{'column_invisible': [('parent.type_order', '!=', 'purchase')]}" readonly="1" force_save="1" />
+                                <field name="product_code" optional="show"/>
+                                <field name="product_name" optional="show"/>
+                                <field name="name" attrs="{'column_invisible': [('parent.type_order', '!=', 'purchase')]}" readonly="1" force_save="1" />
+                                <field name="picking_id" readonly="1" force_save="1"/>
+                                <field name="qty_order" readonly="1" force_save="1" attrs="{'column_invisible': [('parent.type_order', '!=', 'purchase')]}"/>
+                                <field name="qty_order" string="Outstanding" readonly="1" force_save="1" attrs="{'column_invisible': [('parent.type_order', '!=', 'sale')]}"/>
+                                <!-- <field name="qty_balancing" readonly="1" force_save="1"/> -->
+                                <field name="qty_receipt" required="1" string="Schedule Delivery" attrs="{'column_invisible': [('parent.type_order', '!=', 'purchase')], 'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                <field name="qty_receipt" required="1" string="Quantity Delivery" attrs="{'column_invisible': [('parent.type_order', '!=', 'sale')], 'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                <field name="uom_id" readonly="1" force_save="1"/>
+                                <field name="alternative_uom_qty_receipt" required="1" attrs="{'column_invisible': [('parent.type_order', '!=', 'purchase')], 'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                <field name="alternative_uom_id_receipt" readonly="1" attrs="{'column_invisible': [('parent.type_order', '!=', 'purchase')]}"/>
+                                <field name="qty_return" readonly="1"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_eran_sheet_vendor_search" model="ir.ui.view">
+        <field name="name">eran.order.sheet.vendor.search</field>
+        <field name="model">eran.order.sheet</field>
+        <field eval="3" name="priority"/>
+        <field name="arch" type="xml">
+            <search string="Order Sheet">
+                <field name="name"/>
+                <field name="type_order"/>
+                <group expand="0" string="Group By">
+                    <filter string="Type Order" name="type_order_search" domain="[]"  context="{'group_by': 'type_order'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_order_sheet_vendor_action" model="ir.actions.act_window">
+        <field name="name">Order Sheet</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.order.sheet</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('type_order', '=', 'purchase')]</field>
+        <field name="context">{'default_type_order': 'purchase', 'default_is_manual': True}</field>
+        <field name="view_id" ref="eran_order_sheet_vendor_view_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new order sheet
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_order_sheet_customer_action" model="ir.actions.act_window">
+        <field name="name">Order Delivery</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.order.sheet</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('type_order', '=', 'sale')]</field>
+        <field name="context">{'default_type_order': 'sale', 'default_is_manual': True}</field>
+        <field name="view_id" ref="eran_order_sheet_customer_view_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new order sheet
+            </p>
+        </field>
+    </record>
+    
+
+</odoo>

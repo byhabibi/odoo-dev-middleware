@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_action_report_mrp" model="ir.actions.report">
+        <field name="name">Report MRP</field>
+        <field name="model">dsn.demand.planning</field>
+        <field name="report_type">xlsx</field>
+        <field name="report_name">eran_custom.eran_report_mrp</field>
+        <field name="report_file">eran_custom.eran_report_mrp</field>
+        <field name="print_report_name">'MRP Report'</field>
+    </record>
+
+    <record id="eran_action_report_mrp_fix_order" model="ir.actions.report">
+        <field name="name">Report MRP</field>
+        <field name="model">dsn.demand.planning</field>
+        <field name="report_type">xlsx</field>
+        <field name="report_name">eran_custom.eran_report_fix_order</field>
+        <field name="report_file">eran_custom.eran_report_fix_order</field>
+        <field name="print_report_name">'MRP Report Fix Order'</field>
+    </record>
+
+</odoo>

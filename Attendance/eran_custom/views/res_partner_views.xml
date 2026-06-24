@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_res_partner_inherit_form_view" model="ir.ui.view">
+        <field name="name">eran.res.partner.view.form.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_registry']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="company_registry" attrs="{'invisible': [('parent_id','!=',False)]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_view_partner_property_form_view" model="ir.ui.view">
+        <field name="name">eran.res.partner.property.form.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="account.view_partner_property_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='accounting']/group/group[@name='banks']/field[@name='bank_ids']/tree/field[@name='acc_holder_name']" position="attributes">
+                <attribute name="invisible">0</attribute>
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

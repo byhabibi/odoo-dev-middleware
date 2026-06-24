@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+
+    <!-- <t t-name="eran_custom.BomOverviewTable" t-inherit="mrp.BomOverviewTable" t-inherit-mode="extension" owl="1">
+        <xpath expr="//BomOverviewComponentsBlock" position="after">
+            <tr>
+                <td>TEST</td>
+            </tr>
+        </xpath>
+    </t> -->
+
+</templates>

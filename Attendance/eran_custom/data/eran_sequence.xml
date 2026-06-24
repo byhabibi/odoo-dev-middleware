@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Sequences for Res Partner -->
+        <record id="eran_sequence_vendor" model="ir.sequence">
+            <field name="name">ERAN Vendor</field>
+            <field name="code">eran.partner.vendor</field>
+            <field name="prefix">V-</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id"></field>
+        </record>
+
+        <!-- Sequences for Eran Quotation -->
+        <record id="eran_quotation" model="ir.sequence">
+            <field name="name">Eran Quotation</field>
+            <field name="code">eran.quotation</field>
+            <field name="prefix">Q</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id"></field>
+        </record>
+
+        <!-- Stock Opname -->
+        <record id="eran_stock_opname" model="ir.sequence">
+            <field name="name">Eran Stock Opname</field>
+            <field name="code">eran.stock.opname</field>
+            <field name="prefix">STO</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id"></field>
+        </record>
+
+        <record id="eran_order_sheet_seq" model="ir.sequence">
+            <field name="name">Eran Order Sheet</field>
+            <field name="code">eran.order.sheet</field>
+            <field name="prefix">OSV</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id"></field>
+        </record>
+
+        <record id="eran_order_sheet_cust_seq" model="ir.sequence">
+            <field name="name">Eran Order Delivery</field>
+            <field name="code">eran.order.sheet.cust</field>
+            <field name="prefix">OSC</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id"></field>
+        </record>
+
+        <record id="eran_materual_request_seq" model="ir.sequence">
+            <field name="name">Eran Material Request</field>
+            <field name="code">eran.material.request</field>
+            <field name="prefix">REQ/ET/</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id"></field>
+        </record>
+
+        <record id="eran_sequence_fix_order" model="ir.sequence">
+            <field name="name">ERAN Fix Order</field>
+            <field name="code">fix.order</field>
+            <field name="prefix">FO/%(month)s/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="eran_sequence_loi" model="ir.sequence">
+            <field name="name">ERAN LOI</field>
+            <field name="code">eran.quotation.loi</field>
+            <field name="prefix">LOI</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        
+        <record id="dsn_sequence_mrp_non_material" model="ir.sequence">
+            <field name="name">DSN MRP Non Material</field>
+            <field name="code">dsn.mrp.non.material</field>
+            <field name="prefix">MRP-NON-MATERIAL/%(month)s/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="eran_lmk_seq" model="ir.sequence">
+            <field name="name">LMK Number</field>
+            <field name="code">eran.lmk.seq</field>
+            <field name="prefix">IN/LMK/%(year)s/ET/%(month)s/</field>
+            <field name="padding">2</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id"></field>
+            <field name="use_date_range">1</field>
+        </record>
+
+        <record id="eran_sequence_cost_vendor_pricelist" model="ir.sequence">
+            <field name="name">Eran Cost Vendor Pricelist</field>
+            <field name="code">eran.cost.vendor.pricelist</field>
+            <field name="prefix">CVP/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="eran_sequence_tag_sto" model="ir.sequence">
+            <field name="name">Eran Tag STO</field>
+            <field name="code">eran.tag.sto</field>
+            <!-- <field name="prefix">CVP/</field> -->
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

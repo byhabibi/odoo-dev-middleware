@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+
+    <record id="eran_area_found_incoming" model="eran.area.found">
+        <field name="name">Incoming</field>
+    </record>
+
+    <record id="eran_area_found_produksi" model="eran.area.found">
+        <field name="name">Produksi</field>
+    </record>
+
+    <record id="eran_area_found_gudang" model="eran.area.found">
+        <field name="name">Gudang</field>
+    </record>
+
+    <record id="eran_area_found_customer" model="eran.area.found">
+        <field name="name">Customer</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_delivery_schedule_report_view_form" model="ir.ui.view">
+        <field name="name">eran.delivery.schedule.report.view.form</field>
+        <field name="model">eran.delivery.schedule.report</field>
+        <field name="arch" type="xml">
+            <form string="Delivery Schedule">
+                <sheet>
+                    <group>
+                        <field name="purchase_id" invisible="1"/>
+                        <field name="create_date"/>
+                        <field name="create_uid"/>
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Download" name="print_delivery_schedule_pdf" type="object" class="oe_highlight" data-hotkey="v"/>
+                    <button string="Discard" special="cancel" data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="eran_delivery_schedule_report_action" model="ir.actions.act_window">
+        <field name="name">Delivery Schedule</field>
+        <field name="res_model">eran.delivery.schedule.report</field>
+        <field name="view_mode">form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

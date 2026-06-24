@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="stock_scrap_view_search_inherit" model="ir.ui.view">
+        <field name="name">stock.scrap.view.search.inherit</field>
+        <field name="model">stock.scrap</field>
+        <field name="inherit_id" ref="stock.stock_scrap_search_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='product']" position="after">
+                <filter string="Category Group" name="category_group" domain="[]" context="{'group_by':'category_group_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="stock.action_stock_scrap">
+        <field name="name">Disposal</field>
+    </record>
+
+    <record id="eran_stock_scrap_form_view_inherit" model="ir.ui.view">
+        <field name="name">eran.stock.scrap.form.view.inherit</field>
+        <field name="model">stock.scrap</field>
+        <field name="inherit_id" ref="stock.stock_scrap_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="product_category_group_id"/>
+                <field name="effective_date"/>
+            </xpath>
+            <xpath expr="//group/group[1]/div[@class='o_row']" position="after">
+                <field name="unit_cost"/>
+                <field name="value"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_stock_scrap_view_tree_inherit" model="ir.ui.view">
+        <field name="name">eran.stock.scrap.view.tree.inherit</field>
+        <field name="model">stock.scrap</field>
+        <field name="inherit_id" ref="stock.stock_scrap_tree_view"/>
+        <field name="arch" type="xml">
+            <!-- Gunakan XPath yang lebih aman -->
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="product_category_group_id"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

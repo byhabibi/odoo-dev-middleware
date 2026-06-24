@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_paperformat_report_request_material" model="report.paperformat">
+        <field name="name">Eran Material Request Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">10</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_request_material" model="ir.actions.report">
+        <field name="name">Request Material</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_request_material</field>
+        <field name="report_file">eran_custom.eran_template_report_request_material</field>
+        <field name="binding_model_id" ref="model_stock_picking"/>
+        <field name="print_report_name">('Request Material - %s' % (object.name))</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_request_material"/>
+    </record>
+
+    <record id="action_report_request_material_2" model="ir.actions.report">
+        <field name="name">Request Material</field>
+        <field name="model">mrp.production</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_request_material_2</field>
+        <field name="report_file">eran_custom.eran_template_report_request_material_2</field>
+        <field name="binding_model_id" ref="model_mrp_production"/>
+        <field name="print_report_name">('Request Material - %s' % (object.name))</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_request_material"/>
+    </record>
+
+    <template id="eran_template_report_request_material_2">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <style type="text/css">
+                        thead th,
+                        thead td,
+                        tfoot th,
+                        tfoot td
+                        
+                        {
+                            text-align:center;
+                            vertical-align: middle;
+                        }
+                        table,
+                        table th,
+                        table td{
+                            border : 1px solid black;
+                        }
+                        table th,
+                        table td{
+                            padding: 2px 5px;
+                        }
+                        table.borderless,
+                        table.borderless tr,
+                        table.borderless th,
+                        table.borderless td{
+                            border : transparent;
+                        }
+                        .text-left-right {
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                    </style>
+                    <t t-foreach="o.stock_picking_ids" t-as="picking">
+                    
+                        <div class="row" style="position:relative;">
+                            <div class="col-12" style="border:1px solid black;border-bottom:0px transparent;padding:5px;padding-bottom:3px;">
+                                <t t-if="picking.company_id.logo">
+                                    <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 80px;max-width:250px;"/><br/>
+                                </t>
+                                <h5 style="position:absolute;top:50%;left:50%;
+                                    transform: translate(-50%, -50%);
+                                    -webkit-transform: translate(-50%, -50%);
+                                    -moz-transform: translate(-50%, -50%);
+                                    -ms-transform: translate(-50%, -50%);
+                                    -o-transform: translate(-50%, -50%);">
+                                    <b><u>FORM PERMINTAAN MATERIAL</u></b>
+                                </h5>
+                                <table class="borderless">
+                                    <tr>
+                                        <td>SHIFT</td>
+                                        <td>:</td>
+                                        <td><span t-field="picking.shift"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tanggal</td>
+                                        <td>:</td>
+                                        <td><span t-field="picking.create_date"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom:5px;">
+                            <div class="col-12">
+                                <table style="width:100%;">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2">No</th>
+                                            <th rowspan="2">Nama Item</th>
+                                            <th rowspan="2">Dia (Ø)</th>
+                                            <th colspan="3">Qty</th>
+                                            <th rowspan="2">Mcn</th>
+                                            <th rowspan="2">No MC</th>
+                                            <th rowspan="2">Keterangan</th>
+                                        </tr>
+                                        <tr>
+                                            <th>kg</th>
+                                            <th>Btg</th>
+                                            <th>Pcs</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-set="nomor" t-value="1"/>
+                                        <tr t-foreach="picking.move_ids_without_package" t-as="line">
+                                            <t t-set="manufacture_line" t-value="picking.manufacture_production_id.workorder_ids.filtered(lambda wo_line: wo_line.product_id.id == line.product_id.id)"/>
+                                            <td><span t-esc="nomor"/></td>
+                                            <td><span t-field="line.product_id"/></td>
+                                            <td><span t-if="line.product_uom.name == 'KG'" t-field="line.quantity_done"/></td>
+                                            <td></td>
+                                            <td><span t-if="line.product_uom.name != 'KG'" t-field="line.quantity_done"/></td>
+                                            <td><span t-field="line.quantity_done"/></td>
+                                            <td><span t-field="manufacture_line.workcenter_id"/></td>
+                                            <td><span t-field="manufacture_line.workcenter_id.code"/></td>
+                                            <td><!--<span t-field="line.note"/>--></td>
+                                            <t t-set="nomor" t-value="nomor+1"/>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row" style="border:1px solid black;padding-bottom:10px;">
+                            <div class="col-6" style="border-right:1px solid black;border-bottom:1px solid black;padding:3px;   ">
+                                Note:<br/>
+                                <span t-field="picking.name"/><br/>
+                                <span t-field="picking.note"/>
+                            </div>
+                            <div class="col-6" style="padding:5px;padding-bottom:0px;">
+                                <table style="width:100%;">
+                                    <thead>
+                                        <tr>
+                                            <td>Dibuat</td>
+                                            <td>Diketahui</td>
+                                            <td>Disetujui</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="margin-top:5px;">
+                                        <tr>
+                                            <td style="height:50px;"></td>
+                                            <td style="height:50px;"></td>
+                                            <td style="height:50px;"></td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td><span t-field="picking.create_uid"/></td>
+                                            <td style="color:transparent;">A</td>
+                                            <td><span t-field="picking.validated_by_id"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Leader</td>
+                                            <td>SPV Produksi</td>
+                                            <td>Gudang</td>
+                                        </tr>
+                                    </tfoot>
+
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <span t-field="picking.location_id.warehouse_id"/><![CDATA[&nbsp;&nbsp;&nbsp;]]>Putih : Gudang<![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]]>Merah : Pemohon
+                            </div>
+                        </div>
+                        <p style="page-break-before:always;"> </p>
+                    </t>
+                </div>
+                
+            </t>
+        </t>
+    </template>
+
+    <template id="eran_template_report_request_material">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <style type="text/css">
+                        thead th,
+                        thead td,
+                        tfoot th,
+                        tfoot td
+                        
+                        {
+                            text-align:center;
+                            vertical-align: middle;
+                        }
+                        table,
+                        table th,
+                        table td{
+                            border : 1px solid black;
+                        }
+                        table th,
+                        table td{
+                            padding: 2px 5px;
+                        }
+                        table.borderless,
+                        table.borderless tr,
+                        table.borderless th,
+                        table.borderless td{
+                            border : transparent;
+                        }
+                        .text-left-right {
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                    </style>
+                    <div class="row" style="position:relative;">
+                        <div class="col-12" style="border:1px solid black;border-bottom:0px transparent;padding:5px;padding-bottom:3px;">
+                            <t t-if="o.company_id.logo">
+                                <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 80px;max-width:250px;"/><br/>
+                            </t>
+                            <h5 style="position:absolute;top:50%;left:50%;
+                                transform: translate(-50%, -50%);
+                                -webkit-transform: translate(-50%, -50%);
+                                -moz-transform: translate(-50%, -50%);
+                                -ms-transform: translate(-50%, -50%);
+                                -o-transform: translate(-50%, -50%);">
+                                <b><u>FORM PERMINTAAN MATERIAL</u></b>
+                            </h5>
+                            <table class="borderless">
+                                <tr>
+                                    <td>SHIFT</td>
+                                    <td>:</td>
+                                    <td><span t-field="o.shift"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Tanggal</td>
+                                    <td>:</td>
+                                    <td><span t-field="o.create_date"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom:5px;">
+                        <div class="col-12">
+                            <table style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">No</th>
+                                        <th rowspan="2">Nama Item</th>
+                                        <th rowspan="2">Dia (Ø)</th>
+                                        <th colspan="3">Qty</th>
+                                        <th rowspan="2">Mcn</th>
+                                        <th rowspan="2">No MC</th>
+                                        <th rowspan="2">Keterangan</th>
+                                    </tr>
+                                    <tr>
+                                        <th>kg</th>
+                                        <th>Btg</th>
+                                        <th>Pcs</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="nomor" t-value="1"/>
+                                    <tr t-foreach="o.move_ids_without_package" t-as="line">
+                                        <t t-set="manufacture_line" t-value="o.manufacture_production_id.workorder_ids.filtered(lambda wo_line: wo_line.product_id.id == line.product_id.id)"/>
+                                        <td><span t-esc="nomor"/></td>
+                                        <td><span t-field="line.product_id"/></td>
+                                        <td></td>
+                                        <td><span t-if="line.product_uom.name == 'KG'" t-field="line.quantity_done"/></td>
+                                        <td></td>
+                                        <td><span t-if="line.product_uom.name != 'KG'" t-field="line.quantity_done"/></td>
+                                        <td><span t-field="manufacture_line.workcenter_id"/></td>
+                                        <td><span t-field="manufacture_line.workcenter_id.code"/></td>
+                                        <td><!--<span t-field="line.note"/>--></td>
+                                        <t t-set="nomor" t-value="nomor+1"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row" style="border:1px solid black;padding-bottom:10px;">
+                        <div class="col-6" style="border-right:1px solid black;border-bottom:1px solid black;padding:3px;   ">
+                            Note:<br/>
+                            <span t-field="o.name"/><br/>
+                            <span t-field="o.note"/>
+                        </div>
+                        <div class="col-6" style="padding:5px;padding-bottom:0px;">
+                            <table style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <td>Dibuat</td>
+                                        <td>Diketahui</td>
+                                        <td>Disetujui</td>
+                                    </tr>
+                                </thead>
+                                <tbody style="margin-top:5px;">
+                                    <tr>
+                                        <td style="height:50px;"></td>
+                                        <td style="height:50px;"></td>
+                                        <td style="height:50px;"></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td><span t-field="o.create_uid"/></td>
+                                        <td style="color:transparent;">A</td>
+                                        <td><span t-field="o.validated_by_id"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Leader</td>
+                                        <td>SPV Produksi</td>
+                                        <td>Gudang</td>
+                                    </tr>
+                                </tfoot>
+
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <span t-field="o.location_id.warehouse_id"/><![CDATA[&nbsp;&nbsp;&nbsp;]]>Putih : Gudang<![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]]>Merah : Pemohon
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+    
+
+</odoo>

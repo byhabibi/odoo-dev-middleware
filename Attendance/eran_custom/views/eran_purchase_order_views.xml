@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_purchase_order_search_view_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.view.search.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='order_date']" position="after">
+                <filter string="Lock Status" name="lock_state" domain="[]" context="{'group_by': 'lock_state'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_purchase_order_tree_view_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.view.tree.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button string="Lock" name="button_done" type="object"/>
+                <button string="Unlock" name="button_unlock" type="object"/>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="lock_state" widget="badge"/>
+            </xpath>
+            <xpath expr="//field[@name='receipt_status']" position="attributes">
+            <attribute name="widget">badge</attribute>
+                <attribute name="decoration-success">receipt_status == 'full'</attribute>
+                <attribute name="decoration-danger">receipt_status == 'partial'</attribute>
+                <attribute name="decoration-info">receipt_status == 'pending'</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_view_form_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='currency_id']" position="after">
+                <field name="purchase_type" attrs="{'readonly':[('state','!=','draft')]}" force_save="1"/>
+                <field name="categ_id" readonly="1" force_save="1"/>
+                <field name="picking_count_delivery" invisible="1"/>
+                <field name="invoice_count" invisible="1"/>
+                <field name="incoming_picking_count" string="Receipt" invisible="1"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button type="object"
+                    name="action_view_order_sheet"
+                    class="oe_stat_button"
+                    icon="fa-pencil-square-o" attrs="{'invisible':[('order_sheet_count','=', 0)]}">
+                    <field name="order_sheet_count" widget="statinfo" string="Order Sheet"/>
+                </button>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button string="Print Delivery Schedule" name="print_delivery_schedule" type="object" class="oe_highlight" states="purchase,done"/>
+            </xpath>
+            <xpath expr="//header/button[@name='button_confirm'][1]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='button_confirm'][2]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//sheet/div/h1/field[@name='name']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//sheet/div/h1/field[@name='name']" position="after">
+                <field name="name" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+            </xpath>
+            <xpath expr="//group/group/field[@name='date_order']" position="before">
+                <field name="date_order" attrs="{'invisible': [('state', 'not in', ('purchase', 'done', 'cancel'))], 'readonly': [('state', 'not in', ('purchase', 'done', 'cancel'))]}"></field>
+            </xpath>
+            <xpath expr="//notebook/page[@name='products']/field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+                <field name="discount"/>
+            </xpath>
+            <xpath expr="//notebook/page[@name='products']/field[@name='order_line']/tree/field[@name='product_qty']" position="after">
+                <field name="qty_edit" attrs="{'readonly': [('parent.state', 'in', ('purchase', 'done', 'cancel'))]}"/>
+                <field name="order_sheet_line_qty" invisible="1"/>
+            </xpath>
+            <xpath expr="//notebook/page[@name='products']/field[@name='order_line']/tree/field[@name='product_id']" position="before">
+                <field name="purchase_request_id" invisible="1"/>
+            </xpath>
+            <xpath expr="//notebook/page[@name='products']/field[@name='order_line']/tree/field[@name='product_qty']" position="attributes">
+                <attribute name="readonly">1</attribute>
+                <attribute name="force_save">1</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='products']/field[@name='order_line']/tree/field[@name='price_unit']" position="before">
+                <field name="additional_qty" readonly="1" force_save="1"/>
+                <field name="additional_uom_id" string="Alternative UoM"/>
+            </xpath>
+            <xpath expr="//sheet/group/group/field[@name='currency_id']" position="after">
+                <field name="subcon_product" invisible="1"/>
+                <field name="check_osv" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
+                <field name="request_line_qty" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='product_qty']" position="attributes">
+                <attribute name="decoration-danger">product_qty &gt; request_line_qty</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='products']/group/group[2]/field[@name='tax_totals']" position="before">
+                <button colspan="2" name="compute_global_discount" string="Discount" type="object" class="oe_right btn-secondary" attrs="{'invisible':['|','|','|', ('order_sheet_count','>', 0), ('picking_count_delivery','>', 0), ('invoice_count','>', 0), ('incoming_picking_count','>', 0)]}"/>
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='products']/group/group[2]/field[@name='tax_totals']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='products']/group/group[2]/field[@name='tax_totals']" position="after">
+                <field name="amount_untaxed" />
+                <field name="dpp" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="amount_tax" />
+                <field name="amount_total" class="oe_subtotal_footer_separator"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_purchase_order_line_tree" model="ir.ui.view">
+        <field name="name">eran.purchase.order.line.tree</field>
+        <field name="priority">1000</field>
+        <field name="model">purchase.order.line</field>
+        <field name="arch" type="xml">
+            <tree string="Purchase Order Lines" create="false">
+                <field name="order_id"/>
+                <field name="name"/>
+                <field name="partner_id" string="Vendor" />
+                <field name="product_id"/>
+                <field name="price_unit"/>
+                <field name="product_qty"/>
+                <field name="product_uom" groups="uom.group_uom"/>
+                <field name="price_subtotal" widget="monetary"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="date_planned"  widget="date"/>
+                <field name="outstanding_po" sum="outstanding_po"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_action_update_qty_received" model="ir.actions.server">
+        <field name="name">Update Qty Received</field>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="purchase.model_purchase_order"/>
+        <field name="binding_model_id" ref="purchase.model_purchase_order"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="code">
+            records.action_update_qty_received()
+        </field>
+    </record>
+</odoo>

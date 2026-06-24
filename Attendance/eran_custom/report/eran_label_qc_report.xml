@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_paperformat_report_label_qc" model="report.paperformat">
+        <field name="name">Label QC Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- Label QC Pass Format-->
+    <record id="eran_paperformat_report_label_qc_pass" model="report.paperformat">
+        <field name="name">Label QC Pass Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="eran_action_report_label_qc_reject" model="ir.actions.report">
+        <field name="name">Label QC Reject</field>
+        <field name="model">quality.check</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_label_qc_reject</field>
+        <field name="report_file">eran_custom.eran_label_sto_report</field>
+        <field name="print_report_name">'Label QC Reject'</field>
+        <field name="binding_model_id" ref="model_quality_check"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_label_qc"/>
+    </record>
+    <record id="eran_action_report_label_qc_repair" model="ir.actions.report">
+        <field name="name">Label QC Repair</field>
+        <field name="model">quality.check</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_label_qc_repair</field>
+        <field name="report_file">eran_custom.eran_label_qc_repair</field>
+        <field name="print_report_name">'Label QC Repair'</field>
+        <field name="binding_model_id" ref="model_quality_check"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_label_qc"/>
+    </record>
+
+    <!-- Label QC Pass Action-->
+    <record id="eran_action_report_label_qc_pass" model="ir.actions.report">
+        <field name="name">Label QC Pass</field>
+        <field name="model">quality.check</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_label_qc_pass</field>
+        <field name="report_file">eran_custom.eran_label_qc_pass</field>
+        <field name="print_report_name">'Label QC Pass'</field>
+        <field name="binding_model_id" ref="model_quality_check"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_label_qc_pass"/>
+    </record>
+    <template id="eran_label_qc_reject">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page" style="font-size:14px; page-break-after:always;">
+                    <t t-if="len(o.quality_ng_ids)==1">
+                        <t t-foreach="o.quality_ng_ids" t-as="line">
+                            <div class="col-6" style="padding-right: 10px;padding-bottom: 30px;">
+                                <div>
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="5">
+                                        <tr>
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;padding:5px;">
+                                                <t t-if="o.company_id.logo">
+                                                    <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 30px;max-width:90px;"/>
+                                                </t>
+                                            </td>
+                                            <td style="border-bottom: 1px solid #000;padding:5px;">
+                                                <span t-field="o.company_id.name" style="font-size: 12px; font-weight: bold;text-alig:center;"/>
+                                            </td>
+                                        </tr>
+                                        <tr style="font-size: 10px;">
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Opr.Check</td>
+                                            <td style="border-bottom: 1px solid #000;"><span t-field="o.user_id.name"/></td>
+                                        </tr>
+                                        <tr style="font-size: 10px;">
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Nama Part</td>
+                                            <td style="border-bottom: 1px solid #000;"><span t-field="o.product_id.name"/></td>
+                                        </tr>
+                                        <tr style="font-size: 10px;">
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Tanggal</td>
+                                            <td style="border-bottom: 1px solid #000;"><span t-field="o.control_date" t-options="{&quot;widget&quot;: &quot;date&quot;,&quot;format&quot;: &quot;dd/MM/yyyy&quot;}"/></td>
+                                        </tr>
+                                        <tr style="font-size: 10px;">
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jenis NG</td>
+                                            <td style="border-bottom: 1px solid #000;"><span t-field="line.not_good_id.name"/></td>
+                                        </tr>
+                                        <tr style="font-size: 10px;">
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jumlah</td>
+                                            <td style="border-bottom: 1px solid #000;"><span t-field="line.ng_qty"/></td>
+                                        </tr>
+                                    </table>
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                        <tr style="font-size: 10px;">
+                                            <td style="padding-top: 10px;padding-left:5px;">Keterangan: <span style="font-size: 10px;vertical-align:top;" t-esc="o.note"/></td>
+                                            <td style="width: 15%; border-left: 1.5px solid #000;font-size:25px;font-weight: bold;text-align:center;vertical-align:middle;">NG</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                        
+                      <t t-set="wrapper" t-value="o.create_wrapper(o.quality_ng_ids)"/>
+                      <t t-set="wrapper_length" t-value="len(wrapper)"/>
+                      <t t-if="wrapper_length &gt; 0">
+  
+                          <t t-foreach="wrapper_length" t-as="row">
+                              <div class="row">
+                                  <div class="col-6" style="padding-right: 10px;padding-bottom: 30px;">
+                                      <t t-set="ng_id" t-value="wrapper[row-1][0]"/>
+                                      <div>
+                                          <table width="100%" border="0" cellspacing="0" cellpadding="5">
+                                              <tr>
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;padding: 5px;">
+                                                      <t t-if="o.company_id.logo">
+                                                          <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 30px;max-width:90px;"/>
+                                                      </t>
+                                                  </td>
+                                                  <td style="border-bottom: 1px solid #000;padding:5px;">
+                                                      <span t-field="o.company_id.name" style="font-size: 12px; font-weight: bold;text-alig:center;"/>
+                                                  </td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Opr.Check</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="o.user_id.name"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Nama Part</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="o.product_id.name"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Tanggal</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="o.control_date" t-options="{&quot;widget&quot;: &quot;date&quot;,&quot;format&quot;: &quot;dd/MM/yyyy&quot;}"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jenis NG</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.not_good_id.name"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jumlah</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.ng_qty"/></td>
+                                              </tr>
+                                          </table>
+                                          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                              <tr style="font-size: 10px;">
+                                                  <td style="padding-top: 10px;padding-left:5px;">Keterangan: <span style="font-size: 10px;vertical-align:top;" t-esc="o.note"/></td>
+                                                  <td style="width: 15%; border-left: 1.5px solid #000;font-size:25px;font-weight: bold;text-align:center;vertical-align:middle;">NG</td>
+                                              </tr>
+                                          </table>
+                                      </div>
+                                  </div>
+                                  <div class="col-6" style="padding-left: 10px;padding-bottom: 30px;">
+                                      <t t-set="ng_id" t-value="wrapper[row-1][1]"/>
+                                      <div>
+                                          <table width="100%" border="0" cellspacing="0" cellpadding="5">
+                                              <tr>
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;padding:5px;">
+                                                      <t t-if="o.company_id.logo">
+                                                          <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 30px;max-width:90px;"/>
+                                                      </t>
+                                                  </td>
+                                                  <td style="border-bottom: 1px solid #000;padding:5px;">
+                                                      <span t-field="o.company_id.name" style="font-size: 12px; font-weight: bold;text-alig:center;"/>
+                                                  </td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Opr.Check</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="o.user_id.name"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Nama Part</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="o.product_id.name"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Tanggal</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="o.control_date" t-options="{&quot;widget&quot;: &quot;date&quot;,&quot;format&quot;: &quot;dd/MM/yyyy&quot;}"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jenis NG</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.not_good_id.name"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jumlah</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.ng_qty"/></td>
+                                              </tr>
+                                          </table>
+                                          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                              <tr style="font-size: 10px;">
+                                                  <td style="padding-top: 10px;padding-left:5px;">Keterangan: <span style="font-size: 10px;vertical-align:top;" t-esc="o.note"/></td>
+                                                  <td style="width: 15%; border-left: 1.5px solid #000;font-size:25px;font-weight: bold;text-align:center;vertical-align:middle;">NG</td>
+                                              </tr>
+                                          </table>
+                                      </div>
+                                  </div>
+                              </div>
+                              <t t-if="row + 1 == len(wrapper) and len(o.quality_ng_ids) % 2 != 0">
+                                  <div class="col-6" style="padding-right: 10px;padding-bottom: 30px;">
+                                      <t t-set="ng_id" t-value="o.quality_ng_ids[len(o.quality_ng_ids)-1]"/>
+                                      <div>
+                                          <table width="100%" border="0" cellspacing="0" cellpadding="5">
+                                              <tr>
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;padding:5px;">
+                                                      <t t-if="o.company_id.logo">
+                                                          <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 30px;max-width:90px;"/>
+                                                      </t>
+                                                  </td>
+                                                  <td style="border-bottom: 1px solid #000;padding:5px;">
+                                                      <span t-field="o.company_id.name" style="font-size: 12px; font-weight: bold;text-alig:center;"/>
+                                                  </td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Opr.Check</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="o.user_id.name"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Nama Part</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="o.product_id.name"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Tanggal</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="o.control_date" t-options="{&quot;widget&quot;: &quot;date&quot;,&quot;format&quot;: &quot;dd/MM/yyyy&quot;}"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jenis NG</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.not_good_id.name"/></td>
+                                              </tr>
+                                              <tr style="font-size: 10px;">
+                                                  <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jumlah</td>
+                                                  <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.ng_qty"/></td>
+                                              </tr>
+                                          </table>
+                                          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                              <tr style="font-size: 10px;">
+                                                  <td style="padding-top: 10px;padding-left:5px;">Keterangan: <span style="font-size: 10px;vertical-align:top;" t-esc="o.note"/></td>
+                                                  <td style="width: 15%; border-left: 1.5px solid #000;font-size:25px;font-weight: bold;text-align:center;vertical-align:middle;">NG</td>
+                                              </tr>
+                                          </table>
+                                      </div>
+                                  </div>
+                              </t>
+                          </t>
+                      </t>
+                  </div>
+            </t>
+        </t>
+    </template>
+    <template id="eran_label_qc_repair">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page" style="font-size:14px; page-break-after:always;">
+
+                    <t t-if="len(o.quality_ng_ids)==1">
+                        <t t-foreach="o.quality_ng_ids" t-as="line">
+                            <div class="col-6" style="padding-right: 10px;padding-bottom: 30px;">
+                                <div>
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="5">
+                                        <tr>
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;padding:5px;">
+                                                <t t-if="o.company_id.logo">
+                                                    <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 30px;max-width:90px;"/>
+                                                </t>
+                                            </td>
+                                            <td style="border-bottom: 1px solid #000;padding:5px;">
+                                                <span t-field="o.company_id.name" style="font-size: 12px; font-weight: bold;text-alig:center;"/>
+                                            </td>
+                                        </tr>
+                                        <tr style="font-size: 10px;">
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Opr.Check</td>
+                                            <td style="border-bottom: 1px solid #000;"><span t-field="o.user_id.name"/></td>
+                                        </tr>
+                                        <tr style="font-size: 10px;">
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Nama Part</td>
+                                            <td style="border-bottom: 1px solid #000;"><span t-field="o.product_id.name"/></td>
+                                        </tr>
+                                        <tr style="font-size: 10px;">
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Tanggal</td>
+                                            <td style="border-bottom: 1px solid #000;"><span t-field="o.control_date" t-options="{&quot;widget&quot;: &quot;date&quot;,&quot;format&quot;: &quot;dd/MM/yyyy&quot;}"/></td>
+                                        </tr>
+                                        <tr style="font-size: 10px;">
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jenis NG</td>
+                                            <td style="border-bottom: 1px solid #000;"><span t-field="line.not_good_id.name"/></td>
+                                        </tr>
+                                        <tr style="font-size: 10px;">
+                                            <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jumlah</td>
+                                            <td style="border-bottom: 1px solid #000;"><span t-field="line.ng_qty"/></td>
+                                        </tr>
+                                    </table>
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                        <tr style="font-size: 10px;">
+                                            <td style="padding-top: 10px;padding-left:5px;">Keterangan: <span style="font-size: 10px;vertical-align:top;" t-esc="o.note"/></td>
+                                            <td style="width: 15%; border-left: 1.5px solid #000;font-size:25px;font-weight: bold;text-align:center;vertical-align:middle;">NG</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+
+                    <t t-set="wrapper" t-value="o.create_wrapper(o.quality_ng_ids)"/>
+                    <t t-set="wrapper_length" t-value="len(wrapper)"/>
+                    <t t-if="wrapper_length != 0">
+                        <t t-foreach="wrapper_length" t-as="row">
+                            <div class="row">
+                                <div class="col-6" style="padding-right: 10px;padding-bottom: 30px;">
+                                    <t t-set="ng_id" t-value="wrapper[row-1][0]"/>
+                                    <div>
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="5" >
+                                            <tr>
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;padding:5px;">
+                                                    <t t-if="o.company_id.logo">
+                                                        <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 30px;max-width:90px;"/>
+                                                    </t>
+                                                </td>
+                                                <td style="border-bottom: 1px solid #000;padding:5px;">
+                                                    <span t-field="o.company_id.name" style="font-size: 12px; font-weight: bold; text-align:center;"/>
+                                                </td>
+                                            </tr>
+                                            <tr style="font-size: 10px;">
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Opr.Check</td>
+                                                <td style="border-bottom: 1px solid #000;"><span t-field="o.user_id.name"/></td>
+                                            </tr>
+                                            <tr style="font-size: 10px;">
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Nama Part</td>
+                                                <td style="border-bottom: 1px solid #000;"><span t-field="o.product_id.name"/></td>
+                                            </tr>
+                                            <tr style="font-size: 10px;">
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Tanggal</td>
+                                                <td style="border-bottom: 1px solid #000;"><span t-field="o.control_date" t-options="{&quot;widget&quot;: &quot;date&quot;,&quot;format&quot;: &quot;dd/MM/yyyy&quot;}"/></td>
+                                            </tr>
+                                            <tr style="font-size: 10px;">
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jenis NG</td>
+                                                <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.not_good_id.name"/></td>
+                                            </tr>
+                                            <tr style="font-size: 10px;">
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jumlah</td>
+                                                <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.ng_qty"/></td>
+                                            </tr>
+                                        </table>
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                            <tr style="font-size: 10px;">
+                                                <td style="padding-top: 10px;padding-left:5px;border:0px;">
+                                                    Keterangan:
+                                                    <span style="font-size: 10px;vertical-align:top;padding-left:5px;" t-esc="o.note"/>
+                                                </td>
+                                                <td style="vertical-align: top;padding-right:5px;padding-top: 10px;border:0px;">Subcount</td>
+                                                <td style="width: 15%; border-left: 1px solid #000;font-size:25px;font-weight: bold;text-align:center; vertical-align:middle;">NC</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-6" style="padding-left: 10px;padding-bottom: 30px;">
+                                    <t t-set="ng_id" t-value="wrapper[row-1][1]"/>
+                                    <div>
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="5" >
+                                            <tr>
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;padding:5px;">
+                                                    <t t-if="o.company_id.logo">
+                                                        <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 30px;max-width:90px;"/>
+                                                    </t>
+                                                </td>
+                                                <td style="border-bottom: 1px solid #000;padding:5px;">
+                                                    <span t-field="o.company_id.name" style="font-size: 12px; font-weight: bold; text-align:center;"/>
+                                                </td>
+                                            </tr>
+                                            <tr style="font-size: 10px;">
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Opr.Check</td>
+                                                <td style="border-bottom: 1px solid #000;"><span t-field="o.user_id.name"/></td>
+                                            </tr>
+                                            <tr style="font-size: 10px;">
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Nama Part</td>
+                                                <td style="border-bottom: 1px solid #000;"><span t-field="o.product_id.name"/></td>
+                                            </tr>
+                                            <tr style="font-size: 10px;">
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Tanggal</td>
+                                                <td style="border-bottom: 1px solid #000;"><span t-field="o.control_date" t-options="{&quot;widget&quot;: &quot;date&quot;,&quot;format&quot;: &quot;dd/MM/yyyy&quot;}"/></td>
+                                            </tr>
+                                            <tr style="font-size: 10px;">
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jenis NG</td>
+                                                <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.not_good_id.name"/></td>
+                                            </tr>
+                                            <tr style="font-size: 10px;">
+                                                <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jumlah</td>
+                                                <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.ng_qty"/></td>
+                                            </tr>
+                                        </table>
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                            <tr style="font-size: 10px;">
+                                                <td style="padding-top: 10px;padding-left:5px;border:0px;">
+                                                    Keterangan:
+                                                    <span style="font-size: 10px;vertical-align:top;padding-left:5px;" t-esc="o.note"/>
+                                                </td>
+                                                <td style="vertical-align: top;padding-right:5px;padding-top: 10px;border:0px;">Subcount</td>
+                                                <td style="width: 15%; border-left: 1px solid #000;font-size:25px;font-weight: bold;text-align:center; vertical-align:middle;">NC</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                                
+                            <t t-if="row + 1 == len(wrapper) and len(o.quality_ng_ids) % 2 > 0">
+                                <div class="row">
+                                    <div class="col-6" style="padding-right: 10px;padding-bottom: 30px;">
+                                        <t t-set="ng_id" t-value="o.quality_ng_ids[len(o.quality_ng_ids)-1]"/>
+                                        <div>
+                                            <table width="100%" border="0" cellspacing="0" cellpadding="5" >
+                                                <tr>
+                                                    <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;padding:5px;">
+                                                        <t t-if="o.company_id.logo">
+                                                            <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 30px;max-width:90px;"/>
+                                                        </t>
+                                                    </td>
+                                                    <td style="border-bottom: 1px solid #000;padding:5px;">
+                                                        <span t-field="o.company_id.name" style="font-size: 12px; font-weight: bold; text-align:center;"/>
+                                                    </td>
+                                                </tr>
+                                                <tr style="font-size: 10px;">
+                                                    <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Opr.Check</td>
+                                                    <td style="border-bottom: 1px solid #000;"><span t-field="o.user_id.name"/></td>
+                                                </tr>
+                                                <tr style="font-size: 10px;">
+                                                    <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Nama Part</td>
+                                                    <td style="border-bottom: 1px solid #000;"><span t-field="o.product_id.name"/></td>
+                                                </tr>
+                                                <tr style="font-size: 10px;">
+                                                    <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Tanggal</td>
+                                                    <td style="border-bottom: 1px solid #000;"><span t-field="o.control_date" t-options="{&quot;widget&quot;: &quot;date&quot;,&quot;format&quot;: &quot;dd/MM/yyyy&quot;}"/></td>
+                                                </tr>
+                                                <tr style="font-size: 10px;">
+                                                    <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jenis NG</td>
+                                                    <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.not_good_id.name"/></td>
+                                                </tr>
+                                                <tr style="font-size: 10px;">
+                                                    <td style="border-bottom: 1px solid #000; border-right: 1px solid #000;">Jumlah</td>
+                                                    <td style="border-bottom: 1px solid #000;"><span t-field="ng_id.ng_qty"/></td>
+                                                </tr>
+                                            </table>
+                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                <tr style="font-size: 10px;">
+                                                    <td style="padding-top: 10px;padding-left:5px;border:0px;">
+                                                        Keterangan:
+                                                        <span style="font-size: 10px;vertical-align:top;padding-left:5px;" t-esc="o.note"/>
+                                                    </td>
+                                                    <td style="vertical-align: top;padding-right:5px;padding-top: 10px;border:0px;">Subcount</td>
+                                                    <td style="width: 15%; border-left: 1px solid #000;font-size:25px;font-weight: bold;text-align:center; vertical-align:middle;">NC</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </t>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+    
+    <template id="eran_label_qc_pass">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <div class="row">
+                        <div class="col-5" style="border-left:1px solid;border-top:1px solid;border-bottom:1px solid;">
+                            <t t-if="o.company_id.logo">
+                                <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 90px;max-width:390px;"/>
+                            </t>
+                        </div>
+                        <div class="col-1" style="border-right:1px solid;border-top:1px solid;border-bottom:1px solid; text-align:center; padding-top:13px;">
+                            <img src="/eran_custom/static/src/img/label_certif1.png" style="height:30px; width:30px;"/><br/>
+                            <img src="/eran_custom/static/src/img/label_certif2.png" style="height:40px; width:40px;"/>
+                        </div>
+                        <div class="col-6"/>
+                    </div>
+                    <div class="row">
+                        <div class="col-6" style="border-left:1px solid;border-bottom:1px solid;border-right:1px solid;">
+                            <div class="row">
+                                <div class="col-12" style="text-align:center;">
+                                    <h4>QC PASS</h4>
+                                </div>
+                            </div>
+                            <div class="row" style="padding-left:15px;">
+                                <div class="col-3" style="padding:5px;">TANGGAL</div>
+                                <div class="col-9" style="padding:5px;">: <span t-field="o.control_date" t-options="{&quot;widget&quot;: &quot;date&quot;,&quot;format&quot;: &quot;dd/MM/yyyy&quot;}"/></div>
+                            </div>
+                            <div class="row" style="padding-left:15px;">
+                                <div class="col-3" style="padding:5px;">INSPEKTOR</div>
+                                <div class="col-9" style="padding:5px;">: <span t-field="o.user_id.name"/></div>
+                            </div>
+                            <div class="row" style="padding-left:15px;">
+                                <div class="col-12" style="padding:5px;">
+                                    QC DEPARTEMEN
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6"/>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

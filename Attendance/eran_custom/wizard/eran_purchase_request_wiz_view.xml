@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_purchase_request_line_make_purchase_order_form_inherit" model="ir.ui.view">
+        <field name="name">eran.purchase.request.line.make.purchase.order.form.inherit</field>
+        <field name="model">purchase.request.line.make.purchase.order</field>
+        <field name="inherit_id" ref="purchase_request.view_purchase_request_line_make_purchase_order" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='item_ids']/tree/field[@name='name']" position="after">
+                <field name="categ_id" invisible="0" optional="hide"/>
+                <field name="balancing_qty"/>
+            </xpath>
+            <xpath expr="//form/separator" position="attributes">
+                <attribute name="string">Existing PO to update:</attribute>
+            </xpath>
+            <xpath expr="//button[@name='make_purchase_order']" position="attributes">
+                <attribute name="string">Create PO</attribute>
+            </xpath>
+            <xpath expr="//field[@name='supplier_id']" position="after">
+                <field name="purchase_type"/>
+                <field name="categ_id"/>
+            </xpath>
+            <xpath expr="//tree[@name='Details']" position="attributes">
+                <attribute name="decoration-danger">parent.categ_id and parent.categ_id != categ_id</attribute>
+            </xpath>
+            
+        </field>
+    </record>
+    <record
+        id="purchase_request.action_purchase_request_line_make_purchase_order"
+        model="ir.actions.act_window"
+    >
+        <field name="name">Create PO</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">purchase.request.line.make.purchase.order</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="purchase_request.view_purchase_request_line_make_purchase_order" />
+        <field name="target">new</field>
+        <field
+            name="binding_model_id"
+            ref="purchase_request.model_purchase_request_line"
+        />
+    </record>
+</odoo>

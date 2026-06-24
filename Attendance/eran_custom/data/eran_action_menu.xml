@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="action_server_2binvoice" model="ir.actions.server">
+        <field name="name">Ready to Invoice</field>
+        <field name="model_id" ref="stock.model_stock_picking" />
+        <field name="state">code</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="code">
+        for record in records:
+            record.action_button_ready2invoice()
+        </field>
+    </record>
+    <record id="action_server_button_dn_back" model="ir.actions.server">
+        <field name="name">DN Back</field>
+        <field name="model_id" ref="stock.model_stock_picking" />
+        <field name="state">code</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="code">
+        for record in records:
+            record.action_button_dn_back()
+        </field>
+    </record>
+    <record id="action_server_button_dn_out" model="ir.actions.server">
+        <field name="name">DN Out</field>
+        <field name="model_id" ref="stock.model_stock_picking" />
+        <field name="state">code</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="code">
+        for record in records:
+            record.action_button_dn_out()
+        </field>
+    </record>
+</odoo>

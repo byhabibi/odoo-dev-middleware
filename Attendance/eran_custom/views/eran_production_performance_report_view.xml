@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_production_performance_report_tree_view" model="ir.ui.view">
+        <field name="name">eran.production.performance.report.tree.view</field>
+        <field name="model">eran.production.performance.report</field>
+        <field name="arch" type="xml">
+            <tree string="Production Performance Report" create="false" delete="false" limit="80">
+                <field name="manufacture" string="No. MO"/>
+                <field name="mrp_workcenter_group_id" invisible="1"/>
+                <field name="short_string" invisible="1"/>
+                <field name="schedule_date"/>
+                <field name="date_done"/>
+                <field name="product_id"/>
+                <field name="operator_id"/>
+                <field name="qty_plan"/>
+                <field name="product_qty"/>
+                <field name="qty_keppin"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_production_performance_report_search" model="ir.ui.view">
+        <field name="name">eran.production.performance.report.search</field>
+        <field name="model">eran.production.performance.report</field>
+        <field name="arch" type="xml">
+            <search string="Search Production Performance Report">
+                <field name="manufacture"/>
+                <field name="mrp_workcenter_group_id" />
+                
+                <!-- FILTER YANG BENAR -->
+                <filter string="Hari Ini" name="filter_today" 
+                        domain="[('schedule_date', '>=', context_today().strftime('%Y-%m-%d') + ' 00:00:00'), 
+                                ('schedule_date', '&lt;=', context_today().strftime('%Y-%m-%d') + ' 23:59:59')]"/>
+                <filter string="Minggu Ini" name="filter_this_week" 
+                        domain="[('schedule_date', '>=', (context_today() - 7).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
+                <filter string="Bulan Ini" name="filter_this_month" 
+                        domain="[('schedule_date', '>=', context_today().strftime('%Y-%m-01') + ' 00:00:00')]"/>
+                <filter string="Bulan Lalu" name="filter_last_month" 
+                        domain="[('schedule_date', '>=', (context_today() - 30).strftime('%Y-%m-01') + ' 00:00:00'),
+                                ('schedule_date', '&lt;', context_today().strftime('%Y-%m-01') + ' 00:00:00')]"/>
+                
+                <filter name="mrp_workcenter_group_id" string="Workcenter Group"/>
+                <filter string="Category Group" name="groupby_category_group_id" domain="[]" context="{'group_by': 'category_group_id'}"/>
+                <filter string="Workcenter Group" name="mrp_workcenter_group_id" domain="[]" context="{'group_by': 'mrp_workcenter_group_id'}"/>
+                <filter name="short_string" string="Short String" domain="[]" context="{'group_by': 'short_string'}" />
+                
+                <!-- FILTER DEFAULT YANG BENAR -->
+                <filter name="default_filter_this_month" string="" 
+                        domain="[('schedule_date', '>=', context_today().strftime('%Y-%m-01') + ' 00:00:00')]" 
+                        context="{'search_default_default_filter_this_month': 1}"/>
+            </search>
+        </field>
+    </record>
+
+
+    <!-- <record id="eran_production_performance_report_search" model="ir.ui.view">
+        <field name="name">eran.production.performance.report.search</field>
+        <field name="model">eran.production.performance.report</field>
+        <field name="arch" type="xml">
+            <search string="Search Production Performance Report">
+                <field name="manufacture"/>
+                <field name="mrp_workcenter_group_id" />
+                <filter name="mrp_workcenter_group_id" string="Workcenter Group"/>
+                <filter string="Category Group" name="groupby_category_group_id" domain="[]" context="{'group_by': 'category_group_id'}"/>
+                <filter string="Workcenter Group" name="mrp_workcenter_group_id" domain="[]" context="{'group_by': 'mrp_workcenter_group_id'}"/>
+                <filter name="short_string" string="Short String" domain="[]" context="{'group_by': 'short_string'}" />
+            </search>
+        </field>
+    </record> -->
+
+    <record id="eran_production_performance_report_action" model="ir.actions.act_window">
+        <field name="name">Production Performance Report</field>
+        <field name="res_model">eran.production.performance.report</field>
+        <field name="type">ir.actions.act_window</field>
+        <!-- <field name="view_id" ref="eran_production_performance_report_tree_view"/> -->
+        <field name="view_mode">tree,graph,pivot</field>
+        <field name="search_view_id" ref="eran_production_performance_report_search"/>
+        <!-- ✅ CONTEXT BARU DITAMBAH -->
+        <field name="context">{'search_default_default_filter_this_month': 1}</field>
+        <!-- ✅ LIMIT BARU DITAMBAH -->
+        <field name="limit">80</field>
+    </record>
+</odoo>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_product_supplierinfo_tree_view_tree_inherit" model="ir.ui.view">
+        <field name="name">eran.product.supplierinfo.tree.view.tree.inherit</field>
+        <field name="model">product.supplierinfo</field>
+        <field name="inherit_id" ref="product.product_supplierinfo_tree_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='delay']" position="after">
+                <field name="state"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_product_supplierinfo_form_inherit" model="ir.ui.view">
+        <field name="name">eran.product.supplierinfo.form.inherit</field>
+        <field name="model">product.supplierinfo</field>
+        <field name="inherit_id" ref="product.product_supplierinfo_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="state" invisible="1"/>
+                <field name="rounding_value" attrs="{'readonly': [('state', '=', 'done')]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- KANBAN Vendor Pricelists -->
+    <record id="custom_supplierinfo_kanban_inherit" model="ir.ui.view">
+        <field name="name">product.supplierinfo.kanban.custom</field>
+        <field name="model">product.supplierinfo</field>
+        <field name="inherit_id" ref="product.product_supplierinfo_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//t[@t-name='kanban-box']" position="replace">
+                <t t-name="kanban-box">
+                    <div class="oe_kanban_global_click">
+                        <div class="row mb4">
+                            <strong class="col-6">
+                                <span t-esc="record.partner_id.value"/>
+                            </strong>
+                            <strong class="col-6 text-end">
+                                <strong><field name="price" widget="monetary"/></strong>
+                            </strong>
+                        </div>
+                        <div class="row mb4">
+                            <div class="col-12">
+                                <span t-esc="record.product_tmpl_id.value"/>
+                            </div>
+                        </div>
+                        <div class="row mb4">
+                            <div class="col-8">
+                                <span t-esc="record.date_start.value"/> - <span t-esc="record.date_end.value"/>
+                            </div>
+                            <div class="col-4 text-end">
+                                <span t-attf-class="badge #{ ['draft', 'waiting', 'done'].includes(record.state.raw_value) ? 'bg-200' : 'bg-info' }">
+                                    <t t-esc="record.state.raw_value"/>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </xpath>
+            <xpath expr="//kanban" position="inside">
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="state"/>
+                <field name="product_tmpl_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

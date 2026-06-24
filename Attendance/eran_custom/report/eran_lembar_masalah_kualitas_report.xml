@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_request_material_2" model="ir.actions.report">
+        <field name="name">Lembar Masalah Kerja</field>
+        <field name="model">eran.lembar.masalah.kualitas</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_lmk</field>
+        <field name="report_file">eran_custom.eran_template_report_lmk</field>
+        <field name="binding_model_id" ref="model_eran_lembar_masalah_kualitas"/>
+        <field name="print_report_name">('Lembar Masalah Kualitas - %s' % (object.name))</field>
+        <field name="paperformat_id" ref="paperformat_letter_2_no_header"/>
+    </record>
+
+    <template t-name="eran_custom.eran_template_report_lmk">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page" style="font-size:11px;">
+                    <!--<style type="text/css">-->
+                    <!--    thead th,-->
+                    <!--    thead td,-->
+                    <!--    tfoot th,-->
+                    <!--    tfoot td-->
+                        
+                    <!--    {-->
+                    <!--        text-align:center;-->
+                    <!--        vertical-align: middle;-->
+                    <!--    }-->
+                    <!--    table,-->
+                    <!--    table th,-->
+                    <!--    table td{-->
+                    <!--        border : 1px solid black;-->
+                    <!--    }-->
+                    <!--    table th,-->
+                    <!--    table td{-->
+                    <!--        padding: 2px 5px;-->
+                    <!--    }-->
+                    <!--    table.borderless,-->
+                    <!--    table.borderless tr,-->
+                    <!--    table.borderless th,-->
+                    <!--    table.borderless td{-->
+                    <!--        border : none;-->
+                    <!--    }-->
+                    <!--    .text-left-right {-->
+                    <!--        display: flex;-->
+                    <!--        justify-content: space-between;-->
+                    <!--    }-->
+                    <!--</style>-->
+                    <div class="row">
+                        <div class="col-3" style=" height: 80px; border:1px solid; border-right:0px;">
+                            <t t-if="o.company_id.logo">
+                                <img t-att-src="image_data_uri(o.company_id.logo)" style="padding-top:10px; max-height: 60px;max-width:200px;"/><br/>
+                            </t>
+                        </div>
+                        <div class="col-6" style="height: 80px; border:1px solid; border-right:0px;">
+                            <div class="row">
+                              	<div class="col-12" style="padding-top:10px; height: 40px; text-align:center;"><h4><b>LAPORAN MASALAH KUALITAS</b></h4></div>
+                            </div>
+                            <div class="row">
+                              	<div class="col-12" style="padding-top:5px; padding-left:20px; height: 40px;"><span style="font-size:12px;"><b>No LMK : <span t-field="o.name"/></b></span></div>
+                            </div>
+                    	</div>
+                        <div class="col-3" style="height: 80px;">
+                          	<div class="row">
+                            	<div class="col-6" style="padding-left:2px; padding-top:3px; height: 20px; border:1px solid; border-right:0px; border-bottom:0px;">No.Form</div>
+                            	<div class="col-6" style="padding-left:2px; padding-top:3px; height: 20px; border:1px solid; border-bottom:0px;">FM-QA-06.02-1</div>
+                          	</div>
+                          	<div class="row">
+                            	<div class="col-6" style="padding-left:2px; padding-top:3px; height: 20px; border:1px solid; border-right:0px; border-bottom:0px;">Tgl Terbit</div>
+                            	<div class="col-6" style="padding-left:2px; padding-top:3px; height: 20px; border:1px solid; border-bottom:0px;"/>
+                          	</div>
+                          	<div class="row">
+                            	<div class="col-6" style="padding-left:2px; padding-top:3px; height: 20px; border:1px solid; border-right:0px; border-bottom:0px;">Tgl Revisi</div>
+                            	<div class="col-6" style="padding-left:2px; padding-top:3px; height: 20px; border:1px solid; border-bottom:0px;"/>
+                          	</div>
+                          	<div class="row">
+                            	<div class="col-6" style="padding-left:2px; padding-top:3px; height: 20px; border:1px solid; border-right:0px;">No.Revisi</div>
+                            	<div class="col-6" style="padding-left:2px; padding-top:3px; height: 20px; border:1px solid;">1</div>
+                          	</div>
+                        </div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="width:40px; border-left:1px solid;">
+          						</div>
+                                	<div class="col-2" style="padding-left:2px; width:233px; border:1px solid; border-top:0px; border-right:0px;">
+                                  	Supplier/Bagian Terkait :
+                                	</div>
+          						<div class="col" style="padding-left:2px; width:230px; border:1px solid; border-top:0px; border-right:0px;">
+          							Nama Part :
+          						</div>
+          						<div class="col" style="padding-left:2px; width:230px; border:1px solid; border-top:0px; border-right:0px;">
+          							No Part :
+          						</div>
+          						<div class="col" style="padding-left:2px; width:179px; border:1px solid; border-top:0px;">
+          							Area :
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="height:51px; width:40px; border-left:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="padding-left:2px; padding-top:2px; height:51px; width:233px; border:1px solid; border-top:0px; border-right:0px;">
+          							<span t-field="o.partner_id.name"/>
+          						</div>
+          						<div class="col" style="padding-left:2px; padding-top:2px;height:51px; width:230px; border:1px solid; border-top:0px; border-right:0px;">
+          							<span t-field="o.product_id.name"/>
+          						</div>
+          						<div class="col" style="padding-left:2px; padding-top:2px;height:51px; width:230px; border:1px solid; border-top:0px; border-right:0px;">
+          							<span t-field="o.product_id.default_code"/>
+          						</div>
+          						<div class="col" style="padding-left:2px; padding-top:2px;height:51px; width:179px; border:1px solid; border-top:0px;">
+          							<span t-field="o.product_id.categ_id.name"/>
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="height:51px; width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="height:51px; width:234px; border:1px solid; border-top:0px;">
+          							<div class="row">
+          							<div class="col" style="padding-left:2px; padding-top:2px; height:17px; width:120px; border-bottom:1px solid; border-right:1px solid;">Tgl Pengiriman</div>
+          							<div class="col" style="padding-left:2px; height:17px;  width:113px; border-bottom:1px solid;"><span t-field="o.delivery_date"/></div>
+          							</div>
+          							<div class="row">
+          							<div class="col" style="padding-left:2px; padding-top:2px; height:17px; width:120px;  border-bottom:1px solid; border-right:1px solid;">Tgl Produksi</div>
+          							<div class="col" style="padding-left:2px; height:17px; width:113px; border-bottom:1px solid;"><span t-field="o.production_date"/></div>
+          							</div>
+          							<div class="row">
+          							<div class="col" style="padding-left:2px; padding-top:2px; height:17px; width:120px;  border-right:1px solid;">Jumlah</div>
+          							<div class="col" style="padding-left:2px; height:17px; width:113px;"><span t-field="o.order_qty"/></div>
+          							</div>
+          						</div>
+          						<div class="col" style="height:51px; width:159px; border:1px solid; border-top:0px; border-right:0px; border-left:0px;">
+          							Jenis cacat part :<br/>
+          							<br/>
+          							<span style="padding-left:5px;"> <t t-if="'Visual' in o.part_defect_type_ids.mapped('name')"><i class="fa fa-circle"/></t><t t-else=""><i class="fa fa-circle-o"/></t> Visual</span>
+          						</div>
+          						<div class="col" style="height:51px; width:160px; border:1px solid; border-top:0px; border-right:0px; border-left:0px;">
+          							<br/>
+          							<br/>
+          							<span style="padding-left:5px;"> <t t-if="'Dimensi' in o.part_defect_type_ids.mapped('name')"><i class="fa fa-circle"/></t><t t-else=""><i class="fa fa-circle-o"/></t> Dimensi</span>
+          						</div>
+          						<div class="col" style="height:51px; width:160px; border:1px solid; border-top:0px; border-right:0px; border-left:0px;">
+          							<br/>
+          							<br/>
+          							<span style="padding-left:5px;"> <t t-if="'Fungsi' in o.part_defect_type_ids.mapped('name')"><i class="fa fa-circle"/></t><t t-else=""><i class="fa fa-circle-o"/></t> Fungsi</span>
+          						</div>
+          						<div class="col" style="height:51px; width:159px; border:1px solid; border-top:0px; border-left:0px;">
+          							<br/>
+          							<br/>
+          							<span style="padding-left:5px;"> <t t-if="'Material' in o.part_defect_type_ids.mapped('name')"><i class="fa fa-circle"/></t><t t-else=""><i class="fa fa-circle-o"/></t> Material</span>
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="height:51px; width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="height:51px; width:234px; border:1px solid; border-top:0px;">
+          							<div class="row">
+            							<div class="col" style="padding-left:2px; padding-top:2px; height:17px; width:120px; border-bottom:1px solid; border-right:1px solid;">Jumlah Cek</div>
+            							<t t-set="j_cek" t-value="sum(o.lmk_line_ids.mapped('quantity_sample'))"/>
+            							<t t-set="j_ng" t-value="sum(o.lmk_line_ids.mapped('quantity_ng'))"/>
+            							<div class="col" style="padding-left:2px; height:17px; width:113px; border-bottom:1px solid;"><span t-esc="j_cek"/></div>
+          							</div>
+          							<div class="row">
+            							<div class="col" style="text-align:center; padding-top:2px; height:17px; width:120px;  border-bottom:1px solid; border-right:1px solid;">OK</div>
+            							
+            							<div class="col" style="padding-left:2px; height:17px; width:113px; border-bottom:1px solid;"><span t-esc="j_cek - j_ng"/></div>
+          							</div>
+          							<div class="row">
+            							<div class="col" style="text-align:center; padding-top:2px; height:17px; width:120px;  border-right:1px solid;">NG</div>
+            							<div class="col" style="padding-left:2px; height:17px; width:113px;"><span t-esc="j_ng"/></div>
+          							</div>
+          						</div>
+          						<div class="col" style="height:51px; width:159px; border:1px solid; border-top:0px; border-right:0px; border-left:0px;">
+          							Area ditemukan masalah :<br/>
+          							<br/>
+          							<span style="padding-left:5px;"> <t t-if="'Incoming' in o.area_found_ids.mapped('name')"><i class="fa fa-circle"/></t><t t-else=""><i class="fa fa-circle-o"/></t> Incoming</span>
+          						</div>
+          						<div class="col" style="height:51px; width:160px; border:1px solid; border-top:0px; border-right:0px; border-left:0px;">
+          							<br/>
+          							<br/>
+          							<span style="padding-left:5px;"> <t t-if="'Produksi' in o.area_found_ids.mapped('name')"><i class="fa fa-circle"/></t><t t-else=""><i class="fa fa-circle-o"/></t> Produksi</span>
+          						</div>
+          						<div class="col" style="height:51px; width:160px; border:1px solid; border-top:0px; border-right:0px; border-left:0px;">
+          							<br/>
+          							<br/>
+          							<span style="padding-left:5px;"> <t t-if="'Gudang' in o.area_found_ids.mapped('name')"><i class="fa fa-circle"/></t><t t-else=""><i class="fa fa-circle-o"/></t> Gudang</span>
+          						</div>
+          						<div class="col" style="height:51px; width:159px; border:1px solid; border-top:0px; border-left:0px;">
+          							<br/>
+          							<br/>
+          							<span style="padding-left:5px;"> <t t-if="'Customer' in o.area_found_ids.mapped('name')"><i class="fa fa-circle"/></t><t t-else=""><i class="fa fa-circle-o"/></t> Customer</span>
+          						</div>
+                    </div>
+                    <div class="row">
+            						<div class="col-1" style="height:237px; width:40px; border-left:1px solid; border-bottom:1px solid;">
+            						</div>
+            						<div class="col-2" style="height:237px; width:447px; border:1px solid; border-top:0px;">
+            							<div class="row">
+            								<t t-set="uraian_masalah" t-value=""/>
+            								<t t-set="uraian_standard" t-value=""/>
+            								<t t-set="count_len" t-value="len(o.lmk_line_ids)"/>
+            								<t t-set="len_len" t-value="1"/>
+            								<t t-foreach="o.lmk_line_ids.filtered(lambda l: l.not_good_id)" t-as="lines">
+            									<t t-if="len_len == 1 and count_len == 1">
+            										<t t-set="uraian_masalah" t-value="str(lines.not_good_id.name)"/>
+            										<t t-set="uraian_standard" t-value="str(lines.not_good_id.standard)"/>
+            									</t>
+            									<t t-elif="len_len == 1">
+            										<t t-set="uraian_masalah" t-value="str(lines.not_good_id.name) + ', '"/>
+            										<t t-set="uraian_standard" t-value="str(lines.not_good_id.standard) + ', '"/>  
+            									</t>
+            									<t t-elif="count_len &gt; len_len">
+            										<t t-set="uraian_masalah" t-value="str(uraian_masalah) + str(lines.not_good_id.name) + ', '"/>
+            										<t t-set="uraian_standard" t-value="str(uraian_standard) + str(lines.not_good_id.standard) + ', '"/>  
+            									</t>
+            									<t t-else="">
+            										<t t-set="uraian_masalah" t-value="uraian_masalah + lines.not_good_id.name"/>
+            										<t t-set="uraian_standard" t-value="uraian_standard + lines.not_good_id.standard"/>
+            									</t>
+            									<t t-set="len_len" t-value="len_len + 1"/>  
+            								</t>
+            								<div class="col" style="padding-left:3px; padding-top:3px; height:90px; width:447px;">
+            									Uraian Masalah :<br/>
+            									<span t-esc="uraian_masalah"/>
+            								</div>
+            							</div>
+            							<div class="row">
+            								<div class="col" style="padding-left:3px; width:223px; border-top:1px solid; border-right:1px solid;">
+            									Standard
+            								</div>
+            								<div class="col" style="padding-left:3px; width:223px; border-top:1px solid;">
+            									Actual
+            								</div>
+            							</div>
+            							<div class="row">
+            								<div class="col" style="height:50px; width:223px; border-top:1px solid; border-right:1px solid; border-bottom:1px solid;">
+            									<span t-esc="uraian_standard"/>
+            								</div>
+            								<div class="col" style="padding-left:2px; height:50px; width:223px; border-top:1px solid; border-bottom:1px solid;">
+            									<span t-esc="uraian_masalah"/>
+            								</div>
+            							</div>
+            							<div class="row">
+            								<div class="col" style="padding-left:3px; width:447px; border-bottom:1px solid;">
+            									Tindakan Sementara
+            								</div>
+            							</div>
+            							<div class="row">
+            								<div class="col" style="padding-left:2px; height:56px; width:447px;">
+            									<span t-field="o.tindakan_sementara"/>
+            								</div>
+            							</div>
+            							<div class="row">
+            								<div class="col" style="padding-left:3px; height:17px; width:447px; border-top:1px solid; border-bottom:1px solid;">
+            									Batas Waktu Jawaban : <span t-field="o.batas_waktu"/>
+            								</div>
+            							</div>
+                      	</div>
+                      	<div class="col" style="height:237px; width:425px; border:1px solid; border-top:0px; border-left:0px;">
+                        	<div class="row">
+            								<div class="col" style="padding-left:3px; padding-top:3px; height:140px; width:425px;">
+            									Ilustrasi Problem : <br/>
+            									<t t-set="img_count" t-value="1"/>
+            									<t t-foreach="o.lmk_attachment_ids" t-as="lines">
+            									<t t-if="img_count &lt;= 4">
+            										<img t-att-src="image_data_uri(lines.image)" style="padding-top:10px; padding-right:5px; max-height: 120px;max-width:120px;"/>
+            									</t>
+            									<t t-set="img_count" t-value="img_count + 1"/>
+            									</t>
+            								</div>
+                        	</div>
+            							<div class="row">
+            								<div class="col" style="width:41px; border-top:1px solid; border-right:1px solid;">
+            									
+            								</div>
+            								<div class="col" style="text-align:center; width:128px; border-top:1px solid; border-right:1px solid;">
+            									Dibuat
+            								</div>
+            								<div class="col" style="text-align:center; width:128px; border-top:1px solid; border-right:1px solid;">
+            									Diperiksa
+            								</div>
+            								<div class="col" style="text-align:center; width:128px; border-top:1px solid;">
+            									Diterima
+            								</div>
+            							</div>
+                        	<div class="row">
+            								<div class="col" style="padding-top:20px; text-align:center; height:51px; width:41px; border-top:1px solid; border-right:1px solid;">
+            									Ttd
+            								</div>
+            								<t t-set="sign_ids" t-value="o.env['hr.employee'].sudo().search([('user_id', '=', o.create_uid.id)])"/>
+            								<div class="col" style="height:51px; width:128px; border-top:1px solid; border-right:1px solid; text-align:center; justify-content:center; line-height:47px;">
+            									<t t-if="sign_ids and sign_ids.signature">
+            										<img t-att-src="image_data_uri(sign_ids.signature)" style="max-width:47px; width:100%; object-fit:contain;" alt="Signature"/>
+            									</t>
+            								</div>
+            								<div class="col" style="height:51px; width:128px; border-top:1px solid; border-right:1px solid; text-align:center; justify-content:center; line-height:47px;">
+            									<t t-if="len(o.approval_line_ids) &gt; 0 and o.approval_line_ids.sorted(lambda x: x.sequence)[0].signature != False and o.approval_line_ids.sorted(lambda x: x.sequence)[0].is_approved == True">
+            										<img t-att-src="image_data_uri(o.approval_line_ids.sorted(lambda x: x.sequence)[0].signature)" style="max-width:47px; width:100%; object-fit:contain;" alt="Signature"/>
+            									</t>
+            								</div>
+            								<div class="col" style="height:51px; width:128px; border-top:1px solid; border-right:1px solid; text-align:center; justify-content:center; line-height:47px;">
+            									<t t-if="len(o.approval_line_ids) &gt; 0 and o.approval_line_ids.sorted(lambda x: x.sequence)[1].signature != False and o.approval_line_ids.sorted(lambda x: x.sequence)[1].is_approved == True">
+            										<img t-att-src="image_data_uri(o.approval_line_ids.sorted(lambda x: x.sequence)[1].signature)" style="max-width:47px; width:100%; object-fit:contain;" alt="Signature"/>
+            									</t>
+            								</div>
+            							</div>
+                        	<div class="row">
+                          		<t t-set="approve_count" t-value="1"/>
+              								<t t-set="diperiksa_name" t-value=""/>
+              								<t t-set="diperiksa_date" t-value=""/>
+              								<t t-foreach="o.approval_line_ids.filtered(lambda l: l.is_approved == True).sorted(lambda r: r.sequence)" t-as="lines">
+              								<t t-if="approve_count == 1">
+              									<t t-set="diperiksa_name" t-value="lines.user_id.name"/>
+              									<t t-set="diperiksa_date" t-value="lines.date_approved"/>
+              								</t>
+              								<t t-set="approve_count" t-value="approve_count + 1"/>
+              								</t>
+              								<div class="col" style="text-align:center; height:17px; width:41px; border-top:1px solid; border-right:1px solid;">
+              									Tgl
+              								</div>
+              								<div class="col" style="text-align:center; width:128px; height:17px; border-top:1px solid; border-right:1px solid;">
+              									<span t-field="o.lmk_date"/>
+              								</div>
+              								<div class="col" style="text-align:center; width:128px; height:17px; border-top:1px solid; border-right:1px solid;">
+              									<!-- <span t-esc="diperiksa_date" t-options="{'widget': 'date','format': 'dd/MM/yyyy'}"/> -->
+              									<t t-if="o.approval_line_ids and o.approval_line_ids[0].is_approved == True">
+              										<span t-esc="diperiksa_date" t-options="{'widget': 'date','format': 'dd/MM/yyyy'}"/>
+              									</t>
+              								</div>
+              								<div class="col" style="text-align:center; width:128px; height:17px; border-top:1px solid;">
+              									<t t-if="o.approval_line_ids and o.approval_line_ids[1].is_approved == True">
+              										<span t-esc="diperiksa_date" t-options="{'widget': 'date','format': 'dd/MM/yyyy'}"/>
+              									</t>
+              									<!-- <span t-field="o.approve_date"/>
+              									<span t-field="o.approval_line_ids.date_approved[0]"/> -->
+              								</div>
+                        	</div>
+            							<div class="row">
+            								<div class="col" style="text-align:center; height:17px; width:41px; border-top:1px solid; border-right:1px solid;">
+            									Nama
+            								</div>
+            								<div class="col" style="text-align:center; width:128px; height:17px; border-top:1px solid; border-right:1px solid;">
+            									<span t-field="o.create_uid.name"/>
+            								</div>
+            								<div class="col" style="text-align:center; width:128px; height:17px; border-top:1px solid; border-right:1px solid;">
+            									<!-- <span t-esc="diperiksa_name"/> -->
+            									<!-- <span t-esc="o.approve_uid.name"/> -->
+            									<t t-if="o.approval_line_ids and o.approval_line_ids.sorted(lambda x: x.sequence)[0].is_approved == True">
+            										<span t-esc="o.approval_line_ids.sorted(lambda x: x.sequence)[0].user_id.name"/>
+            									</t>
+            								</div>
+            								<div class="col" style="text-align:center; width:128px; height:17px; border-top:1px solid;">
+            									<t t-if="o.approval_line_ids and o.approval_line_ids.sorted(lambda x: x.sequence)[1].is_approved == True">
+            										<span t-field="o.approval_line_ids.sorted(lambda x: x.sequence)[1].user_id.name"/>
+            									</t>
+            								</div>
+            								<!-- <div class="col" style="text-align:center; width:128px; height:17px; border-top:1px solid;">
+            									<span t-field="o.approve_uid.name"/>
+            								</div> -->
+							</div>
+                      	</div>
+                    </div>
+          					<div class="row">
+          						<div class="col-1" style="width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="text-align:center; width:872px; border:1px solid; border-top:0px;">
+          							<b>PICA (PROBLEM IDENTIFICATION AND CORRECTIVE ACTION) SUPPLIER</b>
+          						</div>
+          					</div>
+                    <div class="row">
+          						<div class="col-1" style="width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="padding-left:3px; padding-top:3px; height:20px; width:872px; border:1px solid; border-top:0px;">
+          							Kenapa terjadi masalah :
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="text-align:center; width:97px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							4M
+          						</div>
+          						<div class="col-2" style="text-align:center; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							Why1
+          						</div>
+          						<div class="col-2" style="text-align:center; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							Why2
+          						</div>
+          						<div class="col-2" style="text-align:center; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							Why3
+          						</div>
+          						<div class="col-2" style="text-align:center; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							Why4
+          						</div>
+          						<div class="col-2" style="text-align:center; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							Why5
+						          </div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="padding-top:20px;text-align:center; height:50px; width:97px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							Man
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="padding-top:20px;text-align:center; text-align:center; height:50px; width:97px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							Method
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="padding-top:20px;text-align:center; height:50px; width:97px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							Material
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="padding-top:20px;text-align:center; height:50px; width:97px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							Machine
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="text-align:center; height:50px; width:155px; border-right:1px solid; border-bottom:1px solid;">
+          							
+						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="height:30px; width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="height:30px; width:872px; border:1px solid; border-top:0px;">
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="padding-left:3px; width:632px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							Tindakan perbaikan dan pencegahan
+          						</div>
+          						<div class="col-2" style="text-align:center; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							DUE DATE  
+          						</div>
+          						<div class="col-2" style="text-align:center; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							PIC
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="text-align:center; width:97px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							4M
+          						</div>
+          						<div class="col-2" style="width:535px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="height:50px; width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="padding-top:20px; text-align:center; height:50px; width:97px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							Man
+          						</div>
+          						<div class="col-2" style="height:50px; width:535px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="height:50px; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="height:50px; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="height:50px; width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="padding-top:20px; text-align:center; height:50px; width:97px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							Method
+          						</div>
+          						<div class="col-2" style="height:50px; width:535px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="height:50px; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="height:50px; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="height:50px; width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="padding-top:20px; text-align:center; height:50px; width:97px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							Material
+          						</div>
+          						<div class="col-2" style="height:50px; width:535px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="height:50px; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="height:50px; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="height:50px; width:40px; border-left:1px solid; border-bottom:1px solid;">
+          						</div>
+          						<div class="col-2" style="padding-top:20px; text-align:center; height:50px; width:97px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							Machine
+          						</div>
+          						<div class="col-2" style="height:50px; width:535px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="height:50px; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+          						<div class="col-2" style="height:50px; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          							
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="height:10px; width:40px; border-left:1px solid; border-bottom:1px solid;">
+          						</div>
+          						<div class="col-2" style="height:10px; width:632px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          						</div>
+          						<div class="col-2" style="height:10px; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          						</div>
+          						<div class="col-2" style="height:10px; width:120px; border-right:1px solid; border-bottom:1px solid;">
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="width:40px; border-left:1px solid;">
+          						</div>
+          						<div class="col-2" style="padding-left:3px; width:160px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							Status LMK
+          						</div>
+          						<div class="col-2" style="padding-left:3px; width:320px; border-right:1px solid; border-bottom:1px solid;">
+          							Monitoring Problem (5 Lot Produksi)
+          						</div>
+          						<div class="col-2" style="padding-left:3px; width:392px; border-right:1px solid; border-bottom:1px solid;">
+          							Supplier/bagian terkait
+          						</div>
+                    </div>
+                    <div class="row">
+          						<div class="col-1" style="height:100px; width:40px; border-left:1px solid; border-bottom:1px solid;">
+          						</div>
+          						<div class="col-2" style="height:100px; width:160px; border-left:1px solid; border-right:1px solid; border-bottom:1px solid;">
+          							<div class="row">
+          								<div class="col-1" style="padding-top:50px; text-align:center; height:100px; width:76px; border-right:1px solid;">
+          									CLOSED
+          								</div>
+          								<div class="col-2" style="padding-top:50px; text-align:center; height:100px; width:76px;">
+          									OPEN
+          								</div>
+          							</div>
+          						</div>
+                      	<div class="col-2" style="height:100px; width:320px; border-right:1px solid; border-bottom:1px solid;">
+            							<div class="row">
+            								<div class="col-1" style="padding-top:3px; text-align:center; height:20px; width:70px; border-right:1px solid; border-bottom:1px solid;">
+            									Tgl
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-bottom:1px solid;">
+            									
+            								</div>
+            							</div>
+							            <div class="row">
+            								<div class="col-1" style="padding-top:3px; text-align:center; height:20px; width:70px; border-right:1px solid; border-bottom:1px solid;">
+            									Qty NG
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-bottom:1px solid;">
+            									
+            								</div>
+            							</div>
+            							<div class="row">
+            								<div class="col-1" style="padding-top:3px; text-align:center; height:20px; width:70px; border-right:1px solid; border-bottom:1px solid;">
+            									Lot Prod
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-bottom:1px solid;">
+            									
+            								</div>
+            							</div>
+            							<div class="row">
+            								<div class="col-1" style="padding-top:3px; text-align:center; height:20px; width:70px; border-right:1px solid; border-bottom:1px solid;">
+            									PIC
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-bottom:1px solid;">
+            									
+            								</div>
+            							</div>
+            							<div class="row">
+            								<div class="col-1" style="padding-top:3px; text-align:center; height:20px; width:70px; border-right:1px solid; border-bottom:1px solid;">
+            									Paraf
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:50px; border-bottom:1px solid;">
+            									
+            								</div>
+            							</div>
+                      	</div>
+                      	<div class="col-2" style="height:100px; width:392px; border-right:1px solid; border-bottom:1px solid;">
+            							<div class="row">
+            								<div class="col-1" style="height:20px; width:62px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="padding-top:3px; text-align:center; height:20px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									Dibuat
+            								</div>
+            								<div class="col-1" style="padding-top:3px; text-align:center; height:20px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									Diperiksa
+            								</div>
+            								<div class="col-1" style="padding-top:3px; text-align:center; height:20px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									Disetujui
+            								</div>
+            							</div>
+            							<div class="row">
+            								<div class="col-1" style="padding-top:10px; text-align:center; height:40px; width:62px; border-right:1px solid; border-bottom:1px solid;">
+            									Ttd
+            								</div>
+            								<div class="col-1" style="height:40px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:40px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:40px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            							</div>
+            							<div class="row">
+            								<div class="col-1" style="padding-top:3px; text-align:center; height:20px; width:62px; border-right:1px solid; border-bottom:1px solid;">
+            									Tgl
+            								</div>
+            								<div class="col-1" style="height:20px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            							</div>
+            							<div class="row">
+            								<div class="col-1" style="padding-top:3px; text-align:center; height:20px; width:62px; border-right:1px solid; border-bottom:1px solid;">
+            									Nama
+            								</div>
+            								<div class="col-1" style="height:20px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            								<div class="col-1" style="height:20px; width:110px; border-right:1px solid; border-bottom:1px solid;">
+            									
+            								</div>
+            							</div>
+                      	</div>
+                    </div>
+                    <div class="row">
+						<div class="col-1" style="height:30px; width:40px; border-left:1px solid; border-bottom:1px solid;">
+						</div>
+						<div class="col-2" style="padding-top:15px; padding-left:3px; height:30px; width:750px; border-left:1px solid; border-bottom:1px solid;">
+							FM-QA-06.02-01
+						</div>
+						<div class="col-2" style="padding-top:15px; padding-right:3px; text-align:right; height:30px; width:122px; border-right:1px solid; border-bottom:1px solid;">
+							Revisi 1
+						</div>
+                    </div>
+                    <p style="page-break-before:always;"> </p>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

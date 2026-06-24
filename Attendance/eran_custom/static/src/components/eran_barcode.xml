@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="stock_barcode.MainComponent" t-inherit-mode="extension" owl="1">
+        <!-- Mengincar area kontrol utama di aplikasi Barcode -->
+        <xpath expr="//div[contains(@class, 'o_action_buttons')]" position="inside">
+            <div class="fixed-bottom p-3" t-if="!env.model.record.dn_out">
+                <button class="btn btn-primary btn-lg w-100 o_barcode_dn_out text-uppercase" 
+                        style="height: 60px; font-weight: bold; font-size: 1.2rem;"
+                        t-on-click="() => env.model.dnOut()">
+                    <i class="fa fa-paper-plane me-2"/> DN OUT
+                </button>
+            </div>
+        </xpath>
+        
+         <xpath expr="//button[contains(@class, 'o_add_line')]" position="attributes">
+            <attribute name="t-if">false</attribute>
+        </xpath>
+
+        <xpath expr="//button[contains(@class, 'o_validate_page')]" position="attributes">
+            <attribute name="t-if">false</attribute>
+        </xpath>
+
+        <xpath expr="//button[contains(@class, 'o_put_in_pack')]" position="attributes">
+            <attribute name="t-if">false</attribute>
+        </xpath>
+    </t>
+</templates>

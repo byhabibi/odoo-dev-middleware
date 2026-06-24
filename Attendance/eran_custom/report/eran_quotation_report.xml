@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_paperformat_report_quotation" model="report.paperformat">
+        <field name="name">Quotation Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">20</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="eran_action_report_quotation" model="ir.actions.report">
+        <field name="name">Quotation new Lead</field>
+        <field name="model">eran.quotation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_quotation</field>
+        <field name="report_file">eran_custom.eran_template_report_quotation</field>
+        <field name="print_report_name">'Quotation - %s' % object.name</field>
+        <field name="binding_model_id" ref="eran_custom.model_eran_quotation"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_quotation"/>
+    </record>
+
+    <record id="eran_action_report_quotation_adjustment" model="ir.actions.report">
+        <field name="name">Adjustment Quotation</field>
+        <field name="model">eran.quotation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_quotation_adjustment</field>
+        <field name="report_file">eran_custom.eran_template_report_quotation_adjustment</field>
+        <field name="print_report_name">'Quotation - %s' % object.name</field>
+        <field name="binding_model_id" ref="eran_custom.model_eran_quotation"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_quotation"/>
+    </record>
+
+    <template id="eran_template_report_quotation">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <style type="text/css">
+                        table,
+                        table th,
+                        table td{
+                            font-size:14px;
+                            padding: 2px;
+                        }
+                    </style>
+                    <div class="row">
+                        <div class="col-8" style="position: relative;">
+                            <div style="position: absolute; bottom: 0;">
+                                Gunung Putri, <span t-field="o.date_order" t-options="{'widget': 'date','format': 'dd MMMM yyyy'}"/>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <img t-att-src="image_data_uri(o.company_id.logo)" style="width:200px;height:100px;" alt="Logo"/>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:40px;">
+                        <div class="col-2">
+                            <span>To</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: <span t-if="o.partner_id.company_type != 'company'" t-field="o.partner_id.parent_id.name"/> <span t-if="o.partner_id.company_type == 'company'" t-field="o.partner_id.name"/></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <span>Attn</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: <span t-if="o.partner_id.company_type != 'company'" t-field="o.partner_id.name"/></span>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:20px;">
+                        <div class="col-2">
+                            <span>Hal</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: Penawaran Harga</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <span>No</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: <span t-field="o.name"/></span>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:20px;">
+                        <span>Dengan hormat, <br/><![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]]>Bersama ini kami sampaikan penawaran harga part dibawah ini:</span>
+                    </div>
+                    <table class="" style="width:100%;border:1px solid;margin-top:20px;">
+                        <t t-set="nomor" t-value="1"/>
+                        <tr>
+                            <td style="text-align:center;width:5%; border:1px solid;"><b>No</b></td>
+                            <td style="text-align:center;width:45%; border:1px solid;"><b>Deskripsi</b></td>
+                            <td style="text-align:center;width:25%; border:1px solid;"><b>No Part</b></td>
+                            <td style="text-align:center;width:25%; border:1px solid;"><b>Price / Pcs</b></td>
+                        </tr>
+                        <t t-foreach="o.quotation_line" t-as="line">
+                            <tr t-if="not line.display_type">
+                                <td style="width:10px;text-align:center; border-right:1px solid;"><span t-esc="nomor"/></td>
+                                <td style="border-right:1px solid;"><span t-field="line.product_id.name"/></td>
+                                <td style="border-right:1px solid;"><span t-field="line.no_part"/></td>
+                                <td style="text-align:right"><span t-field="line.price_unit" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                <t t-set="nomor" t-value="nomor+1"/>
+                            </tr>
+                            <tr t-else="">
+                                <td colspan="4">
+                                    <span t-field="line.name"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </table>
+                    <div class="row" style="margin-top:20px;">
+                        <div class="col-12">
+                            <span t-field="o.note"/>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:20px;">
+                        <div class="col-12">
+                            <span>Demikian penawaran harga ini kami sampaikan, atas perhatiannya kami ucapkan terima kasih.</span>
+                        </div>
+                    </div>
+                    <br/>
+                    <table class="table table-bordered table-borderless" style="width:100%;">
+                        <tr>
+                            <td>Hormat kami,</td>
+                        </tr>
+                        <tr>
+                            <td style="height:60px;">
+                                <t t-if="len(o.approval_line_ids) &gt; 0 and o.approval_line_ids[0].signature != False">
+                                    <img t-att-src="image_data_uri(o.approval_line_ids[0].signature)" style="height:60px;max-width:110px;width:90%;" alt="Signature"/>
+                                </t>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span t-field="o.approve_uid" t-if="o.approve_uid.name"/></td>
+                        </tr>
+                    </table>
+                </div>
+                <div t-attf-class="footer o_standard_footer o_company_#{o.company_id.id}_layout">
+                    <div class="text-center" style="border-top: 1px solid black;">
+                        <ul class="list-inline mb4">
+                            <div t-field="o.company_id.report_footer"/>
+                        </ul>
+
+                        <!-- <div t-if="report_type == 'pdf'" class="text-muted">
+                            Page: <span class="page"/> / <span class="topage"/>
+                        </div> -->
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+    <template id="eran_template_report_quotation_adjustment">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <style type="text/css">
+                        table,
+                        table th,
+                        table td{
+                            font-size:14px;
+                            padding: 2px;
+                        }
+                    </style>
+                    <div class="row">
+                        <div class="col-8" style="position: relative;">
+                            <div style="position: absolute; bottom: 0;">
+                                Gunung Putri, <span t-field="o.date_order" t-options="{'widget': 'date','format': 'dd MMMM yyyy'}"/>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <img t-att-src="image_data_uri(o.company_id.logo)" style="width:200px;height:100px;" alt="Logo"/>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:40px;">
+                        <div class="col-2">
+                            <span>To</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: <span t-if="o.partner_id.company_type != 'company'" t-field="o.partner_id.parent_id.name"/> <span t-if="o.partner_id.company_type == 'company'" t-field="o.partner_id.name"/></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <span>Attn</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: <span t-if="o.partner_id.company_type != 'company'" t-field="o.partner_id.name"/></span>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:20px;">
+                        <div class="col-2">
+                            <span>Hal</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: Penawaran Harga</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <span>No</span>
+                        </div>
+                        <div class="col-10">
+                            <span>: <span t-field="o.name"/></span>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:20px;">
+                        <span>Dengan hormat, <br/><![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]]>Bersama ini kami sampaikan penawaran harga part dibawah ini:</span>
+                    </div>
+                    <table class="" style="width:100%;border:1px solid;margin-top:20px;">
+                        <t t-set="nomor" t-value="1"/>
+                        <tr>
+                            <td style="text-align:center;width:5%; border:1px solid;"><b>No</b></td>
+                            <td style="text-align:center;width:40%; border:1px solid;"><b>Deskripsi</b></td>
+                            <td style="text-align:center;width:25%; border:1px solid;"><b>No Part</b></td>
+                            <td style="text-align:center;width:15%; border:1px solid;"><b>Price / Pcs</b></td>
+                            <td style="text-align:center;width:15%; border:1px solid;"><b>Req New Price</b></td>
+                        </tr>
+                        <t t-foreach="o.quotation_line" t-as="line">
+                            <tr t-if="not line.display_type">
+                                <td style="width:10px;text-align:center; border-right:1px solid;"><span t-esc="nomor"/></td>
+                                <td style="border-right:1px solid;"><span t-field="line.product_id.name"/></td>
+                                <td style="border-right:1px solid;"><span t-field="line.no_part"/></td>
+                                <td style="text-align:right; border-right:1px solid;"><span t-field="line.price_unit" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                <td style="text-align:right;"><span t-field="line.req_new_price"/></td>
+                                <t t-set="nomor" t-value="nomor+1"/>
+                            </tr>
+                            <tr t-else="">
+                                <td colspan="4">
+                                    <span t-field="line.name"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </table>
+                    <div class="row" style="margin-top:20px;">
+                        <div class="col-12">
+                            <span t-field="o.note"/>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:20px;">
+                        <div class="col-12">
+                            <span>Demikian penawaran harga ini kami sampaikan, atas perhatiannya kami ucapkan terima kasih.</span>
+                        </div>
+                    </div>
+                    <br/>
+                    <table class="table table-bordered table-borderless" style="width:100%;">
+                        <tr>
+                            <td>Hormat kami,</td>
+                        </tr>
+                        <tr>
+                            <td style="height:60px;">
+                                <t t-if="len(o.approval_line_ids) &gt; 0 and o.approval_line_ids[0].signature != False">
+                                    <img t-att-src="image_data_uri(o.approval_line_ids[0].signature)" style="height:60px;max-width:110px;width:90%;" alt="Signature"/>
+                                </t>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span t-field="o.approve_uid" t-if="o.approve_uid.name"/></td>
+                        </tr>
+                    </table>
+                </div>
+                <div t-attf-class="footer o_standard_footer o_company_#{o.company_id.id}_layout">
+                    <div class="text-center" style="border-top: 1px solid black;">
+                        <ul class="list-inline mb4">
+                            <div t-field="o.company_id.report_footer"/>
+                        </ul>
+
+                        <!-- <div t-if="report_type == 'pdf'" class="text-muted">
+                            Page: <span class="page"/> / <span class="topage"/>
+                        </div> -->
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+    
+
+
+
+</odoo>

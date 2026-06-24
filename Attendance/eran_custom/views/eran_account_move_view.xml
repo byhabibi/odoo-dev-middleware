@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_account_view_move_tree_inherit" model="ir.ui.view">
+        <field name="name">eran.account.view.order.tree.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_partner_display_name']" position="after">
+                <field name="payment_reference" string="Invoice Vendor" invisible="context.get('default_move_type') not in ('in_invoice', 'in_refund','in_receipt')"/>
+                <field name="po_customers" />
+            </xpath>
+            <xpath expr="//field[@name='invoice_date_due']" position="replace">
+                <field name="invoice_date_due" 
+                    optional="show" 
+                    attrs="{'invisible': [['payment_state', 'in', ('paid', 'in_payment', 'reversed')]]}"/>
+            </xpath>
+        </field>
+    </record>
+    
+
+    <record id="eran_account_view_move_form_inherit" model="ir.ui.view">
+        <field name="name">eran.account.view.order.form.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='price_total']" position="after">
+                <field name="picking_id" force_save="1" invisible="1"/>
+                <field name="stock_move_id" force_save="1" invisible="1"/>
+            </xpath>
+            <!-- <xpath expr="//group[@name='accounting_info_group']" position="inside">
+                <field name="tax_invoice_date" widget="date"/>
+                <field name="invoice_exchange_date" widget="date"/>
+            </xpath> -->
+            <xpath expr="//field[@name='partner_bank_id'][1]" position="attributes">
+              <attribute name="attrs">{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice', 'in_refund', 'in_receipt'))], 'readonly': [('state', '!=', 'draft')]}</attribute>
+            </xpath>
+            <xpath expr="//page[@id='other_tab']/group[@id='other_tab_group']/group[@name='sale_info_group']/field[@name='partner_bank_id']" position="attributes">
+              <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//group[@id='header_left_group']" position="inside">
+                <field name="no_faktur_pajak" invisible="1"/>
+                <field name="tax_invoice_date" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice'))]}" widget="date"/>
+                <field name="invoice_exchange_date" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice'))]}" widget="date"/>
+                <field name="note"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_id']" position="before">
+                <field name="po_ref" force_save="1" invisible="1"/>
+            </xpath>
+            
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_id']" position="after">
+                <field name="sale_line_ids" widget="many2many_tags" force_save="1" optional="hide"/>
+                <field name="picking_dn_supplier"/>
+                <field name="picking_purchase_ref"/>
+                <field name="picking_id" optional="hide"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='product_uom_id']" position="after">
+                <field name="alternative_quantity"/>
+                <field name="alternative_uom_id" />
+            </xpath>
+            <xpath expr="//button[@name='action_automatic_entry']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+                <attribute name="invisible">1</attribute>
+                <attribute name="attrs">{}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='name']" position="after">
+                <field name="po_ref" force_save="1" invisible="1"/>
+            </xpath>
+            <xpath expr="//group[@id='header_right_group']/field[@name='payment_reference']" position="attributes">
+                <attribute name="attrs">{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'out_receipt'))]}</attribute>
+            </xpath>
+            <xpath expr="//group[@id='header_right_group']/field[@name='payment_reference']" position="after">
+                <field name="payment_reference" string="Invoice Vendor" attrs="{'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'in_receipt'))]}"/>
+            </xpath>
+
+            <xpath expr="//page[@id='invoice_tab']/group/group/group/field[@name='tax_totals']" position="attributes">
+                <attribute name="attrs">{'invisible': [('move_type', 'in', ('out_invoice', 'in_invoice'))]}</attribute>
+            </xpath>
+            <xpath expr="//page[@id='invoice_tab']/group/group/group/field[@name='tax_totals']" position="after">
+                <field name="amount_untaxed" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice'))]}"/>
+                <field name="dpp" widget="monetary" options="{'currency_field': 'currency_id'}" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice'))]}"/>
+                <field name="discount" widget="monetary" options="{'currency_field': 'currency_id'}" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice'))]}"/>
+                <field name="ppn_amount" widget="monetary" options="{'currency_field': 'currency_id'}" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice'))]}" />
+                <field name="pph22_amount" widget="monetary" options="{'currency_field': 'currency_id'}" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice'))]}"/>
+                <field name="pph23_amount" widget="monetary" options="{'currency_field': 'currency_id'}" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice'))]}"/>
+                <field name="amount_tax" string="Taxes" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice'))]}"/>
+                <field name="amount_total" class="oe_subtotal_footer_separator" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice'))]}"/>
+            </xpath>
+            <xpath expr="//group[@id='header_right_group']" position="inside">
+                <field name="dpp_print"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_account_move_efaktur_form_view_inherit" model="ir.ui.view">
+        <field name="name">eran.account.move.efaktur.form.view.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="l10n_id_efaktur.account_move_efaktur_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='l10n_id_tax_number']" position="attributes">
+                <attribute name="attrs">{'invisible': [('move_type', '=', 'entry')], 'readonly': [('state', '!=', 'draft')]}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_view_account_invoice_filter_inherit" model="ir.ui.view">
+        <field name="name">eran.view.account.invoice.filter.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="po_customers" />
+                <field name="payment_reference" string="Invoice Vendor" invisible="context.get('default_move_type') not in ('in_invoice', 'in_refund', 'in_receipt')"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Delivery Order Accounting-->
+    <record id="eran_vpicktree_delivery_order_tree_view_inherit_in_accounting" model="ir.ui.view">
+        <field name="name">eran.vpicktree.tree.view.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="priority">1000</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="eran_custom.eran_vpicktree_tree_view_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='requester']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='suplier']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="currency_id" invisible="1"/>
+                <!-- <field name="requester" optional="show"/>
+                <field name="suplier" optional="show"/> -->
+                <field name="po_ref" optional="show"/>
+                <field name="eran_amount_total" widget="monetary" optional="hide"/>
+                <field name="ready_to_invoice" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="dn_supplier"/>
+            </xpath>
+            <xpath expr="//field[@name='date_done']" position="after">
+                <field name="dn_back_date" widget="date"/>
+                <field name="ready_to_invoice_date" widget="date"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_delivery_order" model="ir.actions.act_window">
+        <field name="name">Delivery Order</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="eran_custom.eran_vpicktree_delivery_order_tree_view_inherit_in_accounting"/>
+        <field name="context">{"search_default_done": 1,'create':False, 'delete':False}</field>
+        <field name="domain">[('picking_type_code','=','outgoing'),('invoice_state', 'in', ('partial_invoice', '2binvoiced', 'invoiced')),('picking_type_id.able_to_invoice','=','invoiceable')]</field>
+    </record>
+
+    <menuitem id="menu_action_delivery_order" 
+        name="Delivery Order" 
+        action="action_delivery_order" 
+        parent="account.menu_finance_receivables" 
+        groups="account.group_account_manager"
+        sequence="0"/>
+
+    <record id="eran_invoice_form_inherit_bi_add_field_picking_many2many_inherit" model="ir.ui.view">
+        <field name="name">eran.invoice.form.inherit.bi.add.field.picking.many2many.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="invoice_from_picking.invoice_form_inherit_bi_add_field_picking_many2many"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='picking_ids']" position="attributes">
+                <attribute name="attrs">{'readonly': [('state', '!=', 'draft')]}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- stock picking view in accounting -->
+    <record id="eran_accounting_delivery_order_detail_tree_view" model="ir.ui.view">
+        <field name="name">eran.accounting.delivery.order.detail.tree.view.inherit</field>
+        <field name="model">stock.move</field>
+        <field name="inherit_id" ref="eran_custom.eran_sale_delivery_report_tree_view_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="field[@name='delivery_preparation_number']" position="after">
+                <field name="invoice_state"/>
+                <field name="payment_state" optional="hide"/>
+            </xpath>
+            <xpath expr="field[@name='contact_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="field[@name='product_id']" position="before">
+                <field name="partner_id" widget="res_partner_many2one" string="Contact"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Delivery Order Detail -->
+    <record id="action_delivery_order_detail" model="ir.actions.act_window">
+        <field name="name">Delivery Order Detail</field>
+        <field name="res_model">stock.move</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="eran_custom.eran_accounting_delivery_order_detail_tree_view"/>
+        <field name="context">{"search_default_done": 1,'create':False, 'delete':False}</field>
+        <field name="domain">[('picking_type_code','=','outgoing'),('picking_type_id.able_to_invoice','=','invoiceable')]</field>
+    </record>
+
+    <menuitem id="menu_action_delivery_order_detail" 
+        name="Delivery Order Detail" 
+        action="action_delivery_order_detail" 
+        parent="account.menu_finance_receivables" 
+        groups="account.group_account_manager"
+        sequence="0"/>
+    
+    <!-- Receipt Accounting-->
+    <record id="eran_vpicktree_receipt_tree_view_inherit_in_accounting" model="ir.ui.view">
+        <field name="name">eran.vpicktree.tree.view.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="priority">1000</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="eran_custom.eran_vpicktree_tree_view_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='requester']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='suplier']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='transfer_reference']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="currency_id" invisible="1"/>
+                <!-- <field name="requester" optional="show"/> -->
+                <!-- <field name="suplier" optional="show"/> -->
+                <field name="purchase_ref_id" string="PO Reference" optional="show"/>
+                <field name="eran_amount_total" widget="monetary" optional="hide"/>
+                <field name="ready_to_invoice" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="dn_supplier"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_receipt" model="ir.actions.act_window">
+        <field name="name">Receipt</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="eran_custom.eran_vpicktree_receipt_tree_view_inherit_in_accounting"/>
+        <field name="context">{"search_default_done": 1,'create':False, 'delete':False}</field>
+        <field name="domain">[('picking_type_code','=','incoming'), ('invoice_state', 'in', ('partial_invoice', '2binvoiced', 'invoiced')), ('picking_type_id.able_to_invoice','=','billable')]</field>
+    </record>
+
+    <menuitem id="menu_action_receipt" 
+        name="Receipt" 
+        action="action_receipt" 
+        parent="account.menu_finance_payables" 
+        groups="account.group_account_manager"
+        sequence="0"/>
+</odoo>

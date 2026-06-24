@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mans_approval_hr_tree_view" model="ir.ui.view">
+        <field name="name">mans.approval.hr.tree</field>
+        <field name="model">mans.approval.hr</field>
+        <field name="arch" type="xml">
+            <tree string="Approval Hr">
+                <field name="reference"/>
+                <field name="models"/>
+                <field name="approval_type"/>
+                <field name="approval_rule"/>
+            </tree>
+        </field>
+    </record>
+    <record id="mans_approval_hr_form_view" model="ir.ui.view">
+        <field name="name">mans.approval.hr.form.view</field>
+        <field name="model">mans.approval.hr</field>
+        <field name="arch" type="xml">
+            <form string="Approval Hr">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="reference"/>
+                            <field name="models"/>
+                            <field name="approval_type"/>
+                            <field name="approval_rule"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Position Details">
+                            <field name="job_ids" string="Job Position" mode="tree" attrs="{'readonly': [('approval_type', '=', 'individual-base-approval')]}">
+                                <tree string="Job Position" name="job_position_details" editable="bottom">
+                                    <field name="sequence" widget="handle"/>    
+                                    <field name="job_id"/>
+                                    <field name="approval_hr_id" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Individual Details">
+                            <field name="user_ids" class="oe_inline" string="Approver" mode="tree" attrs="{'readonly': [('approval_type', '=', 'position-base-approval')]}">
+                                <tree string="User" name="user_details" editable="bottom">
+                                    <field name="sequence" widget="handle"/>    
+                                    <field name="user_id"/>
+                                    <field name="approval_hr_id" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

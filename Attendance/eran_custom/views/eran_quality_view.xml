@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_view_quality_check_wizard_inherit" model="ir.ui.view">
+        <field name="name">eran.quality_check_wizard.view.inherit</field>
+        <field name="model">quality.check.wizard</field>
+        <field name="inherit_id" ref="quality_control.view_quality_check_wizard"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='do_pass'][2]" position="attributes">
+                <attribute name="string">Validate</attribute>
+            </xpath>
+            <xpath expr="//button[@name='do_fail']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//button[@name='do_pass'][2]" position="after">
+                <button name="create_lmk" type="object" string="Create LMK" class="btn btn-primary"/>
+            </xpath>
+            <xpath expr="//field[@name='additional_note']" position="after">
+                <field name="order_sheet_id"/>
+                <field name="order_qty" force_save="1"/>
+                <field name="good_qty"/>
+                <field name="not_good_qty"/>
+            </xpath>
+            <xpath expr="//footer" position="after">
+                <notebook>
+                    <page string="Not Good" name="sheet_lines">
+                        <field name="quality_ng_ids">
+                            <tree string="Not Good" editable="bottom">
+                                <field name="not_good_id" options="{'no_open':True,'no_create': True}"/>
+                                <field name="ng_qty"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Attachment" name="attachment_qc_lines">
+                        <field name="quality_attachment_ng_ids">
+                            <tree string="Attachment" editable="bottom">
+                                <field name="image" required="1" widget="image" options="{'size': [300, 300]}"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_quality_check_view_form_inherit" model="ir.ui.view">
+        <field name="name">eran.quality.check.view.inherit</field>
+        <field name="model">quality.check</field>
+        <field name="inherit_id" ref="quality_control.quality_check_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='do_pass'][1]" position="attributes">
+                <attribute name="string">Validate</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='do_pass'][2]" position="attributes">
+                <attribute name="string">Validate</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='do_fail'][1]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='do_fail'][2]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_see_alerts']" position="after">
+                <button name="action_lmk_list" icon="fa-file-text" type="object" class="oe_stat_button" attrs="{'invisible': [('lmk_count', '=', 0)]}">
+                    <field name="lmk_count" string="LMK" widget="statinfo"/>
+                </button>
+            </xpath>
+            <xpath expr="//header/button[@name='do_alert']" position="after">
+                <button name="do_set_draft" type="object" attrs="{'invisible': ['|', ('alert_ids', '!=', []), ('quality_state', '=', 'none')]}" string="Set TO DO"/>
+                <button name="create_lmk" type="object" class="btn btn-primary" attrs="{'invisible': [('lmk_count', '!=', 0)]}" string="Create LMK"/>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="order_sheet_id"/>
+                <field name="order_qty" force_save="1"/>
+                <field name="good_qty"/>
+                <field name="not_good_qty"/>
+                <field name="lmk_ids" invisible="1"/>
+            </xpath>
+            <xpath expr="//group/group/field[@name='picking_id']" position="after">
+                <field name="batch_id" readonly="1"/>
+            </xpath>
+            <xpath expr="//page[@name='notes']" position="after">
+                <page string="Not Good" name="sheet_lines">
+                    <field name="quality_ng_ids" attrs="{'readonly': [('quality_state', '!=', 'none')]}">
+                        <tree string="Not Good" editable="bottom">
+                            <field name="not_good_id" options="{'no_open':True,'no_create': True}"/>
+                            <field name="ng_qty"/>
+                        </tree>
+                    </field>
+                </page>
+                <page string="Attachment" name="attachment_qc_lines">
+                    <field name="quality_attachment_ng_ids" attrs="{'readonly': [('quality_state', '!=', 'none')]}">
+                        <tree string="Attachment" editable="bottom">
+                            <field name="image" required="1" widget="image" options="{'size': [300, 300]}"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_quality_check_view_tree_inherit" model="ir.ui.view">
+        <field name="name">eran.quality.check.view.tree.inherit</field>
+        <field name="model">quality.check</field>
+        <field name="inherit_id" ref="quality_control.quality_check_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='picking_id']" position="after">
+                <field name="batch_id" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_quality_check_view_search_inherit" model="ir.ui.view">
+        <field name="name">eran.quality.check.view.search.inherit</field>
+        <field name="model">quality.check</field>
+        <field name="inherit_id" ref="quality_control.quality_check_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='picking_id']" position="after">
+                <field name="batch_id" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_check_no_good_view_tree" model="ir.ui.view">
+        <field name="name">eran.check.no.good.view.tree</field>
+        <field name="model">quality.check.ng</field>
+        <field name="arch" type="xml">
+            <tree string="Check Ng" create="false" edit="false" delete="false">
+                <field name="quality_check_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="picking_id"/>
+                <field name="not_good_id"/>
+                <field name="ng_qty"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_check_no_good_action" model="ir.actions.act_window">
+        <field name="name">Reporting Incoming Inspection</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">quality.check.ng</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a Quality Check
+            </p>
+        </field>
+    </record>
+
+    <!--Return Order Line-->
+    <record id="return_order_line_view_tree" model="ir.ui.view">
+        <field name="name">eran.return.order.line.view.tree</field>
+        <field name="model">eran.return.order.line</field>
+        <field name="arch" type="xml">
+            <tree string="Return Order Line" create="false" edit="false" delete="false">
+                <field name="picking_id"/>
+                <field name="partner_id"/>
+                <field name="date_done_picking"/>
+                <field name="product_id"/>
+                <field name="category_group_id" />
+                <field name="product_category_id"/>
+                <field name="list_return_type"/>
+                <field name="location_id"/>
+                <field name="location_dest_id"/>
+                <field name="quantity_done"/>
+                <field name="product_uom" />
+                <field name="replanishment_type" />
+                <field name="create_uid" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_return_order_line_graph" model="ir.ui.view">
+        <field name="name">view.return.order.line.graph</field>
+        <field name="model">eran.return.order.line</field>
+        <field name="arch" type="xml">
+            <graph string="Return Order Line" sample="1">
+                <field name="product_id"/>
+                <field name="location_dest_id"/>
+                <field name="quantity_done" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_return_order_line_pivot" model="ir.ui.view">
+        <field name="name">view.return.order.line.pivot</field>
+        <field name="model">eran.return.order.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Stock Moves Analysis" sample="1">
+                <field name="product_id" type="row"/>
+                <field name="location_dest_id" type="row"/>
+                <field name="quantity_done" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_return_order_line_search" model="ir.ui.view">
+        <field name="name">view.return.order.line.search</field>
+        <field name="model">eran.return.order.line</field>
+        <field name="arch" type="xml">
+            <search string="Stock Moves">
+                <field name="picking_id" string="Transfer" filter_domain="[('picking_id', 'ilike', self)]"/>
+                <field name="partner_id" string="Contact" filter_domain="[('partner_id', 'ilike', self)]"/>
+                <field name="product_id" string="Product" filter_domain="[('product_id', 'ilike', self)]"/>
+                <field name="location_id" string="Source Location"/>
+                <field name="location_dest_id" string="Destination Location"/>
+                <separator/>
+                <filter string="Effective Date" name="today" date="date_done_picking"/>
+                <group expand="0" string="Group By">
+                    <filter string="Product" name="by_product" domain="[]"  context="{'group_by': 'product_id'}"/>
+                    <filter string="Category Group" name="category_group" domain="[]" context="{'group_by':'category_group_id'}"/>
+                    <filter string="Transfer" name="groupby_picking_id" domain="[]"  context="{'group_by': 'picking_id'}"/>
+                    <filter string="Source Location" name="groupby_location_id" domain="[]" context="{'group_by': 'location_id'}"/>
+                    <filter string="Destination Location" name="groupby_dest_location_id" domain="[]" context="{'group_by': 'location_dest_id'}"/>
+                    <filter string="Effective Date" name="groupby_date" domain="[]" context="{'group_by': 'date_done_picking'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_return_order_line_action_serv" model="ir.actions.server">
+        <field name="name">Return Order Line</field>
+        <field name="model_id" ref="eran_custom.model_eran_return_order_line"/>
+        <field name="state">code</field>
+        <field name="code">action = env.get('eran.return.order.line').action_eran_return_order_line()</field>
+        <!-- <field name="res_model">eran.return.order.line</field>
+        <field name="view_mode">tree,graph,pivot</field>
+        <field name="domain"></field>
+        <field name="context">{}</field>
+        <field name="view_id" ref="return_order_line_view_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                
+            </p>
+        </field> -->
+    </record>
+
+    <record id="eran_lembar_masalah_kualitas_view_tree" model="ir.ui.view">
+        <field name="name">eran.lembar.masalah.kualitas.view_tree</field>
+        <field name="model">eran.lembar.masalah.kualitas</field>
+        <field name="arch" type="xml">
+            <tree string="Lembar Masalah Kerja">
+                <field name="name"/>
+                <field name="lmk_date"/>
+                <field name="delivery_date"/>
+                <field name="product_id"/>
+                <field name="order_sheet_id"/>
+                <field name="order_qty"/>
+                <!-- <field name="jenis_cacat"/> -->
+                <field name="part_defect_type_ids" widget="many2many_tags"/>
+                <!-- <field name="area_ditemukan"/> -->
+                <field name="area_found_ids" widget="many2many_tags"/>
+                <field name="picking_id"/>
+                <field name="production_id"/>
+                <field name="point_id"/>
+                <field name="team_id"/>
+                <field name="partner_id"/>
+                <field name="tindakan_sementara"/>
+                <field name="batas_waktu"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_eran_pica_view_tree" model="ir.ui.view">
+        <field name="name">eran.pica.view.tree</field>
+        <field name="model">eran.pica</field>
+        <field name="arch" type="xml">
+            <tree string="PICA" editable="bottom" create="0">
+                <field name="name" readonly="1"/>
+                <field name="pica_date"/>
+                <field name="pica_delivery_date"/>
+                <field name="lmk_id" readonly="1"/>
+                <field name="product_id" readonly="1"/>
+                <field name="partner_id" readonly="1"/>
+                <field name="partner_type" readonly="1"/>
+                <field name="not_good_id" readonly="1"/>
+                <field name="quantity_ng" readonly="1"/>
+                <field name="problem_identification"/>
+                <field name="pi_why_send"/>
+                <field name="pi_why_made"/>
+                <field name="corrective_action"/>
+                <field name="ca_occure"/>
+                <field name="pic_id"/>
+                <field name="remark"/>
+                <button name="open_attachment" type="object" icon="fa-folder" string="Attachment"/>
+             </tree>
+        </field>
+    </record>
+
+    <record id="view_dsn_eran_pica_attachment_form" model="ir.ui.view">
+        <field name="name">view.dsn.eran.pica.attachment.form</field>
+        <field name="model">eran.pica</field>
+        <field name="arch" type="xml">
+            <form string="Attachment">
+                <group>
+                    <field name="attachment_ids" widget="many2many_binary"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="eran_lembar_masalah_kualitas_view_form" model="ir.ui.view">
+        <field name="name">eran.lembar.masalah.kualitas.view_form</field>
+        <field name="model">eran.lembar.masalah.kualitas</field>
+        <field name="arch" type="xml">
+            <form string="Lembar Masalah Kerja">
+            <header>
+                <field name="state" widget="statusbar" statusbar_visible="draft,waiting_approval,done"/>
+                <button name="btn_waiting_approval" string="Request Approval" type="object" class="btn btn-primary" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                <button name="btn_approved" string="Approve" type="object" class="btn btn-primary" attrs="{'invisible': ['|', ('user_in_assigned_to', '=', False),('state', '!=', 'waiting_approval')]}"/>
+                <button name="btn_set_to_draft" string="Set To Draft" type="object" class="btn btn-primary" attrs="{'invisible': [('state', 'in', ('draft','closed'))]}"/>
+                <button name="btn_create_pica" string="Create Pica" type="object" class="btn btn-primary" attrs="{'invisible': ['|', ('is_pica_created', '=', True),('state', '!=', 'done')]}"/>
+                <!-- <button name="btn_create_pica" string="Create Pica" type="object" class="btn btn-primary"/> -->
+            </header>
+            <sheet>
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_open_pica"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-file-text-o"
+                            attrs="{'invisible': [('pica_count', '=', 0)]}">
+                        <field name="pica_count" widget="statinfo" string="PICA"/>
+                    </button>
+                </div>
+                <div class="oe_title">
+                    <h1>
+                        <field name="name" readonly="1"/>
+                    </h1>
+                </div>
+                <group name="sheet_header">
+                    <group name="partner_details">
+                        <field name="is_pica_created" invisible="1"/>
+                        <field name="quality_check_id" invisible="1"/>
+                        <field name="partner_type" required="1" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}" />
+                        <field name="lmk_type" required="1" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="lmk_date" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="delivery_date" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="production_date" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="product_id" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="order_sheet_id" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="order_qty" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="part_defect_type_ids" widget="many2many_tags" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="area_found_ids" widget="many2many_tags" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                    </group>
+                    <group name="sheet_details">
+                        <field name="picking_id" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="production_id" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="point_id" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="team_id" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="partner_id" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="tindakan_sementara" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="batas_waktu" attrs="{'readonly': [('state', 'in', ['done', 'waiting_approval'])]}"/>
+                        <field name="company_id" invisible="1"/>
+                    </group>
+                </group>
+                <notebook>
+                    <page string="LMK Details" name="lmk_lines">
+                        <field name="lmk_line_ids" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                            <tree string="LMK Details" editable="bottom">
+                                <field name="quantity_sample"/>
+                                <field name="not_good_id"/>
+                                <field name="quantity_ng"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Attachment" name="lmk_attachment">
+                        <field name="lmk_attachment_ids" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                            <tree string="Attachment" editable="bottom">
+                                <field name="image" required="1" widget="image" options="{'size': [300, 300]}"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <!-- APPROVAL -->
+                    <page name="approver" string="Approver">
+                        <group>
+                            <group>
+                                <field name="user_in_assigned_to" invisible="1"/>
+                                <field name="approval_qc_id"/>
+                                <field name="approval_rule"/>
+                                <field name="approval_type"/>
+                            </group>
+                            <group>
+                                <field name="approve_uid"/>
+                                <field name="approve_date"/>
+                            </group>
+                        </group>
+                        <field name="approval_line_ids" mode="tree" readonly="1">
+                            <tree string="Approval Line" name="approval_line" editable="bottom">
+                                <field name="user_id"/>
+                                <field name="is_approved"/>
+                                <field name="date_approved"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <!-- END APPROVAL -->
+                </notebook>
+            </sheet>
+            <div class="oe_chatter">
+                <field name="message_follower_ids"/>
+                <field name="activity_ids"/>
+                <field name="message_ids"/>
+            </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- KANBAN Lembar Masalah Kualitas -->
+    <record id="eran_lembar_masalah_kualitas_kanban_view" model="ir.ui.view">
+        <field name="name">eran.lembar.masalah.kualitas</field>
+        <field name="model">eran.lembar.masalah.kualitas</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="name"/>
+                <field name="lmk_date"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="row mb4">
+                                <strong class="col-12">
+                                    <span t-esc="record.partner_id.value"/>
+                                </strong>
+                            </div>
+                            <div class="row mb4">
+                                <div class="col-12">
+                                    <span t-esc="record.product_id.value"/>
+                                </div>
+                            </div>
+                            <div class="row mb4">
+                                <div class="col-6">
+                                    <span t-esc="record.name.value"/>
+                                </div>
+                                <div class="col-3">
+                                    <span t-esc="record.lmk_date.value"/>
+                                </div>
+                                <div class="col-3">
+                                    <span t-attf-class="badge #{ ['draft', 'waiting_approval', 'done'].includes(record.state.raw_value) ? 'bg-200' : 'bg-info' }">
+                                        <t t-esc="record.state.raw_value"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--  -->
+
+    <record id="eran_lembar_masalah_kualitas_view_search" model="ir.ui.view">
+        <field name="name">eran.lembar.masalah.kualitas.view.search</field>
+        <field name="model">eran.lembar.masalah.kualitas</field>
+        <field name="arch" type="xml">
+            <search string="">
+                <group expand="0" string="Group By">
+                    <filter string="Category Group" name="category_group" domain="[]" context="{'group_by':'category_group_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_lembar_masalah_kualitas_action" model="ir.actions.act_window">
+        <field name="name">Lembar Masalah Kualitas</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.lembar.masalah.kualitas</field>
+        <field name="view_mode">tree,kanban</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('eran_lembar_masalah_kualitas_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('eran_lembar_masalah_kualitas_view_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create Lembar Masalah Kualitas
+            </p>
+        </field>
+    </record>
+
+    <!-- Action untuk PICA Customer -->
+    <record id="eran_pica_customer_action" model="ir.actions.act_window">
+        <field name="name">PICA Customer</field>
+        <field name="res_model">eran.pica</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('partner_type', '=', 'customer')]</field> <!-- Sesuaikan value 'customer' -->
+        <field name="context">{'default_partner_type': 'customer'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create PICA Customer</p>
+        </field>
+    </record>
+
+    <!-- Action untuk PICA Vendor -->
+    <record id="eran_pica_vendor_action" model="ir.actions.act_window">
+        <field name="name">PICA Vendor</field>
+        <field name="res_model">eran.pica</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('partner_type', '=', 'vendor')]</field> <!-- Sesuaikan value 'vendor' -->
+        <field name="context">{'default_partner_type': 'vendor'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create PICA Vendor</p>
+        </field>
+    </record>
+
+    <!-- Action untuk disposal -->
+    <record id="eran_disposal_action" model="ir.actions.act_window">
+        <field name="name">Disposal</field>
+        <field name="res_model">stock.scrap</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('scrap_location_id.name', '=', 'DISPOSAL')]</field> 
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create Disposal</p>
+        </field>
+    </record>
+
+    <!-- <record id="eran_disposal_view_tree" model="ir.ui.view">
+        <field name="name">eran.disposal.view.tree</field>
+        <field name="model">stock.scrap</field>
+        <field name="inherit_id" ref="stock.stock_scrap_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="product_category_group_id"/>
+            </xpath>
+        </field>
+    </record> -->
+
+    <!--Quality Point-->
+    <record id="eran_inherit_quality_point_view_form_inherit_mrp" model="ir.ui.view">
+        <field name="name">eran.inherit.quality.point.view.form.inherit.mrp</field>
+        <field name="model">quality.point</field>
+        <field name="inherit_id" ref="mrp_workorder.quality_point_view_form_inherit_mrp"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='is_workorder_step']" position="after">
+                <field name="automatic_pass"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_inherit_quality_point_view_tree" model="ir.ui.view">
+        <field name="name">eran.inherit.quality.point.view.tree</field>
+        <field name="model">quality.point</field>
+        <field name="inherit_id" ref="mrp_workorder.quality_point_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='operation_id']" position="after">
+                <field name="automatic_pass"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="quality_control.quality_check_action_main" model="ir.actions.act_window">
+        <field name="name">Quality Inspection</field>
+    </record>
+
+    <record id="eran_lembar_masalah_kualitas_line_view_tree" model="ir.ui.view">
+        <field name="name">eran.lembar.masalah.kualitas.line.view.tree</field>
+        <field name="model">eran.lembar.masalah.kualitas.line</field>
+        <field name="arch" type="xml">
+            <tree string="LMK Line" create="false" delete="false">
+                <field name="not_good_id" />
+                <field name="lmk_id"/>
+                <field name="quantity_sample" />
+                <field name="quantity_ng" />
+                <field name="lmk_date"/>
+                <field name="delivery_date"/>
+                <field name="product_id"/>
+                <field name="category_group"/>
+                <field name="partner_type"/>
+                <field name="lmk_type"/>
+                <field name="production_date"/>
+                <field name="order_sheet_id"/>
+                <field name="order_qty"/>
+                <field name="partner_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- <record id="eran_lembar_masalah_kualitas_view_pivot" model="ir.ui.view">
+        <field name="name">eran.lembar.masalah.kualitas.view.pivot</field>
+        <field name="model">eran.lembar.masalah.kualitas.line</field>
+        <field name="arch" type="xml">
+            <pivot string="LMK Analysis" sample="1">
+                <field name="lmk_date" type="row"/>
+                <field name="delivery_date" type="col"/>
+            </pivot>
+        </field>
+    </record> -->
+
+    <record id="eran_lembar_masalah_kualitas_line_view_search" model="ir.ui.view">
+        <field name="name">eran.lembar.masalah.kualitas.line.view.search</field>
+        <field name="model">eran.lembar.masalah.kualitas.line</field>
+        <field name="arch" type="xml">
+            <search string="LMK Search">
+                <!-- search -->
+                <field name="lmk_id"/>
+                <field name="product_id"/>
+                <field name="category_group"/>
+                <field name="partner_type"/>
+                <field name="lmk_type"/>
+                <field name="production_date"/>
+                <field name="order_sheet_id"/>
+                <field name="order_qty"/>
+                <field name="partner_id"/>
+                <!-- filter -->
+                <!-- <field name="name" string="Name" filter_domain="[('name', 'ilike', self)]"/> -->
+                <!-- group by -->
+                <filter name="not_good_id" string="Jenis NG" domain="[]" context="{'group_by': 'not_good_id'}" />
+                <filter name="lmk_date" string="Create date" domain="[]" context="{'group_by': 'lmk_date'}" />
+                <filter name="delivery_date" string="Delivery Date" domain="[]" context="{'group_by': 'delivery_date'}" />
+                <filter name="product_id" string="Product" domain="[]" context="{'group_by': 'product_id'}" />
+                <filter name="category_group" string="Category Group" domain="[]" context="{'group_by': 'category_group'}" />
+                <filter name="partner_type" string="Partner Type" domain="[]" context="{'group_by': 'partner_type'}" />
+                <filter name="lmk_type" string="LMK Type" domain="[]" context="{'group_by': 'lmk_type'}" />
+                <filter name="order_sheet_id" string="Order Sheet" domain="[]" context="{'group_by': 'order_sheet_id'}" />
+                <filter name="partner_id" string="Partner" domain="[]" context="{'group_by': 'partner_id'}" />
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_lembar_masalah_kualitas_line_action" model="ir.actions.act_window">
+        <field name="name">LMK Line</field>
+        <field name="res_model">eran.lembar.masalah.kualitas.line</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree,pivot</field>
+        <field name="view_id" ref="eran_lembar_masalah_kualitas_line_view_tree" />
+        <field name="search_view_id" ref="eran_lembar_masalah_kualitas_line_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tidak ada data LMK
+            </p>
+        </field>
+    </record>
+
+    <!-- Quality Claim Rate -->
+    <record id="eran_quality_claim_rate_view_tree" model="ir.ui.view">
+        <field name="name">eran.quality.claim.rate.view.tree</field>
+        <field name="model">eran.quality.claim.rate</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date"/>
+                <field name="target"/>
+                <field name="key_message"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Quality Complaint -->
+    <record id="eran_quality_complaint_view_tree" model="ir.ui.view">
+        <field name="name">eran.quality.complaint.view.tree</field>
+        <field name="model">eran.quality.complaint</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date"/>
+                <field name="target"/>
+                <field name="key_message"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Quality Disposal to Sales -->
+    <record id="eran_quality_disposal_view_tree" model="ir.ui.view">
+        <field name="name">eran.quality.disposal.view.tree</field>
+        <field name="model">eran.quality.disposal</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date"/>
+                <field name="target"/>
+                <field name="key_message"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_claim_rate_action" model="ir.actions.act_window">
+        <field name="name">Claim Rate</field>
+        <field name="res_model">eran.quality.claim.rate</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_quality_claim_rate_view_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create Claim Rate
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_complaint_action" model="ir.actions.act_window">
+        <field name="name">Complaint</field>
+        <field name="res_model">eran.quality.complaint</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_quality_complaint_view_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create Complaint
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_disposal_to_sales_action" model="ir.actions.act_window">
+        <field name="name">Disposal to Sales</field>
+        <field name="res_model">eran.quality.disposal</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_quality_disposal_view_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create Disposal to Sales
+            </p>
+        </field>
+    </record>
+    
+</odoo>

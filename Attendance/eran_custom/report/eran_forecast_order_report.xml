@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_paperformat_forecast_order_report" model="report.paperformat">
+        <field name="name">Order Report Paperformat</field>
+        <field name="default" eval="True" />
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">10</field>
+        <field name="margin_right">10</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">10</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_forecast_order" model="ir.actions.report">
+        <field name="name">Order Report</field>
+        <field name="model">dsn.forecast.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_forecast_order</field>
+        <field name="report_file">eran_custom.eran_template_report_forecast_order</field>
+        <field name="print_report_name">'Order Report - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_dsn_forecast_order"/>
+        <field name="paperformat_id" ref="eran_custom.eran_paperformat_forecast_order_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="eran_template_report_forecast_order">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <style type="text/css">
+                        body{
+                            font-size:10px;
+                        }
+                    </style>
+                    <div class="row">
+                        <div class="col-12 text-center" style="font-size:20px;">
+                            <b>Surat Perintah Kerja</b>
+                            <br/>
+                            <span style="font-size:16px;">(SPK)</span>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:10px;">
+                        <div class="col-6">
+                            <table class="table-borderless" style="width:100%;">
+                                <tr style="border:0;">
+                                    <td style="width:50%; border:0;">
+                                        <span>No SPK</span>
+                                    </td>
+                                    <td style="width:2%; border:0;">
+                                        <span>:</span>
+                                    </td>
+                                    <td style="width:48%; border:0;">
+                                        <span t-esc="o.name"/>
+                                    </td>
+                                </tr>
+                                <tr style="border:0;">
+                                    <td style="border:0;">
+                                        <span>Tanggal</span>
+                                    </td>
+                                    <td style="border:0;">
+                                        <span>:</span>
+                                    </td>
+                                    <td style="border:0;">
+                                        <span t-esc="o.create_date" t-options='{"widget": "date"}'/>
+                                    </td>
+                                </tr>
+                                <tr style="border:0;">
+                                    <td style="border:0;">
+                                        <span>Kepada</span>
+                                    </td>
+                                    <td style="border:0;">
+                                        <span>:</span>
+                                    </td>
+                                    <td style="border:0;">
+                                        <span t-esc="o.department_to.name" t-if="o.department_to"/>
+                                    </td>
+                                </tr>
+                                <tr style="border:0;">
+                                    <td style="border:0;">
+                                        <span>Dari</span>
+                                    </td>
+                                    <td style="border:0;">
+                                        <span>:</span>
+                                    </td>
+                                    <td style="border:0;">
+                                        <span t-esc="o.department_from.name" t-if="o.department_from"/>
+                                    </td>
+                                </tr>
+                                <tr style="border:0;">
+                                    <td style="border:0;">
+                                        <span>Target</span>
+                                    </td>
+                                    <td style="border:0;">
+                                        <span>:</span>
+                                    </td>
+                                    <td style="border:0;">
+                                        <span t-esc="o.deadline"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-6">
+
+                        </div>
+                    </div>
+                    <t t-set="num" t-value="1"/>
+                    <div class="row" style="margin-top:10px;">
+                        <div class="col-12">
+                            <table class="table table-bordered" style="width:100%;border:1px solid #000;">
+                                <tr>
+                                    <td style="border:1px solid; width:5%;">NO</td>
+                                    <td style="border:1px solid; width:30%;">Part Name</td>
+                                    <td style="border:1px solid; width:15%;">Part Number</td>
+                                    <td style="border:1px solid; width:50%;">Remark</td>
+                                </tr>
+                                <tr>
+                                    <td style="border:1px solid;"><span t-esc="num"/></td>
+                                    <td style="border:1px solid;"><span t-if="o.type == 'forecast_order'">Forecast Order </span> <span t-if="o.type == 'fix_order'">Fix Order </span> <span t-esc="o.get_forecast_date()[0]"/>-<span t-esc="o.get_forecast_date()[-1]"/></td>
+                                    <td style="border:1px solid;"></td>
+                                    <td style="border:1px solid;">
+                                        <t t-foreach="zip(o.get_customer_group()[0]['Total'], o.get_forecast_date())" t-as="item">
+                                            <t t-set="total" t-value="item[0]"/>
+                                            <t t-set="forecast_date" t-value="item[1]"/>
+                                            <span t-esc="forecast_date"/> : <span t-esc="total" t-options="{'widget': 'float', 'precision': 0}"/> Pcs
+                                            <br/>
+                                        </t>
+                                    </td>   
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px;">
+                        <div class="col-2">
+                        </div>
+                        <div class="col-10">
+                            <table class="table table-bordered" style="width:100%; float:right; text-align:center; border:1px solid #000;">
+                                <tr>
+                                    <td style="width:20%; border:1px solid;">
+                                        <span>Dibuat</span>
+                                    </td>
+                                    <td style="width:20%; border:1px solid;">
+                                        <span>Diperiksa 1</span>
+                                    </td>
+                                    <td style="width:20%; border:1px solid;">
+                                        <span>Diperiksa 2</span>
+                                    </td>
+                                    <td style="width:20%; border:1px solid;">
+                                        <span>Diketahui</span>
+                                    </td>
+                                    <td style="width:20%; border:1px solid;">
+                                        <span>Diterima</span>
+                                    </td>
+                                </tr>
+                                <tr style="line-height:65px;">
+                                    <td style="border:1px solid;"><![CDATA[&nbsp;]]></td>
+                                    <td style="border:1px solid;"></td>
+                                    <td style="border:1px solid;"></td>
+                                    <td style="border:1px solid;"></td>
+                                    <td style="border:1px solid;"></td>
+                                </tr>
+                                <tr>
+                                    <td style="border:1px solid;"><![CDATA[&nbsp;]]></td>
+                                    <td style="border:1px solid;"></td>
+                                    <td style="border:1px solid;"></td>
+                                    <td style="border:1px solid;"></td>
+                                    <td style="border:1px solid;"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px;">
+                        <div class="col-7">
+                            <table class="table table-bordered" style="width:100%;border:1px solid #000;">
+                                <tr>
+                                    <td rowspan="2" style="border:1px solid;">
+                                        Category Group
+                                    </td>
+                                    <t t-foreach="o.get_forecast_date()" t-as="forecast_date">
+                                        <td style="border:1px solid;">
+                                            <span t-esc="forecast_date"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr t-if="o.get_forecast_date()">
+                                    <td t-foreach="o.get_forecast_date()" t-as="forecast_date" style="border:1px solid;">
+                                        <t t-if="o.type!='fix_order'">
+                                            Forecast (Qty)
+                                        </t>
+                                        <t t-else="">
+                                            Fix order (Qty)
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr t-foreach="o.get_category_sort_group()[0]" t-as="group_qty">
+                                    <td style="border:1px solid;"><span t-esc="group_qty"/></td>
+                                    <td style="text-align:right; border:1px solid;height:20px;" t-foreach="o.get_category_sort_group()[0][group_qty]" t-as="vals">
+                                        <span t-esc="vals" t-options="{'widget': 'float', 'precision': 0}"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-5">
+                            <table class="table table-bordered" style="width:100%; margin-left:5px;border:1px solid #000;">
+                                <tr>
+                                    <t t-foreach="o.get_forecast_date()" t-as="forecast_date">
+                                        <td style="border:1px solid;">
+                                            <span t-esc="forecast_date"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr t-if="o.get_forecast_date()">
+                                    <td t-foreach="o.get_forecast_date()" t-as="forecast_date" style="border:1px solid;">
+                                        <t t-if="o.type!='fix_order'">
+                                            Forecast
+                                        </t>
+                                        <t t-else="">
+                                            Fix order
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr t-foreach="o.get_category_sort_group()[1]" t-as="group_total">
+                                    <td style="text-align:right; border:1px solid;height:20px;" t-foreach="o.get_category_sort_group()[1][group_total]" t-as="vals">
+                                         <span t-field="o.forecast_line_ids.currency_id.symbol"/> <span t-esc="vals"  t-options="{'widget': 'float', 'precision': 0}"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px;">
+                        <div class="col-7">
+                            <table class="table table-bordered" style="width:100%; border:1px solid #000;">
+                                <tr>
+                                    <td rowspan="2" style="border:1px solid;">
+                                        Customer Group
+                                    </td>
+                                    <t t-foreach="o.get_forecast_date()" t-as="forecast_date">
+                                        <td style="border:1px solid;">
+                                            <span t-esc="forecast_date"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr t-if="o.get_forecast_date()">
+                                    <td t-foreach="o.get_forecast_date()" t-as="forecast_date" style="border:1px solid; padding-left:0px; padding-right:0px;">
+                                        <t t-if="o.type!='fix_order'">
+                                            Forecast (Qty)
+                                        </t>
+                                        <t t-else="">
+                                            Fix order (Qty)
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr t-foreach="o.get_customer_group()[0]" t-as="group_qty">
+                                    <td style="border:1px solid; padding-right:0px;"><span t-esc="group_qty[:40]"/></td>
+                                    <td style="text-align:right; border:1px solid;height:20px;" t-foreach="o.get_customer_group()[0][group_qty]" t-as="vals">
+                                        <span t-esc="vals" t-options="{'widget': 'float', 'precision': 0}"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-5">
+                            <table class="table table-bordered" style="width:100%; margin-left:5px; border:1px solid #000; page-break-inside: avoid;">
+                                <tr>
+                                    <t t-foreach="o.get_forecast_date()" t-as="forecast_date">
+                                        <td style="border:1px solid;">
+                                            <span t-esc="forecast_date"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr t-if="o.get_forecast_date()">
+                                    <td t-foreach="o.get_forecast_date()" t-as="forecast_date" style="border:1px solid;">
+                                        <t t-if="o.type!='fix_order'">
+                                            Forecast
+                                        </t>
+                                        <t t-else="">
+                                            Fix order
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr t-foreach="o.get_customer_group()[1]" t-as="group_total">
+                                    <td style="text-align:right;border:1px solid;height:20px;" t-foreach="o.get_customer_group()[1][group_total]" t-as="vals">
+                                         <span t-field="o.forecast_line_ids.currency_id.symbol"/> <span t-esc="vals" t-options="{'widget': 'float', 'precision': 0}"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

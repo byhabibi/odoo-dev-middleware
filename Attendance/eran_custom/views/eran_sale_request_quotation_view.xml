@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Eran Quotation Views -->
+    <record id="eran_sale_rfq_view_search" model="ir.ui.view">
+        <field name="name">eran.sale.rfq.view.search</field>
+        <field name="model">eran.sale.rfq</field>
+        <field name="arch" type="xml">
+            <search string="Search Sales Order">
+                <field name="name" string="Order"/>
+                <field name="partner_id"/>
+                <field name="team_id" string="Sales Team"/>
+                <group expand="0" string="Group By">
+                    <filter string="Salesperson" name="salesperson" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter name="customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Order Date" name="order_month" domain="[]" context="{'group_by': 'date_order'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_sale_rfq_view_tree" model="ir.ui.view">
+        <field name="name">eran.sale.rfq.view.tree</field>
+        <field name="model">eran.sale.rfq</field>
+        <field name="arch" type="xml">
+            <tree string="Quotations">
+                <field name="name" string="Name" readonly="1" decoration-bf="1"/>
+                <field name="date_order" string="Order Date" widget="date" optional="show"/>
+                <field name="commitment_date" optional="hide"/>
+                <field name="partner_id" readonly="1"/>
+                <field name="user_id" optional="show" widget="many2one_avatar_user"/>
+                <field name="team_id" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show" readonly="1"/>
+                <field name="currency_id" invisible="1"/>
+                <!-- <field name="tag_ids" optional="hide" widget="many2many_tags" options="{'color_field': 'color'}"/> -->
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_sale_rfq_view_form" model="ir.ui.view">
+        <field name="name">eran.sale.rfq.view_form</field>
+        <field name="model">eran.sale.rfq</field>
+        <field name="arch" type="xml">
+            <form string="Quotation" class="o_sale_order">
+            <header>
+                <button name="action_confirm" string="Confirm" type="object" class="btn btn-primary" states="draft"/>
+                <button name="action_generate_quotation" string="Generate Quotation" type="object" class="btn btn-primary" states="confirm,in_progress"/>
+                <button name="btn_draft" string="Reset To Draft" type="object" states="confirm"/>
+                <field name="state" widget="statusbar"/>
+            </header>
+            <sheet>
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_quotations"
+                        string="Quaotations"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-pencil-square-o"
+                        attrs="{'invisible': [('count_quotations', '=', 0)]}">
+                        <field name="count_quotations" widget="statinfo" string="Quotations"/>
+                    </button> 
+                    <!-- <button name="action_view_loi"
+                        string="LOI"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-pencil-square-o"
+                        attrs="{'invisible': [('count_loi', '=', 0)]}">
+                        <field name="count_loi" widget="statinfo" string="LOI"/>
+                    </button>  -->
+                </div>
+                <div class="oe_title">
+                    <h1>
+                        <field name="name" readonly="1"/>
+                    </h1>
+                </div>
+                <group name="quotation_header">
+                    <group name="partner_details">
+                        <field name="partner_id" widget="res_partner_many2one" context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}" options='{"always_reload": True}' attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                        <field name="partner_shipping_id" groups="account.group_delivery_invoice_address" context="{'default_type':'delivery'}" options='{"always_reload": True}' attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                    </group>
+                    <group name="order_details">
+                        <field name="date_order" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                        <field name="expiration_date" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                        <label for="pricelist_id" groups="product.group_product_pricelist"/>
+                        <div groups="product.group_product_pricelist" class="o_row">
+                            <field name="pricelist_id" options="{'no_open':True,'no_create': True}" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                        </div>
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="pricelist_id" invisible="1"/>
+                        <field name="payment_term_id" options="{'no_open':True,'no_create': True}" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                        <field name="quotations_ids" widget="many2many_tags" invisible="1"/>
+                    </group>
+                </group>
+                <notebook>
+                    <page string="RFQ Lines" name="quotation_lines">
+                        <field
+                            name="order_line"
+                            widget="section_and_note_one2many"
+                            mode="tree,kanban"  attrs="{'readonly': [('state', '!=', 'draft')]}">
+                        >
+                            <tree
+                                string="Quotation Order Lines"
+                                editable="bottom"
+                            >
+                                <control>
+                                    <create name="add_product_control" string="Add a product"/>
+                                    <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                                    <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                                </control>
+                                <field name="display_type" invisible="1"/>
+                                <field name="product_uom_category_id" invisible="1"/>
+                                <field name="projection_sales" />
+                                <field
+                                    name="product_id"
+                                    force_save="1"
+                                    context="{
+                                        'partner_id': parent.partner_id,
+                                        'quantity': product_uom_qty,
+                                        'pricelist': parent.pricelist_id,
+                                        'uom':product_uom,
+                                        'company_id': parent.company_id,
+                                        'default_description_sale': name
+                                    }"
+                                    options="{
+                                        'no_open': True,
+                                    }"
+                                    domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+                                    widget="sol_product_many2one"
+                                />
+                                <field name="product_code" optional="show"/>
+                                <field name="product_name" optional="show"/>
+                                <field name="no_part" optional="show"/>
+                                <field name="product_template_id"
+                                    string="Product"
+                                    invisible="1"
+                                    context="{
+                                        'partner_id': parent.partner_id,
+                                        'quantity': product_uom_qty,
+                                        'pricelist': parent.pricelist_id,
+                                        'uom':product_uom,
+                                        'company_id': parent.company_id,
+                                        'default_description_sale': name
+                                    }"
+                                    options="{
+                                        'no_open': True,
+                                    }"
+                                    domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+                                    widget="sol_product_many2one"/>
+                                <field name="name" widget="section_and_note_text" optional="show"/>
+                                <field name="qty_quotation" optional="hide"/>
+                                <field
+                                    name="product_uom_qty"
+                                    context="{
+                                        'partner_id': parent.partner_id,
+                                        'quantity': product_uom_qty,
+                                        'pricelist': parent.pricelist_id,
+                                        'uom': product_uom,
+                                        'company_id': parent.company_id
+                                    }"
+                                />
+                                <field name="product_uom" invisible="1" groups="!uom.group_uom"/>
+                                <field
+                                    name="product_uom"
+                                    force_save="1"
+                                    string="UoM"
+                                    context="{'company_id': parent.company_id}"
+                                    options='{"no_open": True}'
+                                    optional="show"
+                                    invisible="1"
+                                />
+                                <field name="quotation_line_ids" widget="many2many_tags" optional="hide"/>
+                                <field name="price_unit"/>
+                                <!-- <field name="req_new_price" widget="monetary"/> -->
+                                <field
+                                    name="tax_id"
+                                    widget="many2many_tags"
+                                    options="{'no_create': True}"
+                                    domain="[('type_tax_use','=','sale'),('company_id','=',parent.company_id)]"
+                                    context="{'active_test': True}"
+                                    optional="show"
+                                />
+                                <field name="price_subtotal" widget="monetary" groups="account.group_show_line_subtotals_tax_excluded"/>
+                                <field name="currency_id" invisible="1"/>
+                                <field name="company_id" invisible="1"/>
+                            </tree>
+                        </field>
+                        <group name="note_group" col="6" class="mt-2 mt-md-0">
+                            <group colspan="4">
+                                <field  colspan="2" name="note" nolabel="1" placeholder="Terms and conditions..." attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                            </group>
+                            <group class="oe_subtotal_footer oe_right" colspan="2" name="quotation_total">
+                                <field name="tax_totals" widget="account-tax-totals-field" nolabel="1" colspan="2" readonly="1"/>
+                            </group>
+                            <div class="clearfix"/>
+                        </group>
+                    </page>
+                    <page string="Other Info" name="other_information">
+                        <group>
+                            <group name="sales_person" string="Sales">
+                                <field name="user_id" widget="many2one_avatar_user" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                <field name="team_id" options="{'no_create': True}" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                <label for="require_signature" string="Online confirmation"/>
+                                <div>
+                                    <field name="require_signature" class="oe_inline" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                    <span>Signature</span>
+                                </div>
+                                <field name="client_order_ref" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                            </group>
+                            <group name="sale_info" string="Invoicing and Payments">
+                                <label for="fiscal_position_id"/>
+                                <div class="o_row">
+                                    <field name="fiscal_position_id" options="{'no_create': True}" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                </div>
+                            </group>
+                        </group>
+                        <group>
+                            <group name="sale_shipping" string="Delivery">
+                                <label for="commitment_date" string="Delivery Date"/>
+                                <div name="commitment_date_div" class="o_row">
+                                    <field name="commitment_date" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                </div>
+                            </group>
+                            <group string="Tracking" name="sale_reporting">
+                                <group name="technical" colspan="2" class="mb-0">
+                                    <field name="origin" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                </group>
+                                <group name="utm_link" colspan="2" class="mt-0">
+                                    <field name="campaign_id" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                    <field name="medium_id" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                    <field name="source_id" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                </group>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+            </sheet>
+            <div class="oe_chatter">
+                <field name="message_follower_ids"/>
+                <field name="activity_ids"/>
+                <field name="message_ids"/>
+            </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- KANBAN QUOTATION -->
+    <record id="eran_quotation_kanban_view" model="ir.ui.view">
+        <field name="name">eran.sale.rfq.kanban</field>
+        <field name="model">eran.sale.rfq</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="partner_id"/>
+                <field name="name"/>
+                <field name="date_order"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="row mb4">
+                                <strong class="col-6">
+                                    <span t-esc="record.partner_id.value"/>
+                                </strong>
+                            </div>
+                            <div class="row mb4">
+                                <div class="col-6">
+                                    <span t-esc="record.name.value"/>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span t-esc="record.date_order.value"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--  -->
+
+    <record id="eran_sale_rfq_action" model="ir.actions.act_window">
+        <field name="name">Sale RFQ</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.sale.rfq</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_id" ref="eran_sale_rfq_view_tree"/>
+        <field name="search_view_id" ref="eran_sale_rfq_view_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new request for quotation
+            </p>
+        </field>
+    </record>
+
+    <!-- Quotation Order Line -->
+
+    <record id="sale_rfq_order_line_report_tree_view" model="ir.ui.view">
+        <field name="name">eran.sale.rfq.order.line.tree.view</field>
+        <field name="model">eran.sale.rfq.line</field>
+        <field name="arch" type="xml">
+            <tree string="Sale Request for Quotation Line">
+                <field name="create_date"/>
+                <field name="rfq_date"/>
+                <field name="rfq_expiration_date"/>
+                <field name="partner_id"/>
+                <field name="projection_sales" />
+                <field name="name"/>
+                <field name="price_unit"/>
+                <!-- <field name="req_new_price"/> -->
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_rfq_order_line_report" model="ir.actions.act_window">
+        <field name="name">Sale RFQ Order Line</field>
+        <field name="res_model">eran.sale.rfq.line</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_custom.sale_rfq_order_line_report_tree_view"/>
+        <field name="context">{'create':False, 'delete':False}</field>
+        <field name="domain">[]</field>
+    </record>
+</odoo>

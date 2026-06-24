@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_quotation_loi_wizard" model="ir.ui.view">
+        <field name="name">eran.quotation.loi.wizard</field>
+        <field name="model">eran.quotation.loi.wiz</field>
+        <field name="arch" type="xml">
+            <form string="Letter Of Interest">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="partner_id" required="1"/>
+                            <field name="pricelist_id" required="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Price Rules" name="wiz_line">
+                            <field name="quotation_loi_line">
+                                <tree editable="bottom">
+                                    <field name="product_id" required="1"/>
+                                    <field name="min_qty"/>
+                                    <field name="price"/>
+                                    <field name="start_date" required="1"/>
+                                    <field name="end_date" required="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <footer>
+                    <button string="Confirm" name="btn_confirm" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn btn-secondary" special="cancel" data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="eran_quotation_loi_wizard_action" model="ir.actions.act_window">
+        <field name="name">eran.quotation.loi.wizard.action</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.quotation.loi.wiz</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="eran_quotation_loi_wizard"/>
+        <field name="target">new</field>
+    </record>
+
+    
+</odoo>

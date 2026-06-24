@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.rule" id="eran_purchase_request_department_domain">
+        <field name="name">Purchase Request Department </field>
+        <field name="model_id" ref="model_purchase_request"/>
+        <field name="domain_force">[('department_id','=',user.employee_id.department_id.id)]</field>
+        <field name="groups" eval="[(4, ref('purchase_request.group_purchase_request_user'))]"/>
+    </record>
+
+    <record id="purchase_request.purchase_request_followers_rule" model="ir.rule">
+        <field name="name">Follow Purchase Request</field>
+        <field name="model_id" ref="model_purchase_request" />
+        <field name="groups" eval="[(6,0, [ref('purchase_request.group_purchase_request_user')])]" />
+        <field name="active" eval="False"/>
+        <field name="perm_read" eval="True" />
+        <field name="perm_write" eval="False" />
+        <field name="perm_create" eval="False" />
+        <field name="perm_unlink" eval="False" />
+        <field name="domain_force">
+            ['|',('requested_by','=',user.id),
+                                        ('message_partner_ids', 'in',
+            [user.partner_id.id])]
+        </field>
+    </record>
+
+    <record id="purchase_request.purchase_request_rule" model="ir.rule">
+        <field name="name">Purchase Request User</field>
+        <field name="model_id" ref="model_purchase_request" />
+        <field name="groups" eval="[(6,0, [ref('purchase_request.group_purchase_request_user')])]" />
+        <field name="active" eval="False"/>
+        <field name="perm_read" eval="True" />
+        <field name="perm_write" eval="True" />
+        <field name="perm_create" eval="True" />
+        <field name="perm_unlink" eval="True" />
+        <field name="domain_force">[('requested_by','=',user.id)]</field>
+    </record>
+
+    <record id="purchase_request.purchase_request_line_followers_rule" model="ir.rule">
+        <field name="name">Follow Purchase Request Line</field>
+        <field name="model_id" ref="model_purchase_request_line" />
+        <field name="groups" eval="[(6,0, [ref('purchase_request.group_purchase_request_user')])]" />
+        <field name="active" eval="False"/>
+        <field name="perm_read" eval="True" />
+        <field name="perm_write" eval="False" />
+        <field name="perm_create" eval="False" />
+        <field name="perm_unlink" eval="False" />
+        <field name="domain_force">
+            ['|',('request_id.requested_by','=',user.id),
+                                        ('request_id.message_partner_ids', 'in',
+            [user.partner_id.id])]
+        </field>
+    </record>
+
+    <record id="purchase_request.purchase_request_line_rule" model="ir.rule">
+        <field name="name">Purchase Request Line User</field>
+        <field name="model_id" ref="model_purchase_request_line" />
+        <field name="groups" eval="[(6,0, [ref('purchase_request.group_purchase_request_user')])]" />
+        <field name="active" eval="False"/>
+        <field name="perm_read" eval="True" />
+        <field name="perm_write" eval="True" />
+        <field name="perm_create" eval="True" />
+        <field name="perm_unlink" eval="True" />
+        <field name="domain_force">[('request_id.requested_by','=',user.id)]</field>
+    </record>
+
+
+</odoo>

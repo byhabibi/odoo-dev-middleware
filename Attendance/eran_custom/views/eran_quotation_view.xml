@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Eran Quotation Views -->
+    <record id="eran_quotation_view_search" model="ir.ui.view">
+        <field name="name">eran.quotation.view.search</field>
+        <field name="model">eran.quotation</field>
+        <field name="arch" type="xml">
+            <search string="Search Sales Order">
+                <field name="name" string="Order"/>
+                <field name="partner_id"/>
+                <field name="team_id" string="Sales Team"/>
+                <filter name="assigned_to_ids" string="Assigned to me" domain="[('assigned_to_ids','in',[uid])]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Salesperson" name="salesperson" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter name="customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Order Date" name="order_month" domain="[]" context="{'group_by': 'date_order'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_quotation_view_tree" model="ir.ui.view">
+        <field name="name">eran.quotation.view.tree</field>
+        <field name="model">eran.quotation</field>
+        <field name="arch" type="xml">
+            <tree string="Quotations">
+                <field name="name" string="Name" readonly="1" decoration-bf="1"/>
+                <field name="date_order" string="Order Date" widget="date" optional="show"/>
+                <field name="commitment_date" optional="hide"/>
+                <field name="partner_id" readonly="1"/>
+                <field name="user_id" optional="show" widget="many2one_avatar_user"/>
+                <field name="team_id" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show" readonly="1"/>
+                <!-- <field name="amount_untaxed" sum="Total Tax Excluded" widget="monetary" optional="hide"/>
+                <field name="amount_tax" sum="Tax Total" widget="monetary" optional="hide"/>
+                <field name="amount_total" sum="Total Tax Included" widget="monetary" decoration-bf="1" optional="show"/> -->
+                <field name="currency_id" invisible="1"/>
+                <field name="tag_ids" optional="hide" widget="many2many_tags" options="{'color_field': 'color'}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_quotation_view_form" model="ir.ui.view">
+        <field name="name">eran.quotation.view_form</field>
+        <field name="model">eran.quotation</field>
+        <field name="arch" type="xml">
+            <form string="Quotation" class="o_sale_order">
+            <header>
+                <button name="btn_draft" string="Reset To Draft" type="object" states="closed"/>
+                <button name="btn_create_loi" string="Create LOI" type="object" attrs="{'invisible': ['|', '|', ('id', '=', False), ('is_loi_created', '!=', False), ('state', '!=', 'done')]}"/>
+                <button name="btn_create_revision" string="Create Revision" type="object" confirm="Are you sure want to create revision?" attrs="{'invisible': ['|', '|', '|',('parent_id', '!=', False), ('id', '=', False), ('state', '=', 'draft'), ('count_loi', '>', 0)]}"/>
+                <button name="btn_waiting_approval" string="Request Approval" type="object" class="btn btn-primary" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                <button name="btn_approved" string="Approve" type="object" class="btn btn-primary" attrs="{'invisible': ['|', ('user_in_assigned_to', '=', False),('state', '!=', 'waiting_approval')]}"/>
+                <button name="btn_set_to_draft" string="Set To Draft" type="object" class="btn btn-primary" attrs="{'invisible': [('state', 'in', ('draft','done','closed'))]}"/>
+                <button name="action_quotation_send" string="Send by Email" type="object"/>
+                <field name="state" widget="statusbar"/>
+            </header>
+            <sheet>
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_history"
+                        string="History"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-pencil-square-o"
+                        attrs="{'invisible': [('child_line_count', '=', 0)]}">
+                        <field name="child_line_count" widget="statinfo" string="History"/>
+                    </button> 
+                    <button name="action_view_loi"
+                        string="LOI"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-pencil-square-o"
+                        attrs="{'invisible': [('count_loi', '=', 0)]}">
+                        <field name="count_loi" widget="statinfo" string="LOI"/>
+                    </button> 
+                </div>
+                <div class="oe_title">
+                    <h1>
+                        <field name="name" readonly="1"/>
+                    </h1>
+                </div>
+                <group name="quotation_header">
+                    <group name="partner_details">
+                        <field name="partner_id" widget="res_partner_many2one" context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}" options='{"always_reload": True}' attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                        <field name="partner_shipping_id" groups="account.group_delivery_invoice_address" context="{'default_type':'delivery'}" options='{"always_reload": True}' attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                    </group>
+                    <group name="order_details">
+                        <field name="date_order" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                        <field name="expiration_date" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                        <label for="pricelist_id" groups="product.group_product_pricelist"/>
+                        <div groups="product.group_product_pricelist" class="o_row">
+                            <field name="pricelist_id" options="{'no_open':True,'no_create': True}" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                        </div>
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="pricelist_id" invisible="1"/>
+                        <field name="payment_term_id" options="{'no_open':True,'no_create': True}" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                        <field name="parent_id" readonly="1"/>
+                        <field name="sale_rfq_id" invisible="1"/>
+                        <field name="id" invisible="1"/>
+                        <field name="child_line" invisible="1"/>
+                        <field name="child_line_count" invisible="1"/>
+                        <field name="is_loi_created" invisible="1"/>
+                        <field name="count_loi" invisible="1"/>
+                        <field name="loi_ids" invisible="1"/>
+
+                        <field name="assigned_to_ids" widget="many2many_tags" invisible="1"/>
+                        <field name="user_in_assigned_to" invisible="1"/>
+                    </group>
+                </group>
+                <notebook>
+                    <page string="Quotation Lines" name="quotation_lines">
+                        <field
+                            name="quotation_line"
+                            widget="section_and_note_one2many"
+                            mode="tree,kanban"  attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"
+                        >
+                            <tree
+                                string="Quotation Order Lines"
+                                editable="bottom"
+                            >
+                                <control>
+                                    <create name="add_product_control" string="Add a product"/>
+                                    <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                                    <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                                </control>
+                                <field name="display_type" invisible="1"/>
+                                <field name="product_uom_category_id" invisible="1"/>
+                                <field
+                                    name="product_id"
+                                    force_save="1"
+                                    context="{
+                                        'partner_id': parent.partner_id,
+                                        'quantity': product_uom_qty,
+                                        'pricelist': parent.pricelist_id,
+                                        'uom':product_uom,
+                                        'company_id': parent.company_id,
+                                        'default_description_sale': name
+                                    }"
+                                    options="{
+                                        'no_open': True,
+                                    }"
+                                    domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+                                    widget="sol_product_many2one"
+                                />
+                                <field name="product_code" optional="show"/>
+                                <field name="product_name" optional="show"/>
+                                <field name="no_part" optional="show"/>
+                                <field name="product_template_id"
+                                    string="Product"
+                                    invisible="1"
+                                    context="{
+                                        'partner_id': parent.partner_id,
+                                        'quantity': product_uom_qty,
+                                        'pricelist': parent.pricelist_id,
+                                        'uom':product_uom,
+                                        'company_id': parent.company_id,
+                                        'default_description_sale': name
+                                    }"
+                                    options="{
+                                        'no_open': True,
+                                    }"
+                                    domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+                                    widget="sol_product_many2one"/>
+                                <field name="name" widget="section_and_note_text" optional="show"/>
+                                <field name="sale_rfq_line_id" optional="hide"/>
+                                <field
+                                    name="product_uom_qty"
+                                    context="{
+                                        'partner_id': parent.partner_id,
+                                        'quantity': product_uom_qty,
+                                        'pricelist': parent.pricelist_id,
+                                        'uom': product_uom,
+                                        'company_id': parent.company_id
+                                    }"
+                                />
+                                <field name="product_uom" invisible="1" groups="!uom.group_uom"/>
+                                <field
+                                    name="product_uom"
+                                    force_save="1"
+                                    string="UoM"
+                                    context="{'company_id': parent.company_id}"
+                                    options='{"no_open": True}'
+                                    optional="show"
+                                    invisible="1"
+                                />
+                                <field name="bom_cost" widget="monetary"/>
+                                <field name="price_unit"/>
+                                <field name="req_new_price" widget="monetary"/>
+                                <field
+                                    name="tax_id"
+                                    widget="many2many_tags"
+                                    options="{'no_create': True}"
+                                    domain="[('type_tax_use','=','sale'),('company_id','=',parent.company_id)]"
+                                    context="{'active_test': True}"
+                                    optional="show"
+                                />
+                                <field name="price_subtotal" widget="monetary" groups="account.group_show_line_subtotals_tax_excluded"/>
+                                <field name="currency_id" invisible="1"/>
+                                <field name="company_id" invisible="1"/>
+                            </tree>
+                        </field>
+                        <group name="note_group" col="6" class="mt-2 mt-md-0">
+                            <group colspan="4">
+                                <field  colspan="2" name="note" nolabel="1" placeholder="Terms and conditions..." attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                            </group>
+                            <group class="oe_subtotal_footer oe_right" colspan="2" name="quotation_total">
+                                <field name="tax_totals" widget="account-tax-totals-field" nolabel="1" colspan="2" readonly="1"/>
+                            </group>
+                            <div class="clearfix"/>
+                        </group>
+                    </page>
+                    <page string="Other Info" name="other_information">
+                        <group>
+                            <group name="sales_person" string="Sales">
+                                <field name="user_id" widget="many2one_avatar_user" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                <field name="team_id" options="{'no_create': True}" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                <label for="require_signature" string="Online confirmation"/>
+                                <div>
+                                    <field name="require_signature" class="oe_inline" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                    <span>Signature</span>
+                                </div>
+                                <field name="client_order_ref" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                            </group>
+                            <group name="sale_info" string="Invoicing and Payments">
+                                <label for="fiscal_position_id"/>
+                                <div class="o_row">
+                                    <field name="fiscal_position_id" options="{'no_create': True}" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                </div>
+                            </group>
+                        </group>
+                        <group>
+                            <group name="sale_shipping" string="Delivery">
+                                <label for="commitment_date" string="Delivery Date"/>
+                                <div name="commitment_date_div" class="o_row">
+                                    <field name="commitment_date" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                </div>
+                            </group>
+                            <group string="Tracking" name="sale_reporting">
+                                <group name="technical" colspan="2" class="mb-0">
+                                    <field name="origin" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                </group>
+                                <group name="utm_link" colspan="2" class="mt-0">
+                                    <field name="campaign_id" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                    <field name="medium_id" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                    <field name="source_id" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                                </group>
+                            </group>
+                        </group>
+                        <group>
+                            <group name="approval" string="Approval">
+                                <field name="approve_uid"/>
+                                <field name="approve_date"/>
+                            </group>
+                            
+                        </group>
+                    </page>
+                    <page name="approver" string="Approver">
+                        <group>
+                            <group>
+                                <field name="approval_quotation_id"/>
+                                <field name="approval_rule"/>
+                                <field name="approval_type"/>
+                            </group>
+                        </group>
+                        <field name="approval_line_ids" mode="tree" readonly="1">
+                            <tree string="Approval Line" name="approval_line" editable="bottom">
+                                <field name="user_id"/>
+                                <field name="is_approved"/>
+                                <field name="date_approved"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Customer Signature" name="customer_signature" attrs="{'invisible': [('require_signature', '=', False), ('signed_by', '=', False), ('signature', '=', False), ('signed_on', '=', False)]}">
+                        <group>
+                            <field name="signed_by" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                            <field name="signed_on" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                            <field name="signature" widget="image" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}"/>
+                        </group>
+                    </page>
+                    <page string="Breakdown COGS" name="breakdown_cogs">
+                        <group invisible="1">
+                            <field name="breakdown_cogs_file" filename="breakdown_cogs_filename" widget="download_link" options="{'filename': 'breakdown_cogs_filename'}"/>
+                            <field name="breakdown_cogs_filename" invisible="1"/>
+                        </group>
+                        <field name="breakdown_cogs_file_line" mode="tree" attrs="{'readonly': [('state', 'in', ('done', 'closed'))]}">
+                            <tree string="Breakdown COGS Lines" editable="bottom">
+                                <field name="name" invisible="1"/>
+                                <field name="attachment" filename="name" widget="download_link" options="{'filename': 'name'}"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </sheet>
+            <div class="oe_chatter">
+                <field name="message_follower_ids"/>
+                <field name="activity_ids"/>
+                <field name="message_ids"/>
+            </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- KANBAN QUOTATION -->
+    <record id="eran_quotation_kanban_view" model="ir.ui.view">
+        <field name="name">eran.quotation.kanban</field>
+        <field name="model">eran.quotation</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="partner_id"/>
+                <field name="name"/>
+                <field name="date_order"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="row mb4">
+                                <strong class="col-6">
+                                    <span t-esc="record.partner_id.value"/>
+                                </strong>
+                            </div>
+                            <div class="row mb4">
+                                <div class="col-6">
+                                    <span t-esc="record.name.value"/>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span t-esc="record.date_order.value"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--  -->
+
+    <record id="eran_quotation_action" model="ir.actions.act_window">
+        <field name="name">Quotations</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.quotation</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_id" ref="eran_quotation_view_tree"/>
+        <field name="search_view_id" ref="eran_quotation_view_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new quotation
+            </p>
+        </field>
+    </record>
+
+    <!-- Eran LOI Views -->
+    <record id="eran_loi_view_search" model="ir.ui.view">
+        <field name="name">eran.loi.view.search</field>
+        <field name="model">eran.quotation.loi</field>
+        <field name="arch" type="xml">
+            <search string="Search LOI">
+                <field name="name" string="Refrence"/>
+                <field name="partner_id"/>
+                <field name="pricelist_id"/>
+                <filter name="assigned_to_ids" string="Assigned to me" domain="[('assigned_to_ids','in',[uid])]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Pricelist" name="pricelist" domain="[]" context="{'group_by': 'pricelist_id'}"/>
+                    <filter name="customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_quotation_loi_tree" model="ir.ui.view">
+        <field name="name">eran.quotation.loi.tree</field>
+        <field name="model">eran.quotation.loi</field>
+        <field name="arch" type="xml">
+            <tree string="LOI">
+                <field name="partner_id"/>
+                <field name="pricelist_id"/>
+                <field name="quotation_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_quotation_loi_form" model="ir.ui.view">
+        <field name="name">eran.quotation.loi.form</field>
+        <field name="model">eran.quotation.loi</field>
+        <field name="arch" type="xml">
+            <form string="Letter Of Interest">
+                <header>
+                    <button name="btn_waiting_approval" string="Request Approval" type="object" class="btn btn-primary" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                    <button name="btn_approved" string="Approve" type="object" class="btn btn-primary" attrs="{'invisible': ['|', ('user_in_assigned_to', '=', False),('state', '!=', 'waiting_approval')]}"/>
+                    <button name="btn_set_to_draft" string="Set To Draft" type="object" class="btn btn-primary" attrs="{'invisible': [('state', '=', 'draft')]}"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group name="loi_header">
+                        <group>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="pricelist_id" readonly="1"/>
+                            <field name="quotation_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Pirce Rules" name="loi_line">
+                            <field name="quotation_loi_line" mode="tree" readonly="1">
+                                <tree string="LOI Lines" editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="min_qty"/>
+                                    <field name="price"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="approver" string="Approver">
+                            <group>
+                                <group>
+                                    <field name="approval_loi_id"/>
+                                    <field name="approval_rule"/>
+                                    <field name="approval_type"/>
+                                    <field name="assigned_to_ids" widget="many2many_tags" invisible="1"/>
+                                    <field name="user_in_assigned_to" invisible="1"/>
+                                </group>
+                            </group>
+                            <field name="approval_line_ids" mode="tree" readonly="1">
+                                <tree string="Approval Line" name="approval_line" editable="bottom">
+                                    <field name="user_id"/>
+                                    <field name="is_approved"/>
+                                    <field name="date_approved"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- KANBAN LOI -->
+    <record id="eran_quotation_loi_kanban_view" model="ir.ui.view">
+        <field name="name">eran.quotation.loi.kanban</field>
+        <field name="model">eran.quotation.loi</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="partner_id"/>
+                <field name="quotation_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="row mb4">
+                                <strong class="col-6">
+                                    <span t-esc="record.partner_id.value"/>
+                                </strong>
+                            </div>
+                            <div class="row mb4">
+                                <div class="col-12">
+                                    <span t-esc="record.quotation_id.value"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--  -->
+
+    <record id="eran_sale_loi_action" model="ir.actions.act_window">
+        <field name="name">LOI</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eran.quotation.loi</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_id" ref="eran_quotation_loi_tree"/>
+        <field name="search_view_id" ref="eran_loi_view_search"/>
+        <field name="context">{'create':False, 'delete':False}</field>
+    </record>
+
+    <record id="eran_quotation_loi_line_view_tree" model="ir.ui.view">
+        <field name="name">eran.quotation.loi.line.view.tree</field>
+        <field name="model">eran.quotation.loi.line</field>
+        <field name="arch" type="xml">
+            <tree string="LOI Line" create="false" edit="false" delete="false">
+                <field name="quotation_loi_id"/>
+                <field name="product_id"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="min_qty"/>
+                <field name="price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_quotation_loi_line_report" model="ir.actions.act_window">
+        <field name="name">LOI Line</field>
+        <field name="res_model">eran.quotation.loi.line</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_custom.eran_quotation_loi_line_view_tree"/>
+        <field name="context">{'create':False, 'delete':False}</field>
+        <field name="domain">[]</field>
+    </record>
+
+    <!-- Quotation Order Line -->
+    <record id="quotation_order_line_report_tree_view" model="ir.ui.view">
+        <field name="name">eran.quotation.order.line.tree.view</field>
+        <field name="model">eran.quotation.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Order Line">
+                <field name="create_date"/>
+                <field name="quotation_date"/>
+                <field name="quotation_expiration_date"/>
+                <field name="partner_id"/>
+                <field name="name"/>
+                <field name="bom_cost"/>
+                <field name="price_unit"/>
+                <field name="req_new_price"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_quotation_order_line_report" model="ir.actions.act_window">
+        <field name="name">Quotation Order Line</field>
+        <field name="res_model">eran.quotation.line</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_custom.quotation_order_line_report_tree_view"/>
+        <field name="context">{'create':False, 'delete':False}</field>
+        <field name="domain">[]</field>
+    </record>
+</odoo>

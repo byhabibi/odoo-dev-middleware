@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="work_center_group_tree_view" model="ir.ui.view">
+        <field name="name">work.center.group.tree</field>
+        <field name="model">eran.work.center.group</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_mrp_workcenter_group_action" model="ir.actions.act_window">
+        <field name="name">Work Center Group</field>
+        <field name="res_model">eran.work.center.group</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="work_center_group_tree_view"/>
+    </record>
+
+    <menuitem id="menu_workcenter_group"
+        action="eran_mrp_workcenter_group_action"
+        groups="base.group_user"
+        parent="mrp.menu_mrp_configuration"
+        sequence="3"/>
+</odoo>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_tag_sto_view_tree" model="ir.ui.view">
+        <field name="name">eran.tag.sto.view.tree</field>
+        <field name="model">eran.tag.sto</field>
+        <field name="arch" type="xml">
+            <tree>
+                <header>
+                    <button string="Confirm" name="btn_confirm" type="object" class="oe_highlight"/>
+                </header>
+                <field name="name"/>
+                <field name="location_id"/>
+                <field name="internal_references" />
+                <field name="product_name" />
+                <field name="count_date"/>
+                <field name="product_uom_id" />
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_tag_sto_view_form" model="ir.ui.view">
+        <field name="name">eran.tag.sto.view.form</field>
+        <field name="model">eran.tag.sto</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button string="Confirm" name="btn_confirm" type="object" class="oe_highlight" attrs="{'invisible':[('state','!=','draft')]}"/>
+                    <!-- <button string="Validate" name="btn_validate" type="object" class="oe_highlight" attrs="{'invisible':[('state','!=','confirmed')]}"/> -->
+                    <button string="Print Tag" name="btn_print" type="object" class="oe_highlight"/>
+                    <button string="Reset to Draft" name="btn_reset" type="object" attrs="{'invisible':[('state','=','draft')]}"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1 class="d-flex">
+                            <field name="name" readonly="1" force_save="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="location_id" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="available_product_ids" invisible="1" />
+                            <!-- <field name="product_category_id" attrs="{'readonly':[('state','!=','draft')]}"/> -->
+                            <field name="count_date" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="note" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="company_id" invisible="1"/>
+                        </group>
+                        <!-- <group>
+                            <field name=""/>
+                        </group> -->
+                    </group>
+                    <notebook>
+                        <page name="page_product" string="Product">
+                            <field name="product_line_ids" mode="tree" attrs="{'readonly':[('state','!=','draft')]}">
+                                <tree editable="bottom">
+                                    <field name="product_id" required="1" options="{'no_create_edit': True, 'no_quick_create':True, 'no_create': True}"/>
+                                    <field name="available_product_ids" widget="many2many_tags" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="eran_tag_sto_view_search" model="ir.ui.view">
+        <field name="name">eran_tag_sto_view_search</field>
+        <field name="model">eran.tag.sto</field>
+        <field name="arch" type="xml">
+            <search string="search sto">
+                <field name="name"/>
+                <field name="product_name" />
+                <field name="location_id" />
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_tag_sto_action" model="ir.actions.act_window">
+        <field name="name">Tag STO</field>
+        <field name="res_model">eran.tag.sto</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="eran_tag_sto_view_search"/>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_purchase_order_advance_payment_view_form_inherit" model="ir.ui.view">
+        <field name="name">eran.purchase.order.advance.payment.view.form.inherit</field>
+        <field name="model">purchase.order.advance.payment</field>
+        <field name="inherit_id" ref="purchase_down_payment.purchase_order_advance_payment_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="deposit_account_id" attrs="{'invisible': [('advance_payment_method', '!=', 'percentage')]}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

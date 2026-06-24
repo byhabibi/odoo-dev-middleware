@@ -1,0 +1,573 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_paperformat_report_purchase_order" model="report.paperformat">
+        <field name="name">Purchase Order Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="eran_action_report_purchase_order" model="ir.actions.report">
+        <field name="name">Purchase Order</field>
+        <field name="model">purchase.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_purchase_order</field>
+        <field name="report_file">eran_custom.eran_template_report_purchase_order</field>
+        <field name="print_report_name">'Purchase Order - %s' % object.name</field>
+        <field name="binding_model_id" ref="purchase.model_purchase_order"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_purchase_order"/>
+    </record>
+
+    <record id="eran_action_report_purchase_order_konversi" model="ir.actions.report">
+        <field name="name">Purchase Order Konversi</field>
+        <field name="model">purchase.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_purchase_order_konversi</field>
+        <field name="report_file">eran_custom.eran_template_report_purchase_order_konversi</field>
+        <field name="print_report_name">'Purchase Order Konversi- %s' % object.name</field>
+        <field name="binding_model_id" ref="purchase.model_purchase_order"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_purchase_order"/>
+    </record>
+
+    <record id="purchase.action_report_purchase_order" model="ir.actions.report">
+        <field name="binding_model_id" eval="False"/>
+    </record>
+
+    <template id="eran_template_report_purchase_order">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <style type="text/css">
+                        *,
+                        p,
+                        span,
+                        table,
+                        table th,
+                        table td{
+                            font-size:14px;
+                        }
+                        .fs-12,
+                        .fs-12 *,
+                        .fs-12 p,
+                        .fs-12 span,
+                        .fs-12 table th,
+                        .fs-12 table td
+                        {
+                            font-size:12px !important;
+                        }
+                        table,
+                        table th,
+                        table td{
+                            border : 1px solid black;
+                        }
+                        table th,
+                        table td{
+                            padding: 2px 5px;
+                        }
+                        table.borderless,
+                        table.borderless tr,
+                        table.borderless th,
+                        table.borderless td{
+                            border : transparent;
+                        }
+                    </style>
+                    <div class="row mb-3">
+                        <div style="position:relative;width:55%;border:1px solid black;">
+                            <center><b><u><span style="font-size:20px;">PURCHASE ORDER</span></u></b></center>
+                            <center><b><span style="font-size:20px;">No: </span><span style="font-size:20px;" t-field="o.name"/></b></center>
+                            <table style="width:100%;" class="borderless">
+                                <tr>
+                                    <td style="width:100px;">Vendor No.</td>
+                                    <td style="width:10px;">:</td>
+                                    <td><b><!--<span t-field="o.partner_id.eran_code"/>--></b></td>
+                                </tr>
+                                <tr>
+                                    <td style="width:100px;">Vendor Name</td>
+                                    <td style="width:10px;">:</td>
+                                    <td><b><span t-field="o.partner_id"/></b></td>
+                                </tr>
+                                <t t-if="o.partner_id.child_ids.filtered(lambda x:x.type == 'contact')" t-set="vendor_attn" t-value="o.partner_id.child_ids.filtered(lambda x:x.type == 'contact')[0]"/>
+                                <tr>
+                                    <td style="width:100px;">Attn</td>
+                                    <td style="width:10px;">:</td>
+                                    <td><b><!--<span t-if="vendor_attn" t-esc="vendor_attn.name"/>--></b></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">Address:</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        <span t-field="o.partner_id.street"/> <span t-field="o.partner_id.street2"/> <span t-field="o.partner_id.city"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div style="position:relative;width:45%;border:1px solid black;padding: 0px 5px;" class="fs-12">
+                            <img t-att-src="image_data_uri(o.company_id.logo)" style="max-width:300px;width:100%;" alt="Logo"/>
+                            <br/>
+                            <span t-field="o.company_id.street"/> <span t-field="o.company_id.street2"/>, <span t-field="o.company_id.city"/>, <span t-field="o.company_id.state_id"/>
+                            <br/>
+                            TELP <span t-field="o.company_id.phone"/>, FAX <span t-field="o.company_id.eran_fax"/>
+                        </div>
+                    </div>
+                    <table class="mb-3" style="width:100%;border:transparent;">
+                        <t t-set="nomor" t-value="1"/>
+                        <tr>
+                            <td style="text-align:center;width:10px;"><b>No.</b></td>
+                            <td style="text-align:center;"><b>Part</b></td>
+                            <td style="text-align:center;"><b>Qty</b></td>
+                            <td style="text-align:center;"><b>Harga</b></td>
+                            <td style="text-align:center;"><b>Amount</b></td>
+                        </tr>
+                        <t t-set="down_payment" t-value="o.get_down_payment()"/>
+                        <t t-set="disc_amount" t-value="0"/>
+                        <t t-set="total_amount" t-value="0"/>
+                        <t t-foreach="o.order_line.filtered(lambda o: o.product_id.id != down_payment)" t-as="line">
+                            <t t-set="disc_amount" t-value="disc_amount + ((line.product_qty * line.price_unit) * (line.discount/100))"/>
+                            <t t-set="total_amount" t-value="total_amount + line.product_qty * line.price_unit"/>
+                            <t t-if="'[' in line.name and ']' in line.name">
+                                <t t-set="start" t-value="line.name.index('[')"/>
+                                <t t-set="end" t-value="line.name.index(']')+1"/>
+                                <t t-set="part_name" t-value="line.name.replace(line.name[start:end],'').strip()"/>
+                            </t>
+                            <t t-else="">
+                                <t t-set="part_name" t-value="line.name"/>
+                            </t>
+                            <tr t-if="not line.display_type">
+                                <t t-set="harga" t-value="line.product_qty * line.price_unit"/>
+                                <td style="border-top:0px transparent;border-bottom:0px transparent;width:10px;"><span t-esc="nomor"/></td>
+                                <td style="border-top:0px transparent;border-bottom:0px transparent;"><span t-esc="part_name"/></td>
+                                <td style="border-top:0px transparent;border-bottom:0px transparent;text-align:right;"><span t-esc="'%g'% line.product_qty"/> <span t-field="line.product_uom"/></td>
+                                <td style="border-top:0px transparent;border-bottom:0px transparent;text-align:right;"><span t-field="line.price_unit" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                                <td style="border-top:0px transparent;border-bottom:0px transparent;text-align:right;"><span t-esc="harga" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                                <t t-set="nomor" t-value="nomor+1"/>
+                            </tr>
+                            <!-- <tr t-else="">
+                                <td colspan="5">
+                                    <span t-field="line.name"/>
+                                </td>
+                            </tr> -->
+                        </t>
+                        <t t-set="disc_percent" t-value="int(disc_amount/total_amount*100)"/>
+                        <tr t-if="len(o.order_line.filtered(lambda o: o.product_id.id != down_payment)) &lt; 20" t-foreach="range(20-len(o.order_line))" t-as="line_filler">
+                            <td style="border-top:0px transparent;border-bottom:0px transparent;width:10px;">&amp;nbsp;</td>
+                            <td style="border-top:0px transparent;border-bottom:0px transparent;">&amp;nbsp;</td>
+                            <td style="border-top:0px transparent;border-bottom:0px transparent;">&amp;nbsp;</td>
+                            <td style="border-top:0px transparent;border-bottom:0px transparent;">&amp;nbsp;</td>
+                            <td style="border-top:0px transparent;border-bottom:0px transparent;">&amp;nbsp;</td>
+                        </tr>
+                        <tr>
+                            <t t-set="tax_rowspan" t-value="len(o.tax_totals['groups_by_subtotal']['Untaxed Amount'])"/>
+                            <td t-attf-rowspan="{{tax_rowspan+4}}" colspan="3" style="border-left: transparent;border-bottom: transparent;">
+                                Note:<br/>
+                                <!-- 1. TIDAK DIPERKENANKAN UNTUK DELIVERY TANPA/LEBIH DARI PO<br/>
+                                2. WAJIB MELAMPIRKAN CHECKSHEET &amp; MILLSHEET SAAT DELIVERY<br/>
+                                3. TERM OF PAYMENT. <span t-field="o.payment_term_id"/><br/> -->
+                                <span t-field="o.notes"/><br/>
+                                Delivery To : <span t-field="o.company_id"/><br/>
+                                <span t-field="o.company_id.street"/> <span t-field="o.company_id.street2"/>, <span t-field="o.company_id.city"/>, <span t-field="o.company_id.state_id"/>
+                            </td>
+                            <td style="border:1px solid black;">Total</td>
+                            <td style="border:1px solid black;text-align:right;"><span t-esc="total_amount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid black;">DPP</td>
+                            <td style="border:1px solid black;text-align:right;"><span t-esc="o.dpp" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                        </tr>
+                        <tr>
+                            <!-- <t t-set="disc_amount" t-value="0"/>
+                            <t t-foreach="o.order_line" t-as="line">
+                                <t t-set="disc_amount" t-value="disc_amount + ((line.product_qty * line.price_unit) * (line.discount/100))"/>
+                            </t> -->
+                            <td style="border:1px solid black;">Disc <span t-esc="disc_percent"/>%</td>
+                            <td style="border:1px solid black;text-align:right;"><span t-esc="disc_amount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                        </tr>
+                        <!-- <t t-set="tax_groups" t-value="o.order_line.mapped('taxes_id.tax_group_id')"/> -->
+                        <tr t-foreach="o.tax_totals['groups_by_subtotal']['Untaxed Amount']" t-as="group">
+                            <td style="border:1px solid black;"><span t-esc="group['tax_group_name']"/></td>
+                            <td style="border:1px solid black;text-align:right;"><span t-esc="group['tax_group_amount']" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/><!--<span t-esc="group['tax_group_amount']"/>--></td>
+                        </tr>
+                        <tr>
+                            <t t-set="disc_amount" t-value="0"/>
+                            <t t-set="tax_totals" t-value="0"/>
+                            <t t-foreach="o.order_line" t-as="line">
+                                <t t-set="disc_amount" t-value="disc_amount + ((line.product_qty * line.price_unit) * (line.discount/100))"/>
+                            </t>
+                            <t t-foreach="o.tax_totals['groups_by_subtotal']['Untaxed Amount']" t-as="group">
+                                <t t-set="tax_totals" t-value="tax_totals + group['tax_group_amount']"/>
+                            </t>
+                            <t t-set="nett_amount" t-value="o.tax_totals['amount_total'] - disc_amount + tax_totals"/>
+                            <td style="border:1px solid black;">Nett</td>
+                            <td style="border:1px solid black;text-align:right;"><span t-esc="o.tax_totals['amount_total']" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                        </tr>
+                    </table>
+                    <div class="row mb-3" style="padding-left:50px;">
+                        <div class="col-8">
+                            <t t-set="today_date" t-value="datetime.datetime.now().strftime('%d %b %Y')"/>
+                            <span>Jakarta,</span> <span t-esc="today_date"/><br/>
+                            <t t-set="signatures" t-value="o.get_signatures()"/>
+                            <table style="width:100%; background-image: url('/eran_custom/static/src/img/stample_purchase.png');">
+                                <tr>
+                                    <td style="width:120px;text-align:center;">Issued By,</td>
+                                    <td style="width:120px;text-align:center;">Approved By,</td>
+                                    <td style="width:240px;text-align:center;" colspan="2">Release By,</td>
+                                    <!-- <td style="width:50px;text-align:center;border-color: transparent;border-right:1px solid black;"/>
+                                    <td style="text-align:center;">Confirmation</td> -->
+                                </tr>
+                                <tr>
+                                    <t t-set="sign_ids" t-value="o.env['hr.employee'].sudo().search([('user_id', '=', o.create_uid.id)])"/>
+                                    <td style="height:100px;width:100px; vertical-align: middle;">
+                                        <t t-if="len(sign_ids) &gt; 0 and sign_ids[0].signature != False">
+                                            <!-- is approved & have a signature? -->
+                                            <img t-att-src="image_data_uri(sign_ids[0].signature)" style="max-width:120px;width:100%;" alt="Signature"/>
+                                        </t>
+                                    </td>
+                                    <td style="height:100px;width:100px; vertical-align: middle;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 0 and o.approval_line_ids[0].signature != False">
+                                            <!-- is approved & have a signature? -->
+                                            <img t-att-src="image_data_uri(o.approval_line_ids[0].signature)" style="max-width:120px;width:100%;" alt="Signature"/>
+                                        </t>
+                                    </td>
+                                    <td style="height:80px;width:120px; vertical-align: middle;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 1 and o.approval_line_ids[1].signature != False">
+                                            <!-- is approved & have a signature? -->
+                                            <img t-att-src="image_data_uri(o.approval_line_ids[1].signature)" style="max-width:120px;width:100%;" alt="Signature"/>
+                                        </t>
+                                    </td>
+                                    <td style="height:80px;width:120px; vertical-align: middle;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 2 and o.approval_line_ids[2].signature != False">
+                                            <!-- is approved & have a signature? -->
+                                            <img t-att-src="image_data_uri(o.approval_line_ids[2].signature)" style="max-width:120px;width:100%;" alt="Signature"/>
+                                        </t>
+                                    </td>
+                                    <!-- <td style="height:100px;border-color: transparent;border-right:1px solid black;"/>
+                                    <td style="height:100px;"/> -->
+                                </tr>
+                                <tr>
+                                    <t t-set="sign_ids" t-value="o.env['hr.employee'].sudo().search([('user_id', '=', o.create_uid.id)])"/>
+                                    <td style="text-align:center; height:20px;">
+                                        <t t-if="len(sign_ids) &gt; 0">
+                                            <!-- user request approver -->
+                                            <span t-esc="sign_ids.user_id.name" style="font-size:12px;"/>
+                                        </t>
+                                    </td>
+                                    <td style="text-align:center; height:20px;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 0 and o.approval_line_ids[0].user_id != False">
+                                            <!-- approver name -->
+                                            <span t-esc="o.approval_line_ids[0].user_id.name" style="font-size:12px;"/>
+                                        </t>
+                                    </td>
+                                    <td style="text-align:center; height:20px;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 1 and o.approval_line_ids[1].user_id != False">
+                                            <!-- approver name -->
+                                            <span t-esc="o.approval_line_ids[1].user_id.name" style="font-size:12px;"/>
+                                        </t>
+                                    </td>
+                                    <td style="text-align:center; height:20px;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 2 and o.approval_line_ids[2].user_id != False">
+                                            <!-- approver name -->
+                                            <span t-esc="o.approval_line_ids[2].user_id.name" style="font-size:12px;"/>
+                                        </t>
+                                    </td>
+                                    <!-- <td style="border-color: transparent;border-right:1px solid black;"/>
+                                    <td style="text-align:center;"><span t-field="o.partner_id" style="font-size:12px;"/></td> -->
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-4" style="padding-left: 40px; padding-top: 5px;">
+                            <br/>
+                            <table style="width:100%;">
+                                <tr>
+                                    <td style="text-align:center;">Confirmation</td>
+                                </tr>
+                                <tr>
+                                    <td style="height:100px;"/>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:center; height:20px;"><span t-field="o.partner_id" style="font-size:12px;"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="eran_template_report_purchase_order_konversi">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <style type="text/css">
+                        *,
+                        p,
+                        span,
+                        table,
+                        table th,
+                        table td{
+                            font-size:14px;
+                        }
+                        .fs-12,
+                        .fs-12 *,
+                        .fs-12 p,
+                        .fs-12 span,
+                        .fs-12 table th,
+                        .fs-12 table td
+                        {
+                            font-size:12px !important;
+                        }
+                        table,
+                        table th,
+                        table td{
+                            border : 1px solid black;
+                        }
+                        table th,
+                        table td{
+                            padding: 2px 5px;
+                        }
+                        table.borderless,
+                        table.borderless tr,
+                        table.borderless th,
+                        table.borderless td{
+                            border : transparent;
+                        }
+                    </style>
+                    <div class="row mb-3">
+                        <div style="position:relative;width:55%;border:1px solid black;">
+                            <center><b><u><span style="font-size:20px;">PURCHASE ORDER</span></u></b></center>
+                            <center><b><span style="font-size:20px;">No: </span><span style="font-size:20px;" t-field="o.name"/></b></center>
+                            <table style="width:100%;" class="borderless">
+                                <tr>
+                                    <td style="width:100px;">Vendor No.</td>
+                                    <td style="width:10px;">:</td>
+                                    <td><b><!--<span t-field="o.partner_id.eran_code"/>--></b></td>
+                                </tr>
+                                <tr>
+                                    <td style="width:100px;">Vendor Name</td>
+                                    <td style="width:10px;">:</td>
+                                    <td><b><span t-field="o.partner_id"/></b></td>
+                                </tr>
+                                <t t-if="o.partner_id.child_ids.filtered(lambda x:x.type == 'contact')" t-set="vendor_attn" t-value="o.partner_id.child_ids.filtered(lambda x:x.type == 'contact')[0]"/>
+                                <tr>
+                                    <td style="width:100px;">Attn</td>
+                                    <td style="width:10px;">:</td>
+                                    <td><b><!--<span t-if="vendor_attn" t-esc="vendor_attn.name"/>--></b></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">Address:</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        <span t-field="o.partner_id.street"/> <span t-field="o.partner_id.street2"/> <span t-field="o.partner_id.city"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div style="position:relative;width:45%;border:1px solid black;padding: 0px 5px;" class="fs-12">
+                            <img t-att-src="image_data_uri(o.company_id.logo)" style="max-width:300px;width:100%;" alt="Logo"/>
+                            <br/>
+                            <span t-field="o.company_id.street"/> <span t-field="o.company_id.street2"/>, <span t-field="o.company_id.city"/>, <span t-field="o.company_id.state_id"/>
+                            <br/>
+                            TELP <span t-field="o.company_id.phone"/>, FAX <span t-field="o.company_id.eran_fax"/>
+
+                        </div>
+                    </div>
+                    <table class="mb-3" style="width:100%;border:transparent;">
+                        <t t-set="nomor" t-value="1"/>
+                        <tr>
+                            <td style="text-align:center;width:10px;"><b>No.</b></td>
+                            <td style="text-align:center;"><b>Part</b></td>
+                            <td style="text-align:center;"><b>Qty</b></td>
+                            <td style="text-align:center;"><b>Harga</b></td>
+                            <td style="text-align:center;"><b>Amount</b></td>
+                        </tr>
+                        <t t-set="down_payment" t-value="o.get_down_payment()"/>
+                        <t t-set="disc_amount" t-value="0"/>
+                        <t t-set="total_amount" t-value="0"/>
+                        <t t-foreach="o.order_line.filtered(lambda o: o.product_id.id != down_payment)" t-as="line">
+                            <t t-set="disc_amount" t-value="disc_amount + ((line.product_qty * line.price_unit) * (line.discount/100))"/>
+                            <t t-set="total_amount" t-value="total_amount + line.product_qty * line.price_unit"/>
+                            <t t-if="'[' in line.name and ']' in line.name">
+                                <t t-set="start" t-value="line.name.index('[')"/>
+                                <t t-set="end" t-value="line.name.index(']')+1"/>
+                                <t t-set="part_name" t-value="line.name.replace(line.name[start:end],'').strip()"/>
+                            </t>
+                            <t t-else="">
+                                <t t-set="part_name" t-value="line.name"/>
+                            </t>
+                            <tr t-if="not line.display_type">
+                                <t t-set="ammount" t-value="line.product_qty * line.price_unit"/>
+                                <t t-if="line.additional_qty"><t t-set="harga" t-value="line.price_subtotal / line.additional_qty"/></t>
+                                <t t-else=""><t t-set="harga" t-value="0"/></t>
+                                <td style="border-top:0px transparent;border-bottom:0px transparent;width:10px;"><span t-esc="nomor"/></td>
+                                <td style="border-top:0px transparent;border-bottom:0px transparent;"><span t-esc="part_name"/></td>
+                                <td style="border-top:0px transparent;border-bottom:0px transparent;text-align:right;"><span t-esc="'%g'% line.additional_qty"/> <span t-field="line.additional_uom_id"/></td>
+                                <td style="border-top:0px transparent;border-bottom:0px transparent;text-align:right;"><span t-esc="harga" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                                <td style="border-top:0px transparent;border-bottom:0px transparent;text-align:right;"><span t-esc="ammount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                                <t t-set="nomor" t-value="nomor+1"/>
+                            </tr>
+                            <tr t-else="">
+                                <td colspan="5">
+                                    <span t-field="line.name"/>
+                                </td>
+                            </tr>
+                        </t>
+                        <t t-set="disc_percent" t-value="int(disc_amount/total_amount*100)"/>
+                        <tr t-if="len(o.order_line.filtered(lambda o: o.product_id.id != down_payment)) &lt; 20" t-foreach="range(20-len(o.order_line))" t-as="line_filler">
+                            <td style="border-top:0px transparent;border-bottom:0px transparent;width:10px;">&amp;nbsp;</td>
+                            <td style="border-top:0px transparent;border-bottom:0px transparent;">&amp;nbsp;</td>
+                            <td style="border-top:0px transparent;border-bottom:0px transparent;">&amp;nbsp;</td>
+                            <td style="border-top:0px transparent;border-bottom:0px transparent;">&amp;nbsp;</td>
+                            <td style="border-top:0px transparent;border-bottom:0px transparent;">&amp;nbsp;</td>
+                        </tr>
+                        <tr>
+                            <t t-set="tax_rowspan" t-value="len(o.tax_totals['groups_by_subtotal']['Untaxed Amount'])"/>
+                            <td t-attf-rowspan="{{tax_rowspan+4}}" colspan="3" style="border-left: transparent;border-bottom: transparent;">
+                                Note:<br/>
+                                <!-- 1. TIDAK DIPERKENANKAN UNTUK DELIVERY TANPA/LEBIH DARI PO<br/>
+                                2. WAJIB MELAMPIRKAN CHECKSHEET &amp; MILLSHEET SAAT DELIVERY<br/>
+                                3. TERM OF PAYMENT. <span t-field="o.payment_term_id"/><br/> -->
+                                <span t-field="o.notes"/><br/>
+                                Delivery To : <span t-field="o.company_id"/><br/>
+                                <span t-field="o.company_id.street"/> <span t-field="o.company_id.street2"/>, <span t-field="o.company_id.city"/>, <span t-field="o.company_id.state_id"/>
+                            </td>
+                            <td style="border:1px solid black;">Total</td>
+                            <td style="border:1px solid black;text-align:right;"><span t-esc="total_amount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid black;">DPP</td>
+                            <td style="border:1px solid black;text-align:right;"><span t-esc="o.dpp" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                        </tr>
+                        <tr>
+                            <t t-set="disc_amount" t-value="0"/>
+                            <t t-foreach="o.order_line.filtered(lambda o: o.product_id.id != down_payment)" t-as="line">
+                                <t t-set="disc_amount" t-value="disc_amount + ((line.product_qty * line.price_unit) * (line.discount/100))"/>
+                            </t>
+                            <td style="border:1px solid black;">Disc <span t-esc="disc_percent"/>%</td>
+                            <td style="border:1px solid black;text-align:right;"><span t-esc="disc_amount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                        </tr>
+                        <!-- <t t-set="tax_groups" t-value="o.order_line.mapped('taxes_id.tax_group_id')"/> -->
+                        <tr t-foreach="o.tax_totals['groups_by_subtotal']['Untaxed Amount']" t-as="group">
+                            <td style="border:1px solid black;"><span t-esc="group['tax_group_name']"/></td>
+                            <td style="border:1px solid black;text-align:right;"><span t-esc="group['tax_group_amount']" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/><!--<span t-esc="group['tax_group_amount']"/>--></td>
+                        </tr>
+                        <tr>
+                            <t t-set="disc_amount" t-value="0"/>
+                            <t t-set="tax_totals" t-value="0"/>
+                            <t t-foreach="o.order_line.filtered(lambda o: o.product_id.id != down_payment)" t-as="line">
+                                <t t-set="disc_amount" t-value="disc_amount + ((line.product_qty * line.price_unit) * (line.discount/100))"/>
+                            </t>
+                            <t t-foreach="o.tax_totals['groups_by_subtotal']['Untaxed Amount']" t-as="group">
+                                <t t-set="tax_totals" t-value="tax_totals + group['tax_group_amount']"/>
+                            </t>
+                            <t t-set="nett_amount" t-value="o.tax_totals['amount_total'] - disc_amount + tax_totals"/>
+                            <td style="border:1px solid black;">Nett</td>
+                            <td style="border:1px solid black;text-align:right;"><span t-esc="nett_amount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/></td>
+                        </tr>
+                    </table>
+                    <div class="row mb-3" style="padding-left:50px;">
+                        <div class="col-8">
+                            <t t-set="today_date" t-value="datetime.datetime.now().strftime('%d %b %Y')"/>
+                            <span>Jakarta,</span> <span t-esc="today_date"/><br/>
+                            <t t-set="signatures" t-value="o.get_signatures()"/>
+                            <table style="width:100%; background-image: url('/eran_custom/static/src/img/stample_purchase.png');">
+                                <tr>
+                                    <td style="width:120px;text-align:center;">Issued By,</td>
+                                    <td style="width:120px;text-align:center;">Approved By,</td>
+                                    <td style="width:240px;text-align:center;" colspan="2">Release By,</td>
+                                    <!-- <td style="width:50px;text-align:center;border-color: transparent;border-right:1px solid black;"/>
+                                    <td style="text-align:center;">Confirmation</td> -->
+                                </tr>
+                                <tr>
+                                    <t t-set="sign_ids" t-value="o.env['hr.employee'].sudo().search([('user_id', '=', o.create_uid.id)])"/>
+                                    <td style="height:100px;width:100px; vertical-align: middle;">
+                                        <t t-if="len(sign_ids) &gt; 0 and sign_ids[0].signature != False">
+                                            <!-- is approved & have a signature? -->
+                                            <img t-att-src="image_data_uri(sign_ids[0].signature)" style="max-width:120px;width:100%;" alt="Signature"/>
+                                        </t>
+                                    </td>
+                                    <td style="height:100px;width:100px; vertical-align: middle;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 0 and o.approval_line_ids[0].signature != False">
+                                            <!-- is approved & have a signature? -->
+                                            <img t-att-src="image_data_uri(o.approval_line_ids[0].signature)" style="max-width:120px;width:100%;" alt="Signature"/>
+                                        </t>
+                                    </td>
+                                    <td style="height:80px;width:120px; vertical-align: middle;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 1 and o.approval_line_ids[1].signature != False">
+                                            <!-- is approved & have a signature? -->
+                                            <img t-att-src="image_data_uri(o.approval_line_ids[1].signature)" style="max-width:120px;width:100%;" alt="Signature"/>
+                                        </t>
+                                    </td>
+                                    <td style="height:80px;width:120px; vertical-align: middle;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 2 and o.approval_line_ids[2].signature != False">
+                                            <!-- is approved & have a signature? -->
+                                            <img t-att-src="image_data_uri(o.approval_line_ids[2].signature)" style="max-width:120px;width:100%;" alt="Signature"/>
+                                        </t>
+                                    </td>
+                                    <!-- <td style="height:100px;border-color: transparent;border-right:1px solid black;"/>
+                                    <td style="height:100px;"/> -->
+                                </tr>
+                                <tr>
+                                    <t t-set="sign_ids" t-value="o.env['hr.employee'].sudo().search([('user_id', '=', o.create_uid.id)])"/>
+                                    <td style="text-align:center; height:20px;">
+                                        <t t-if="len(sign_ids) &gt; 0">
+                                            <!-- user request approver name -->
+                                            <span t-esc="sign_ids.user_id.name" style="font-size:12px;"/>
+                                        </t>
+                                    </td>
+                                    <td style="text-align:center; height:20px;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 0 and o.approval_line_ids[0].user_id != False">
+                                            <!-- approver name -->
+                                            <span t-esc="o.approval_line_ids[0].user_id.name" style="font-size:12px;"/>
+                                        </t>
+                                    </td>
+                                    <td style="text-align:center; height:20px;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 1 and o.approval_line_ids[1].user_id != False">
+                                            <!-- approver name -->
+                                            <span t-esc="o.approval_line_ids[1].user_id.name" style="font-size:12px;"/>
+                                        </t>
+                                    </td>
+                                    <td style="text-align:center; height:20px;">
+                                        <t t-if="len(o.approval_line_ids) &gt; 2 and o.approval_line_ids[2].user_id != False">
+                                            <!-- approver name -->
+                                            <span t-esc="o.approval_line_ids[2].user_id.name" style="font-size:12px;"/>
+                                        </t>
+                                    </td>
+                                    <!-- <td style="border-color: transparent;border-right:1px solid black;"/>
+                                    <td style="text-align:center;"><span t-field="o.partner_id" style="font-size:12px;"/></td> -->
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-4" style="padding-left: 40px; padding-top: 5px;">
+                            <br/>
+                            <table style="width:100%;">
+                                <tr>
+                                    <td style="text-align:center;">Confirmation</td>
+                                </tr>
+                                <tr>
+                                    <td style="height:100px;"/>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:center; height:20px;"><span t-field="o.partner_id" style="font-size:12px;"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

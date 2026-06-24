@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_letter_2_no_header" model="report.paperformat">
+        <field name="name">HPS/2 Lanscape Customs</field>
+        <field name="default" eval="True" />
+        <field name="format">custom</field>
+        <field name="page_height">280</field>
+        <field name="page_width">210</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">35</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="eran_report_receipt_of_goods_convertions" model="ir.actions.report">
+        <field name="name">Receipt of Goods</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.template_report_eran_receipt_of_goods_convertions</field>
+        <field name="report_file">eran_custom.template_report_eran_receipt_of_goods_convertions</field>
+        <field name="print_report_name">'Receipt of Goods - %s' % (object.name)</field>
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_letter_2_no_header"/>
+    </record>
+
+    <record id="eran_report_receipt_of_goods" model="ir.actions.report">
+        <field name="name">Receipt of Goods</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.template_report_eran_receipt_of_goods</field>
+        <field name="report_file">eran_custom.template_report_eran_receipt_of_goods</field>
+        <field name="print_report_name">'Receipt of Goods - %s' % (object.name)</field>
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_letter_2_no_header"/>
+    </record>
+
+    <template id="template_report_eran_receipt_of_goods">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <!--<div class="header">    -->
+                        
+                    <!--</div>-->
+                    <t t-if="o.picking_type_id.code == 'incoming'">
+                      <t t-if="o.state == 'done'">
+                        <div class="page" style="font-size:14px;">
+                          <style type="text/css">
+                              table,
+                              table th,
+                              table td{
+                                  font-size:14px;
+                                  padding: 2px;
+                              }
+                          </style>
+                            <div class="row">
+                                <div class="col-auto col-3">
+                                </div>
+                                <div class="col-auto col-6 text-center">
+                                    <h3><b>Receipt of Goods</b></h3>
+                                </div>
+                                <div class="col-auto col-3">
+                                </div>
+                            </div>
+                            <div class="row" style="font-size:14px; margin-top:20px;">
+                                <div class="col-auto col-6">
+                                    <table class="table table-sm o_main_table table-borderless" style="width:400px;">
+                                      <tr>
+                                        <td style="width:200px;">SUPPLIER CODE</td>
+                                        <td style="width:5px;">:</td>
+                                        <td><span t-field="o.partner_id.company_registry"/></td>
+                                      </tr>
+                                      <tr>
+                                        <td>SUPPLIER NAME</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.partner_id.name"/></td>
+                                      </tr>
+                                      <tr>
+                                        <td>ADDRESS</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address'], 'no_marker': True}"/></td>
+                                      </tr>
+                                      <tr>
+                                        <td>SCHEDULE DELIVERY DATE</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.scheduled_date" t-options="{'widget': 'date'}"/></td>
+                                      </tr>
+                                      <tr>
+                                        <td>ACTUAL DELIVERY DATE</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.date_done" t-options="{'widget': 'date'}"/></td>
+                                      </tr>
+                                    </table>
+                                </div>
+                                <div class="col-auto col-6">
+                                    <table class="table table-sm o_main_table table-borderless" style="width:400px;">
+                                      <tr>
+                                        <td style="width:200px;">RECEIVED NUMBER</td>
+                                        <td style="width:5px;">:</td>
+                                        <td><span t-field="o.name"/></td>
+                                      </tr>
+                                      <!-- <tr>
+                                        <td>CREATION DATE</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.create_date" t-options="{'widget': 'date'}"/></td>
+                                      </tr> -->
+                                      <tr>
+                                        <td>PRINTED DATE</td>
+                                        <td>:</td>
+                                        <td><span t-esc="datetime.datetime.now()" t-options="{'widget': 'date'}"/></td>
+                                      </tr>
+                                      <tr>
+                                        <td>TOTAL KANBAN</td>
+                                        <td>:</td>
+                                        <td/>
+                                      </tr>
+                                      <tr>
+                                        <td>PRINT COUNT</td>
+                                        <td>:</td>
+                                        <td/>
+                                      </tr>
+                                      <tr>
+                                        <td>EFFECTIVE DATE</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.date_done" t-options="{'widget': 'date'}"/></td>
+                                      </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top:10px;">
+                                <table class="table table-sm o_main_table table-borderless" style="border-color:black;">
+                                    <thead>
+                                      <tr>
+                                          <th class="text-center" style="border:1px solid; width: 3%" scope="col"><b>No</b></th>
+                                          <th class="text-center" style="border:1px solid; width: 22%" scope="col"><b>Item No</b></th>
+                                          <th class="text-center" style="border:1px solid; width: 30%" scope="col"><b>Material Description</b></th>
+                                          <th class="text-center" style="border:1px solid; width: 11%" scope="col"><b>Qty Terima</b></th>
+                                          <th class="text-center" style="border:1px solid; width: 7%" scope="col"><b>UoM</b></th>
+                                          <th class="text-center" style="border:1px solid; width: 22%" scope="col"><b>PO No</b></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody style="border-bottom:1px solid; border-top:1px solid;">
+                                      <t t-set="no" t-value="1"/>
+                                      <tr t-foreach="o.move_ids_without_package" t-as="line" t-if="line.qty_return != line.quantity_done">
+                                          <td class="text-center" style="border-left:1px solid; width: 3%; padding:2px;" scope="col"><span t-esc="no"/></td>
+                                          <td style="border-left:1px solid; width: 22%; padding:2px;" scope="col"><span t-field="line.product_id.default_code"/></td>
+                                          <td style="border-left:1px solid; width: 30%; padding:2px;" scope="col"><span t-field="line.product_id.name"/></td>
+                                          <td style="border-left:1px solid; width: 11%; padding:2px;" scope="col"><span t-esc="'{:,.2f}'.format(line.quantity_done - line.qty_return)"/></td>
+                                          <td style="border-left:1px solid; width: 7%; padding:2px;" scope="col"><span t-field="line.product_uom"/></td>
+                                          <td style="border-left:1px solid; border-right:1px solid; width: 22%; padding:2px;" scope="col"><span t-field="line.purchase_line_id.order_id"/></td>
+                                          <t t-set="no" t-value="no + 1"/>
+                                      </tr>
+                                      <t t-if="len(o.move_ids_without_package) &lt; 20">
+                                          <t t-set="ss" t-value="20-len(o.move_ids_without_package)"/>
+                                          <tr t-foreach="ss" t-as="line_only">
+                                              <td class="text-center" style="border-left:1px solid; height:20px; width: 3%; padding:2px;" scope="col"/>
+                                              <td class="text-center" style="border-left:1px solid; height:20px; width: 22%; padding:2px;" scope="col"/>
+                                              <td class="text-center" style="border-left:1px solid; height:20px; width: 30%; padding:2px;" scope="col"/>
+                                              <td style="border-left:1px solid; height:20px; width: 11%; padding:2px; text-align:right;" scope="col"/>
+                                              <td style="border-left:1px solid; height:20px; width: 7%; padding:2px; text-align:right;" scope="col"/>
+                                              <td style="border-left:1px solid; border-right:1px solid; height:20px; width: 22%; padding:2px; text-align:right;" scope="col"/>
+                                          </tr>
+                                      </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="row">
+                                <table class="table table-sm o_main_table table-borderless" style="border-color:black;">
+                                    <thead>
+                                      <tr>
+                                          <th class="text-center" style=" width: 13%;" scope="col"/>
+                                          <th class="text-center" style="border:1px solid; width: 24%;" scope="col"><b>DN Supplier</b></th>
+                                          <th class="text-center" style=" width: 3%;" scope="col"/>
+                                          <th class="text-center" style="border:1px solid; width: 21%;" scope="col"><b>Supplier</b></th>
+                                          <th class="text-center" colspan="2" style="border:1px solid; width: 42%;" scope="col"><b>PT. ERAN TEKNIKATAMA</b></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr>
+                                          <td class="text-center" style=" width: 13%" scope="col"/>
+                                          <td rowspan="3" style="border:1px solid; width: 24%;"><span t-field="o.dn_supplier"/></td>
+                                          <td class="text-center" style=" width: 3%" scope="col"/>
+                                          <td class="text-center" style="border:1px solid; width: 21%;" scope="col"><b>Receiver</b></td>
+                                          <td class="text-center" style="border:1px solid; width: 21%;" scope="col"><b>Approved By,</b></td>
+                                          <td class="text-center" style="border:1px solid; width: 21%;" scope="col"><b>Created By,</b></td>
+                                      </tr>
+                                      <tr>
+                                          <td class="text-center" style=" width: 13%; height:80px;" scope="col"/>
+                                          <td class="text-center" style=" width: 3%; height:80px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; width: 21%; height:80px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; width: 21%; height:80px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; border-right:1px solid; width: 21%; height:80px; " scope="col"/>
+                                      </tr>
+                                      <tr>
+                                          <td class="text-center" style=" width: 13%; height:20px;" scope="col"/>
+                                          <td class="text-center" style=" width: 3%; height:20px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; border-bottom:1px solid; width: 21%; height:20px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; border-bottom:1px solid; width: 21%; height:20px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; border-right:1px solid; border-bottom:1px solid; width: 21%; height:20px; " scope="col"><span t-field="o.user_id"/></td>
+                                      </tr>
+                                      <tr>
+                                          <td style="width: 13%; height:30px;" scope="col"/>
+                                          <td style="font-size:14px; vertical-align:bottom; width: 24%; height:30px;" scope="col">Lembar 1 : Supplier</td>
+                                          <td style="width: 3%; height:25px;" scope="col"/>
+                                          <td style="font-size:14px; vertical-align:bottom; width: 21%; height:30px;" scope="col">Lembar 2 : Warehouse</td>
+                                          <td style="width: 21%; height:30px;" scope="col"/>
+                                          <td style="width: 21%; height:30px; " scope="col"/>
+                                      </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                      </t>
+                      <t t-else="">
+                        No Data
+                      </t>
+                    </t>
+                    <t t-else="">
+                      No Data
+                    </t>
+                </t>
+            </t>   
+        </t>
+    </template>
+
+    <template id="template_report_eran_receipt_of_goods_convertions">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <!--<div class="header">    -->
+                        
+                    <!--</div>-->
+                    <t t-if="o.picking_type_id.code == 'incoming'">
+                      <t t-if="o.state == 'done'">
+                        <div class="page" style="font-size:14px;">
+                          <style type="text/css">
+                              table,
+                              table th,
+                              table td{
+                                  font-size:14px;
+                                  padding: 2px;
+                              }
+                          </style>
+                            <div class="row">
+                                <div class="col-auto col-3">
+                                </div>
+                                <div class="col-auto col-6 text-center">
+                                    <h3><b>Receipt of Goods</b></h3>
+                                </div>
+                                <div class="col-auto col-3">
+                                </div>
+                            </div>
+                            <div class="row" style="font-size:14px; margin-top:20px;">
+                                <div class="col-auto col-6">
+                                    <table class="table table-sm o_main_table table-borderless" style="width:400px;">
+                                      <tr>
+                                        <td style="width:200px;">SUPPLIER CODE</td>
+                                        <td style="width:5px;">:</td>
+                                        <td><span t-field="o.partner_id.company_registry"/></td>
+                                      </tr>
+                                      <tr>
+                                        <td>SUPPLIER NAME</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.partner_id.name"/></td>
+                                      </tr>
+                                      <tr>
+                                        <td>ADDRESS</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address'], 'no_marker': True}"/></td>
+                                      </tr>
+                                      <tr>
+                                        <td>SCHEDULE DELIVERY DATE</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.scheduled_date" t-options="{'widget': 'date'}"/></td>
+                                      </tr>
+                                      <tr>
+                                        <td>ACTUAL DELIVERY DATE</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.date_done" t-options="{'widget': 'date'}"/></td>
+                                      </tr>
+                                    </table>
+                                </div>
+                                <div class="col-auto col-6">
+                                    <table class="table table-sm o_main_table table-borderless" style="width:400px;">
+                                      <tr>
+                                        <td style="width:200px;">RECEIVED NUMBER</td>
+                                        <td style="width:5px;">:</td>
+                                        <td><span t-field="o.name"/></td>
+                                      </tr>
+                                      <!-- <tr>
+                                        <td>CREATION DATE</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.create_date" t-options="{'widget': 'date'}"/></td>
+                                      </tr> -->
+                                      <tr>
+                                        <td>PRINTED DATE</td>
+                                        <td>:</td>
+                                        <td><span t-esc="datetime.datetime.now()" t-options="{'widget': 'date'}"/></td>
+                                      </tr>
+                                      <tr>
+                                        <td>TOTAL KANBAN</td>
+                                        <td>:</td>
+                                        <td/>
+                                      </tr>
+                                      <tr>
+                                        <td>PRINT COUNT</td>
+                                        <td>:</td>
+                                        <td/>
+                                      </tr>
+                                      <tr>
+                                        <td>EFFECTIVE DATE</td>
+                                        <td>:</td>
+                                        <td><span t-field="o.date_done" t-options="{'widget': 'date'}"/></td>
+                                      </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top:10px;">
+                                <table class="table table-sm o_main_table table-borderless" style="border-color:black;">
+                                    <thead>
+                                      <tr>
+                                          <th class="text-center" style="border:1px solid; width: 3%" scope="col"><b>No</b></th>
+                                          <th class="text-center" style="border:1px solid; width: 22%" scope="col"><b>Item No</b></th>
+                                          <th class="text-center" style="border:1px solid; width: 30%" scope="col"><b>Material Description</b></th>
+                                          <th class="text-center" style="border:1px solid; width: 11%" scope="col"><b>Qty Terima</b></th>
+                                          <th class="text-center" style="border:1px solid; width: 7%" scope="col"><b>UoM</b></th>
+                                          <th class="text-center" style="border:1px solid; width: 22%" scope="col"><b>PO No</b></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody style="border-bottom:1px solid; border-top:1px solid;">
+                                      <t t-set="no" t-value="1"/>
+                                      <tr t-foreach="o.move_ids_without_package" t-as="line" t-if="line.qty_return != line.quantity_done">
+                                          <td class="text-center" style="border-left:1px solid; width: 3%; padding:2px;" scope="col"><span t-esc="no"/></td>
+                                          <td style="border-left:1px solid; width: 22%; padding:2px;" scope="col"><span t-field="line.product_id.default_code"/></td>
+                                          <td style="border-left:1px solid; width: 30%; padding:2px;" scope="col"><span t-field="line.product_id.name"/></td>
+                                          <td style="border-left:1px solid; width: 11%; padding:2px;" scope="col"><span t-field="line.alternative_quantity_done" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                          <td style="border-left:1px solid; width: 7%; padding:2px;" scope="col"><span t-field="line.alternative_uom_id"/></td>
+                                          <td style="border-left:1px solid; border-right:1px solid; width: 22%; padding:2px;" scope="col"><span t-field="line.purchase_line_id.order_id"/></td>
+                                          <t t-set="no" t-value="no + 1"/>
+                                      </tr>
+                                      <t t-if="len(o.move_ids_without_package) &lt; 20">
+                                          <t t-set="ss" t-value="20-len(o.move_ids_without_package)"/>
+                                          <tr t-foreach="ss" t-as="line_only">
+                                              <td class="text-center" style="border-left:1px solid; height:20px; width: 3%; padding:2px;" scope="col"/>
+                                              <td class="text-center" style="border-left:1px solid; height:20px; width: 22%; padding:2px;" scope="col"/>
+                                              <td class="text-center" style="border-left:1px solid; height:20px; width: 30%; padding:2px;" scope="col"/>
+                                              <td style="border-left:1px solid; height:20px; width: 11%; padding:2px; text-align:right;" scope="col"/>
+                                              <td style="border-left:1px solid; height:20px; width: 7%; padding:2px; text-align:right;" scope="col"/>
+                                              <td style="border-left:1px solid; border-right:1px solid; height:20px; width: 22%; padding:2px; text-align:right;" scope="col"/>
+                                          </tr>
+                                      </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="row">
+                                <table class="table table-sm o_main_table table-borderless" style="border-color:black;">
+                                    <thead>
+                                      <tr>
+                                          <th class="text-center" style=" width: 13%;" scope="col"/>
+                                          <th class="text-center" style="border:1px solid; width: 24%;" scope="col"><b>DN Supplier</b></th>
+                                          <th class="text-center" style=" width: 3%;" scope="col"/>
+                                          <th class="text-center" style="border:1px solid; width: 21%;" scope="col"><b>Supplier</b></th>
+                                          <th class="text-center" colspan="2" style="border:1px solid; width: 42%;" scope="col"><b>PT. ERAN TEKNIKATAMA</b></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr>
+                                          <td class="text-center" style=" width: 13%" scope="col"/>
+                                          <td rowspan="3" style="border:1px solid; width: 24%;"><span t-field="o.dn_supplier"/></td>
+                                          <td class="text-center" style=" width: 3%" scope="col"/>
+                                          <td class="text-center" style="border:1px solid; width: 21%;" scope="col"><b>Receiver</b></td>
+                                          <td class="text-center" style="border:1px solid; width: 21%;" scope="col"><b>Approved By,</b></td>
+                                          <td class="text-center" style="border:1px solid; width: 21%;" scope="col"><b>Created By,</b></td>
+                                      </tr>
+                                      <tr>
+                                          <td class="text-center" style=" width: 13%; height:80px;" scope="col"/>
+                                          <td class="text-center" style=" width: 3%; height:80px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; width: 21%; height:80px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; width: 21%; height:80px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; border-right:1px solid; width: 21%; height:80px; " scope="col"/>
+                                      </tr>
+                                      <tr>
+                                          <td class="text-center" style=" width: 13%; height:20px;" scope="col"/>
+                                          <td class="text-center" style=" width: 3%; height:20px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; border-bottom:1px solid; width: 21%; height:20px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; border-bottom:1px solid; width: 21%; height:20px;" scope="col"/>
+                                          <td class="text-center" style="border-left:1px solid; border-right:1px solid; border-bottom:1px solid; width: 21%; height:20px; " scope="col"><span t-field="o.user_id"/></td>
+                                      </tr>
+                                      <tr>
+                                          <td style="width: 13%; height:30px;" scope="col"/>
+                                          <td style="font-size:14px; vertical-align:bottom; width: 24%; height:30px;" scope="col">Lembar 1 : Supplier</td>
+                                          <td style="width: 3%; height:25px;" scope="col"/>
+                                          <td style="font-size:14px; vertical-align:bottom; width: 21%; height:30px;" scope="col">Lembar 2 : Warehouse</td>
+                                          <td style="width: 21%; height:30px;" scope="col"/>
+                                          <td style="width: 21%; height:30px; " scope="col"/>
+                                      </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                      </t>
+                      <t t-else="">
+                        No Data
+                      </t>
+                    </t>
+                    <t t-else="">
+                      No Data
+                    </t>
+                </t>
+            </t>   
+        </t>
+    </template>
+</odoo>

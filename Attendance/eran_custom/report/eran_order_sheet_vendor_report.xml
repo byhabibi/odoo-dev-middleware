@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_paperformat_order_sheet_vendor" model="report.paperformat">
+        <field name="name">Order Sheet</field>
+        <field name="default" eval="True" />
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">10</field>
+        <field name="margin_right">10</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">10</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="eran_report_order_sheet_vendor" model="ir.actions.report">
+        <field name="name">Order Sheet Report</field>
+        <field name="model">eran.order.sheet</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">eran_custom.eran_template_report_order_sheet_vendor</field>
+        <field name="report_file">eran_custom.eran_template_report_order_sheet_vendor</field>
+        <field name="print_report_name">'Order Sheet - %s' % object.name</field>
+        <field name="binding_model_id" eval="False"/>
+        <field name="paperformat_id" ref="eran_custom.eran_paperformat_order_sheet_vendor"/>
+        <field name="binding_type">report</field>
+    </record>
+
+
+    <template id="eran_template_report_order_sheet_vendor">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="page">
+                        <style type="text/css">
+                            thead tr th,
+                            thead tr td{
+                                text-align:center;
+                                vertical-align: middle;
+                            }
+                            tbody tr td,
+                            tbody tr td span{
+                                vertical-align: middle;
+                            }
+                            table,
+                            table th,
+                            table td{
+                                border : 1px solid black;
+                            }
+                            table th,
+                            table td{
+                                padding: 5px 5px;
+                            }
+                            table.borderless,
+                            table.borderless tr,
+                            table.borderless th,
+                            table.borderless td{
+                                border : transparent;
+                            }
+                            .text-left-right {
+                                display: flex;
+                                justify-content: space-between;
+                            }
+                        </style>
+                        <div class="row">
+                            <div class="col-7 text-end">
+                                <span style="font-size:25px;"><b>ORDER SHEET<![CDATA[&nbsp;]]><![CDATA[&nbsp;]]><![CDATA[&nbsp;]]><![CDATA[&nbsp;]]><![CDATA[&nbsp;]]></b></span><br/>
+                            </div>
+                            <div class="col-5 text-end">
+                                <div t-if="o.picking_id" t-field="o.picking_id.name" t-options="{'widget': 'barcode','symbology':'QR', 'width': 60, 'height': 60, 'img_style': 'max-height:50pt;max-width:100%;', 'img_align': 'center'}"/>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:10px;">
+                            <div class="col-7">
+                                <table class="table-borderless" style="width:100%; border:0;">
+                                    <tr style="border:0;">
+                                        <td style="border:0;">
+                                            <span>SUPPLIER NAME</span>
+                                        </td>
+                                        <td style="border:0;">
+                                            <span>:</span>
+                                        </td>
+                                        <td style="border:0;">
+                                            <span t-esc="o.partner_id.name" t-if="o.partner_id"/>
+                                        </td>
+                                    </tr>
+                                    <tr style="border:0;">
+                                        <td style="border:0;">
+                                            <span>DELIVERY TO</span>
+                                        </td>
+                                        <td style="border:0;">
+                                            <span>:</span>
+                                        </td>
+                                        <td style="border:0;">
+                                            <!-- <span t-esc="o.company_id.name" t-if="o.company_id"/> -->
+                                            <span t-esc="o.env.user.company_id.name"/>
+                                        </td>
+                                    </tr>
+                                    <tr style="border:0;">
+                                        <td style="border:0;">
+                                            <span>SCHEDULE DELIVERY DATE</span>
+                                        </td>
+                                        <td style="border:0;">
+                                            <span>:</span>
+                                        </td>
+                                        <td style="border:0;">
+                                            <span t-esc="o.schedule_date" t-options='{"widget": "date"}' t-if="o.schedule_date"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-5">
+                                <table class="table-borderless" style="width:100%; border:0;">
+                                    <tr style="border:0;">
+                                        <td style="width:50%; border:0;">
+                                            <span>ORDER SHEET NO.</span>
+                                        </td>
+                                        <td style="width:2%; border:0;">
+                                            <span>:</span>
+                                        </td>
+                                        <td style="width:48%; border:0;">
+                                            <span t-esc="o.name" t-if="o.name"/>
+                                        </td>
+                                    </tr>
+                                    <tr style="border:0;">
+                                        <td style="border:0;">
+                                            <span>CREATION DATE</span>
+                                        </td>
+                                        <td style="border:0;">
+                                            <span>:</span>
+                                        </td>
+                                        <td style="border:0;">
+                                            <span t-esc="o.create_date" t-options='{"widget": "date"}'/>
+                                        </td>
+                                    </tr>
+                                    <tr style="border:0;">
+                                        <td style="border:0;">
+                                            <span>PRINTED DATE</span>
+                                        </td>
+                                        <td style="border:0;">
+                                            <span>:</span>
+                                        </td>
+                                        <td style="border:0;">
+                                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <t t-set="no" t-value="1"/>
+                        <div class="row">
+                            <table class="table table-sm" style="text-align:center;">
+                                <tr>
+                                    <td><span>No.</span></td>
+                                    <td><span>Material No</span></td>
+                                    <td><span>Material Description</span></td>
+                                    <td><span>Quantity</span></td>
+                                    <td><span>UoM</span></td>
+                                    <td><span>PO Number</span></td>
+                                </tr>
+                                <tr t-foreach="o.sheet_line_ids" t-as="line">
+                                    <td><span t-esc="no"/></td>
+                                    <td><span t-field="line.product_code"/></td>
+                                    <td><span t-field="line.name"/></td>
+                                    <td><span t-field="line.qty_receipt"/></td>
+                                    <td><span t-field="line.uom_id.name"/></td>
+                                    <td><span t-field="line.purchase_id.name"/></td>
+                                    <t t-set="no" t-value="no+1"/>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="row mt-3" style="page-break-inside:avoid;">
+                            <div class="col-2">
+                            
+                            </div>
+                            <div class="col-7">
+                                <table class="table table-sm" style="border:1px solid; width:100%;">
+                                    <tr style="border:1px solid">
+                                        <td style="text-align:center; width:30%; border:1px solid; height:20px;">
+                                            CREATED BY
+                                        </td>
+                                        <td style="text-align:center; width:35%; border:1px solid; height:20px;">
+                                            CHECKED BY
+                                        </td>
+                                        <td style="text-align:center; width:35%; border:1px solid; height:20px;">
+                                            APPROVED BY
+                                        </td>
+                                    </tr>
+                                    <tr style="border:1px solid">
+                                        <td style="height:160px; vertical-align:top; text-align:center; border:1px solid">
+                                            
+                                        </td>
+                                        <td style="height:160px; vertical-align:top; text-align:center; border:1px solid">
+                                            <!-- <img class="img" src="/eran_custom/static/src/img/img-approved.jpeg" style="height:155px;width:130px;"/> -->
+                                        </td>
+                                        <td style="height:160px; vertical-align:top; text-align:center; border:1px solid">
+                                            <!-- <img class="img" src="/eran_custom/static/src/img/img-approved.jpeg" style="height:155px;width:130px;"/> -->
+                                        </td>
+                                    </tr>
+                                    <tr style="border:1px solid">
+                                        <td style="text-align:center; border:1px solid; height:20px;">
+                                            <span t-esc="o.create_uid.name" />
+                                        </td>
+                                        <td style="text-align:center; border:1px solid; height:20px;">
+                                            <span t-esc="o.checked_by_uid.name" />
+                                        </td>
+                                        <td style="text-align:center; border:1px solid; height:20px;">
+                                            <span t-esc="o.approved_by_uid.name" />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-1">
+                            
+                            </div>
+                            <div class="col-2">
+                                <table class="table table-sm" style="border:1px solid; width:100%;">
+                                    <tr style="border:1px solid">
+                                        <td style="text-align:center; width:100%; border:1px solid; height:20px;">
+                                            SUPPLIER
+                                        </td>
+                                    </tr>
+                                    <tr style="border:1px solid">
+                                        <td style="height:160px; vertical-align:top; text-align:center; border:1px solid">
+                                            
+                                        </td>
+                                    </tr>
+                                    <tr style="border:1px solid">
+                                        <td style="text-align:center; border:1px solid; height:20px;">
+
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>   
+        </t>
+    </template>
+
+</odoo>

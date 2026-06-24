@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="eran_mrp_non_material_wizard_form_view" model="ir.ui.view">
+            <field name="name">eran.mrp.non.material.wizard.form.view</field>
+            <field name="model">eran.mrp.non.material.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="type" readonly="1"></field>
+                        </group>
+                        <group>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="line_ids" string="Material">
+                            <field name="line_ids" readonly="1">
+                                <tree>
+                                    <field name="mrp_non_material_id" readonly="1" options="{'no_open':True,'no_create': True}"/>
+                                    <field name="product_id" readonly="1" options="{'no_open':True,'no_create': True}"/>
+                                    <field name="product_qty" readonly="1"/>
+                                    <field name="allocation_percentage_mrp" readonly="1" attrs="{'column_invisible': [('parent.type', '!=', 'forecast_order')]}"/>
+                                    <field name="uom_id" options="{'no_open':True,'no_create': True}" readonly="1"/>
+                                </tree>
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="mrp_non_material_id" readonly="1" options="{'no_open':True,'no_create': True}"/>
+                                            <field name="product_id" readonly="1" options="{'no_open':True,'no_create': True}"/>
+                                        </group>
+                                        <group>
+                                            <field name="product_qty" readonly="1"/>
+                                            <field name="uom_id"  readonly="1" options="{'no_open':True,'no_create': True}"/>
+                                        </group>
+                                    </group>
+                                     <footer>
+                                    <button string="Close" class="btn-secondary" special="cancel" data-hotkey="z"/>
+                                </footer>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                    <footer>
+                        <button name="create_purchase_request" type="object"
+                            string="Create Purchase Request"
+                             class="oe_highlight"
+                            data-hotkey="w"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="z"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        
+        <record id="eran_action_mrp_non_material_wizard" model="ir.actions.act_window">
+            <field name="name">Preview Non Material</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">eran.mrp.non.material.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="eran_mrp_non_material_wizard_form_view"/>
+        </record>
+    </data>
+</odoo>

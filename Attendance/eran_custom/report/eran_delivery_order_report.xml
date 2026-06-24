@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_paperformat_report_delivery_order" model="report.paperformat">
+        <field name="name">Delivery Order Paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">custom</field>
+        <field name="page_height">140</field>
+        <field name="page_width">210</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="stock.action_report_picking" model="ir.actions.report">
+		<field name="report_name">eran_custom.eran_template_report_delivery_order</field>
+		<field name="report_file">eran_custom.eran_template_report_delivery_order</field>
+        <field name="paperformat_id" ref="eran_paperformat_report_delivery_order"/>
+    </record>
+
+    <template id="eran_template_report_delivery_order">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <div class="row" style="border-bottom:2px solid; font-size:16px;">
+                        <div class="col-6">
+                            <t t-if="o.company_id.logo">
+                                <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 80px;max-width:300px;"/>
+                            </t>
+                        </div>
+                        <div class="col-6">
+                            <br/>
+                            <span style="margin-left:50px;">Delivery Date : </span><span t-esc="o.scheduled_date.strftime('%d %B %Y')"/>
+                            <div t-if="o.name" t-field="o.name" t-options="{'widget': 'barcode', 'width': 600, 'height': 60, 'img_style': 'margin-top:0px;max-width:100%;'}"/><br/>
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col-12">
+                            <table style="width: 100%;border: 1px solid #fff; font-size:16px;">
+                                <tr>
+                                    <td style="text-align:left;border: 1px solid #fff;">Kepada YTH</td>
+                                    <td style="text-align:left;border: 1px solid #fff;">:</td>
+                                    <td style="text-align:left;border: 1px solid #fff;"><span t-field="o.partner_id"/></td>
+                                </tr>
+                                <tr style="border: 1px solid #fff;">
+                                    <td style="text-align:left;width:5%;border: 1px solid #fff;">No PO</td>
+                                    <td style="text-align:left;width:1%;border: 1px solid #fff;">:</td>
+                                    <td style="text-align:left;width:29%;border: 1px solid #fff;"><span t-field="o.po_ref"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;border: 1px solid #FFF;">No Surat Jalan</td>
+                                    <td style="text-align:left;border: 1px solid #FFF;">:</td>
+                                    <td style="text-align:left;border: 1px solid #FFF;">
+                                        <span t-if="o.revision_picking_id" t-field="o.revision_picking_id.name"/>
+                                        <span t-else="" t-field="o.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;border: 1px solid #fff;">No Mobil</td>
+                                    <td style="text-align:left;border: 1px solid #fff;">:</td>
+                                    <td style="text-align:left;border: 1px solid #fff;"><span t-field="o.plat_no"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-bordered table-borderless">
+                                <thead>
+                                    <tr style="text-align:center; font-size:16px;">
+                                        <th style="border:1px solid; width:4%;">No.</th>
+                                        <th style="border:1px solid; width:32%;">Product Name</th>
+                                        <th style="border:1px solid; width:10%;">Qty</th>
+                                        <th style="border:1px solid; width:7%;">UoM</th>
+                                        <th style="border:1px solid; width:11%;">Order Sheet</th>
+                                        <th style="border:1px solid; width:11%;">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="border-bottom:1px solid;">
+                                    <t t-set="no" t-value="0"/>
+                                    <tr t-foreach="o.move_ids_without_package.filtered(lambda l: l.quantity_done != 0)" t-as="lines" style="font-size:14px;">
+                                          <t t-set="no" t-value="no+1"/>
+                                          <t t-set="os_line" t-value="o.order_sheet_id.sheet_line_ids.filtered(lambda osl:osl.product_id.id == lines.product_id.id)"/>
+                                          <t t-set="qtydone" t-value="lines.quantity_done - lines.qty_return"/>
+                                          <td style="padding:1px; border-left:1px solid; text-align:center;"><span t-esc="no"/></td>
+                                          <td style="padding:1px; border-left:1px solid;"><span t-field="lines.description_picking"/></td>
+                                          <td style="padding:1px; border-left:1px solid; text-align:right;"><span t-esc="qtydone" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 0}"/></td>
+                                          <td style="padding:1px; border-left:1px solid; text-align:center;"><span t-field="lines.product_uom"/></td>
+                                          <td style="padding:1px; border-left:1px solid; text-align:right;"><span t-field="o.order_sheet_id.no_order_sheet"/></td>
+                                          <td t-if="no==1" style="padding:1px; vertical-align:middle; text-align:center; border-left:1px solid; border-right:1px solid;" t-att-rowspan="len(o.move_ids_without_package)"><span t-field="o.note"/></td>
+                                    </tr>
+                                    <t t-if="len(o.move_ids_without_package) &lt; 5">
+                                        <t t-set="ss" t-value="5-len(o.move_ids_without_package)"/>
+                                        <tr t-foreach="ss" t-as="line_only">
+                                            <td style="height:2px; border-left:1px solid;"/>
+                                            <td style="height:2px; border-left:1px solid;"/>
+                                            <td style="height:2px; border-left:1px solid;"/>
+                                            <td style="height:2px; border-left:1px solid;"/>
+                                            <td style="height:2px; border-left:1px solid;"/>
+                                            <td style="height:2px; border-left:1px solid; border-right:1px solid;"/>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <br/>
+                   <div class="row" style="font-size:14px;">
+                        <div class="col-3" style="text-align:center;">Dibuat Oleh,</div>
+                        <div class="col-3" style="text-align:center;">Disetujui,</div>
+                        <div class="col-2" style="text-align:center;">Security</div>
+                        <div class="col-2" style="text-align:center;">Pengirim,</div>
+                        <div class="col-2" style="text-align:center;">Diterima Oleh,</div>
+                    </div>
+                    <div class="row" style="font-size:14px;">
+                        <div class="col-3" style="height:70px;"/>
+                        <div class="col-3" style="height:70px;"/>
+                        <div class="col-2" style="height:70px;"/>
+                        <div class="col-2" style="height:70px;"/>
+                        <div class="col-2" style="height:70px;"/>
+                    </div>
+                    <div class="row" style="font-size:14px;">
+                        <div class="col-3" style="text-align:center;">
+                          <t t-set="sign_ids" t-value="o.env['hr.employee'].sudo().search([('user_id', '=', o.create_uid.id)])"/>
+                          <t t-if="len(sign_ids) &gt; 0">
+                            (&amp;emsp;<span t-esc="sign_ids.user_id.name" style="font-size:12px;"/>&amp;emsp;)
+                          </t>
+                        </div>
+                        <div class="col-3" style="text-align:center;">
+                          <t t-set="sign_ids" t-value="o.env['hr.employee'].sudo().search([('user_id', '=', 69)])"/>
+                          (&amp;emsp;<span t-esc="sign_ids.user_id.name" style="font-size:12px;"/>&amp;emsp;)
+                        </div>
+                        <div class="col-2" style="text-align:center;">(&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;)</div>
+                        <div class="col-2" style="text-align:center;">(&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;)</div>
+                        <div class="col-2" style="text-align:center;">(&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;)</div>
+                    </div>
+                    <br/>
+                    <div class="row" style="font-size:13px;">
+                        <div class="col-9">
+                            Lbr 1 2 (Acc), 3 (Gudang), 4 (Customer), 5 (Security)
+                        </div>
+                        <div class="col-3">
+                            <span>Print Date : </span><span t-esc="time.strftime('%d %B %Y')"/><br/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

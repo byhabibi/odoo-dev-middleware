@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eran_product_template_form" model="ir.ui.view">
+        <field name="name">eran.product.template.form</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='general_information']/group/group[@name='group_general']/field[@name='uom_po_id']" position="after">
+                <label for="additional_qty"/>
+                <div name="additional_uom">
+                    <field name="additional_qty" class="oe_inline"/>
+                    <span>
+                        <field name="additional_uom_id" class="oe_inline" placeholder="UoM"/>
+                    </span>
+                </div>
+
+                <label for="additional_qty_2"/>
+                <div name="additional_uom_2">
+                    <field name="additional_qty_2" class="oe_inline"/>
+                    <span>
+                        <field name="additional_uom_id_2" class="oe_inline" placeholder="UoM"/>
+                    </span>
+                </div>
+
+                <label for="allocation_percentage_mrp"/>
+                <div name="additional_uom">
+                    <field name="allocation_percentage_mrp" class="oe_inline"/>
+                    <span>%</span>
+                </div>
+            </xpath>
+            <xpath expr="//page[@name='general_information']/group/group[@name='group_standard_price']/field[@name='categ_id']" position="after">
+                <field name="is_global_discount"/>
+            </xpath>
+            <xpath expr="//page[@name='general_information']/group/group[@name='group_standard_price']/field[@name='product_tag_ids']" position="after">
+                <field name="category_group_id" required="1"/>
+            </xpath>
+            <xpath expr="//page[@name='general_information']/group/group[@name='group_standard_price']/field[@name='product_tag_ids']" position="before">
+                <field name="short_string"/>
+                <field name="product_location_ids" widget="many2many_tags"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_product_template_form_view_inherit" model="ir.ui.view">
+        <field name="name">eran.product.template.view.form.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="purchase.view_product_supplier_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='seller_ids']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='variant_seller_ids']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="stock.action_product_stock_view">
+        <field name="name">Reporting Stock by Product</field>
+    </record>
+
+    <!-- <record id="eran_view_stock_quant_tree_inventory_editable_inherit" model="ir.ui.view">
+        <field name="name">eran_view.stock.quant.tree.inventory.editable.inherit</field>
+        <field name="model">stock.quant</field>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree_inventory_editable"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='location_id']" position="attributes">
+                <attribute name="domain">[('usage', 'in', ['internal', 'transit', 'production'])]</attribute>
+            </xpath>
+        </field>
+    </record> -->
+
+    <record id="eran_view_stock_quant_tree_editable_inherit" model="ir.ui.view">
+        <field name="name">eran_view.stock.quant.tree.editable.inherit</field>
+        <field name="model">stock.quant</field>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree_editable"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='inventory_quantity_auto_apply']" position="after">
+                <field name="cost_product" string="Cost" readonly="1" sum="Total cost"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_product_uom_form_view_inherite" model="ir.ui.view">
+        <field name="name">eran.product.uom.form.view.inherite</field>
+        <field name="model">uom.uom</field>
+        <field name="inherit_id" ref="uom.product_uom_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group/group[@name='active_rounding']/field[@name='active']" position="after">
+                <field name="is_rounded" />
+            </xpath>
+        </field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="stock.dashboard_open_quants">
+        <field name="name">Reporting Stock by Location</field>
+    </record>
+</odoo>

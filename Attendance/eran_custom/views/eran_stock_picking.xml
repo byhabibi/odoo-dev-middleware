@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Action by id -->
+    <record id="act_stock_return_picking" model="ir.actions.act_window">
+        <field name="name">Reverse Transfer</field>
+        <field name="res_model">stock.return.picking</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <act_window id="invoice_from_picking.bi_action_stock_invoice" 
+        name="Create Draft Invoices"
+        res_model="stock.invoice.onshipping"
+        binding_model="False"
+        view_mode="form"
+        view_id="invoice_from_picking.view_stock_invoice_onshipping_form"
+        domain="[('id','in',active_ids)]"
+        target="new"
+        />
+
+    <record id="action_create_invoice_from_picking" model="ir.actions.server">
+        <field name="name">Create Draft Invoices</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="model_stock_picking" />
+        <field name="binding_model_id" ref="model_stock_picking" />
+        <field name="sequence">3</field>
+        <field name="state">code</field>
+        <field name="code">action = records.open_btn_stock_invoice_onshipping()</field>
+    </record>
+
+    <!-- form transfer -->
+    <record id="eran_view_picking_form_inherit" model="ir.ui.view">
+        <field name="name">eran.view.picking.form.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='%(stock.act_stock_return_picking)d']" position="attributes">
+                <attribute name="attrs">{'invisible': ['|',('state', '!=', 'done'),('invoice_state', '=', 'invoiced')]}</attribute>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button type="object" name="view_account_move_ids" class="oe_stat_button" icon="fa-book" attrs="{'invisible':[('invoice_count', '=', 0), ('picking_type_code', 'not in', ('incoming', 'outgoing'))]}">
+                    <field name="invoice_count" widget="statinfo" string="Bills" attrs="{'invisible':[('picking_type_code', '!=', 'incoming')]}"/>
+                    <field name="invoice_count" widget="statinfo" string="Invoices" attrs="{'invisible':[('picking_type_code', '!=', 'outgoing')]}"/>
+                </button>
+            </xpath>
+            <xpath expr="//label[@for='partner_id']/.." position="before">
+                <field name="revision_picking_id" attrs="{'invisible': [('revision_picking_id', '=', False)]}" readonly="1" force_save="1"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="able_to_invoice" invisible="1"/>
+                <field name="need_approval" invisible="1"/>
+                <field name="user_in_assigned_to" invisible="1"/>
+                <field name="revision_picking_ids_count" invisible="1"/>
+                <field name="hide_revision_button" invisible="1"/>
+                <field name="transfer_reference" />
+            </xpath>
+            <xpath expr="//header/button[@name='%(stock.act_stock_return_picking)d']" position="before">
+                <button name="%(eran_report_receipt_of_goods)d" string="Print ROG" attrs="{'invisible': ['|', ('state', '!=', 'done'), ('picking_type_code', '!=', 'incoming')]}" type="action" data-hotkey="r"/>
+                <button name="%(eran_report_receipt_of_goods_convertions)d" string="Print ROG Convertion" attrs="{'invisible': ['|', ('state', '!=', 'done'), ('picking_type_code', '!=', 'incoming')]}" type="action"/>
+                <button name="btn_refund" string="Replacement Shipment" type="object" attrs="{'invisible': ['|',('state', '!=', 'done'),('is_return', '=', False)]}"/>
+                <button name="action_button_ready2invoice" string="Ready to Invoice" type="object" attrs="{'invisible': ['|', '|', '|', '|', '|', ('picking_type_code', '!=', 'outgoing'), ('state', '!=', 'done'), ('dn_out', '=', False), ('dn_back', '=', False), ('ready_to_invoice', '!=', False), ('able_to_invoice', '=', False)]}"/>
+                <!-- <button name="action_is_nothing_invoice" string="Cek all return" type="object"/> -->
+                <button name="create_revision_picking" string="Create Revision" type="object" confirm="Would you like to proceed?" attrs="{'invisible': [('hide_revision_button', '=', True)]}"/>
+            </xpath>
+            <xpath expr="//header/button[@name='action_toggle_is_locked']" position="after">
+                <button name="action_button_dn_out" string="DN Out" type="object" attrs="{'invisible': ['|', '|', ('state', '!=', 'done'), ('dn_out', '!=', False), ('picking_type_code', '!=', 'outgoing')]}"/>
+                <button name="action_button_dn_back" string="DN Back" type="object" attrs="{'invisible': ['|', '|', '|', ('state', '!=', 'done'), ('dn_out', '=', False),('dn_back', '!=', False), ('picking_type_code', '!=', 'outgoing')]}"/>
+            </xpath>
+            <xpath expr="//group/group/label" position="before">
+                <field name="create_date" readonly="1"/>
+            </xpath>
+            <xpath expr="//group/group/div" position="attributes">
+                <attribute name="attrs">{'invisible': [('picking_type_code', '=', 'internal')]}</attribute>
+            </xpath>
+            <xpath expr="//group/group/field[@name='partner_id']" position="attributes">
+                <attribute name="attrs">{'invisible': [('picking_type_code', '=', 'internal')]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='date_done']" position="after">
+                <field name="act_delv_date" attrs="{'invisible': [('picking_type_code', '!=', 'incoming')], 'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                <field name="dn_out_date" attrs="{'invisible':[('dn_out_date','=',False)]}" readonly="1" force_save="1"/>
+                <field name="dn_back_date" attrs="{'invisible':[('dn_back_date','=',False)]}" readonly="1" force_save="1"/>
+                <field name="ready_to_invoice_date" attrs="{'invisible':[('ready_to_invoice_date','=',False)]}" readonly="1" force_save="1"/>
+            </xpath>
+            <xpath expr="//group/group/field[@name='location_dest_id']" position="before">
+                <field name="is_return" invisible="1"/>
+                <field name="picking_type" invisible="1"/>
+                <field name="order_sheet_id" invisible="1"/>
+                <field name="quality_check_todo" invisible="1"/>
+                <field name="return_type" attrs="{'invisible': [('picking_type', '!=', 'Returns')], 'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                <field name="requester" attrs="{'invisible': [('picking_type_code', '!=', 'internal')], 'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                <field name="suplier" attrs="{'invisible': [('picking_type_code', '!=', 'internal')], 'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+            </xpath>
+            <xpath expr="//group/group/field[@name='backorder_id']" position="before">
+                <field name="driver" attrs="{'invisible': [('picking_type_code', '!=', 'outgoing')], 'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                <field name="plat_no" attrs="{'invisible': [('picking_type_code', '!=', 'outgoing')], 'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                <field name="delivery_preparation_number" attrs="{'invisible': [('picking_type_code', '!=', 'outgoing')], 'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+                <field name="list_return_type" attrs="{'invisible': [('picking_type_id', '!=', 19)], 'readonly': [('picking_type_id', '!=', 19)]}"/>
+            </xpath>
+            <xpath expr="//group/group/field[@name='origin']" position="before">
+                <field name="request_date" readonly="1" attrs="{'invisible': [('picking_type_code', '!=', 'internal')]}"/>
+                <field name="shift" attrs="{'invisible': [('picking_type_code', '!=', 'internal')], 'readonly': [('state', 'in', ('done', 'cancel'))]}"/>
+            </xpath>
+            <xpath expr="//group/group/field[@name='origin']" position="after">
+                <field name="currency_id" invisible="1"/>
+                <field name="purchase_order_id" invisible="1"/>
+                <field name="run_purchase_order_id_compute" invisible="1"/>
+                <field name="sale_order_id" invisible="0"/>
+                <field name="dn_supplier" attrs="{'invisible': [('picking_type_code', '!=', 'incoming')]}"/>
+                <field name="ready_to_invoice" readonly="1" invisible="1"/>
+                <field name="dn_back" readonly="1" invisible="1"/>
+                <field name="dn_out" readonly="1" invisible="1"/>
+                <field name="reference_return_id" invisible="1"/>
+                <!-- <field name="ready_to_invoice" readonly="1" attrs="{'invisible': [('picking_type_code', '!=', 'outgoing')], 'readonly': [('state', 'in', ('done', 'cancel'))]}"/> -->
+            </xpath>
+            <xpath expr="//button[@name='action_see_move_scrap']" position="before">
+                <button type="object" name="action_to_return"
+                        class="oe_stat_button"
+                        icon="fa-sign-out"
+                        attrs="{'invisible': [('return_count', '=', 0)]}">
+                    <field name="return_count" widget="statinfo" string="Returns"/>
+                </button>
+                <button type="object" name="action_view_revision_picking_id"
+                        class="oe_stat_button"
+                        icon="fa-truck"
+                        attrs="{'invisible': [('revision_picking_id','=', False)]}">
+                    <div class="o_form_field o_stat_info">
+                        <span class="o_stat_text">Source Revision</span>
+                    </div>
+                </button>
+                <button type="object" name="action_view_revision_picking_ids"
+                        class="oe_stat_button"
+                        icon="fa-truck"
+                        attrs="{'invisible': [('revision_picking_ids_count','=', 0)]}">
+                    <field name="revision_picking_ids_count" widget="statinfo"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='ready_to_invoice']" position="after">
+                <field name="po_ref" attrs="{'invisible': [('picking_type_code', '!=', 'outgoing')]}" readonly="1"/>
+                <field name="no_order_sheet" attrs="{'invisible': [('picking_type_code', 'not in', ('outgoing', 'incoming'))]}" readonly="1"/>
+                <!-- <field name="invoice_state"/> -->
+                <!-- <field name="immediate_transfer"/> -->
+            </xpath>
+            <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/tree/field[@name='product_uom']" position="attributes">
+                <attribute name="invisible">1</attribute>
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+            <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/tree/field[@name='product_uom']" position="after">
+                <field name="order_sheet_line_id" invisible="1"/>
+            </xpath>
+            <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/tree/field[@name='product_id']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            
+            <!-- <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/tree/field[@name='good_qty']" position="attributes">
+                <attribute name="attrs">{'optional': 'hide'}</attribute>
+            </xpath> -->
+
+            <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/tree/field[@name='product_uom_qty']" position="attributes">
+                <attribute name="attrs">{'column_invisible': [('parent.picking_type_code', 'in', ('outgoing', 'incoming'))], 'readonly': ['&amp;', '|', '|',('is_initial_demand_editable', '=', False), ('order_sheet_line_id', '!=', False), '&amp;', '&amp;', ('show_operations', '=', True), ('is_locked', '=', True), ('is_initial_demand_editable', '=', False), '|', ('parent.state','!=','draft'), ('parent.revision_picking_id','=',False)]}</attribute>
+            </xpath>
+            <!-- <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/tree/field[@name='quantity_done']" position="after">
+                <field name="product_uom"/>
+            </xpath> -->
+            <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/tree/field[@name='quantity_done']" position="before">
+                <field name="good_qty" optional="hide"/>
+            </xpath>
+            <!-- <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/tree/field[@name='product_uom']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath> -->
+            <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/tree/field[@name='product_uom']" position="after">
+                <field name="additional_qty" string="Alternative UoM Qty" invisible="1"/>
+                <field name="alternative_uom_id" string="Alternative UoM"/>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='product_uom_qty']" position="after">
+                <field name="product_uom_qty" string="Plant Q'ty" attrs="{'column_invisible': [('parent.picking_type_code', '!=', 'outgoing')], 'readonly': ['&amp;', '|', '|',('is_initial_demand_editable', '=', False), ('order_sheet_line_id', '!=', False), '&amp;', '&amp;', ('show_operations', '=', True), ('is_locked', '=', True), ('is_initial_demand_editable', '=', False), '|', ('parent.state','!=','draft'), ('parent.revision_picking_id','=',False)]}"/>
+                <field name="product_uom_qty" string="Schedule" attrs="{'column_invisible': [('parent.picking_type_code', '!=', 'incoming')], 'readonly': ['&amp;', '|', '|',('is_initial_demand_editable', '=', False), ('order_sheet_line_id', '!=', False), '&amp;', '&amp;', ('show_operations', '=', True), ('is_locked', '=', True), ('is_initial_demand_editable', '=', False), '|', ('parent.state','!=','draft'), ('parent.revision_picking_id','=',False)]}"/>
+                <field name="alternative_uom_qty" string="Alternative Demand" attrs="{'invisible': [('parent.immediate_transfer', '=', True)], 'readonly': ['&amp;', '|', '|',('is_initial_demand_editable', '=', False), ('order_sheet_line_id', '!=', False), '&amp;', '&amp;', ('show_operations', '=', True), ('is_locked', '=', True), ('is_initial_demand_editable', '=', False), '|', ('parent.state','!=','draft'), ('parent.revision_picking_id','=',False)]}" optional="show"/>
+                <!-- <field name="qty_invoice_remind" /> -->
+            </xpath>
+            <xpath expr="//sheet/notebook/page[@name='operations']/field[@name='move_ids_without_package']/tree/field[@name='quantity_done']" position="before">
+                <field name="remaining_qty_inv" invisible="1"/>
+                <field name="qty_return" optional="hide"/>
+                <field name="qty_invoiced" optional="hide"/>
+                <field name="qty_invoice_remind" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='quantity_done']" position="after">
+                <field name="product_uom" />
+                <field name="alternative_qty_done" invisible="1"/>
+                <field name="alternative_quantity_done" attrs="{'readonly': [('product_id', '=', False)], 'column_invisible':[('parent.state', '=', 'draft'), ('parent.immediate_transfer', '=', False)]}" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='quantity_done']" position="attributes">
+                <attribute name="string">Actual / Delivery</attribute>
+            </xpath>
+            <xpath expr="//page[@name='operations']" position="after">
+                <page name="approver" string="Approver" attrs="{'invisible': [('need_approval', '=', False)]}">
+                    <group>
+                        <group>
+                            <field name="approval_stock_id"/>
+                            <field name="approval_rule"/>
+                            <field name="approval_type"/>
+                            <field name="assigned_to_ids" widget="many2many_tags" invisible="1"/>
+                            <field name="user_in_assigned_to" />
+                        </group>
+                    </group>
+                    <field name="approval_line_ids" mode="tree" readonly="1">
+                        <tree string="Approval Line" name="approval_line" editable="bottom">
+                            <field name="user_id"/>
+                            <field name="is_approved"/>
+                            <field name="date_approved"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='product_id']" position="after">
+                <field name="product_code" optional="show" attrs="{'column_invisible': [('parent.picking_type_code', '=', 'mrp_operation')]}"/>
+                <field name="product_name" optional="show" attrs="{'column_invisible': [('parent.picking_type_code', '=', 'mrp_operation')]}"/>
+            </xpath>
+
+            <!-- hide validate button & show request approval button when approval is needed -->
+            <xpath expr="//button[@name='button_validate']" position="attributes">
+                <attribute name="attrs">{'invisible': ['|','|', ('state', 'in', ('waiting','confirmed')), ('show_validate', '=', False), ('need_approval', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//button[@name='button_validate'][2]" position="attributes">
+                <attribute name="attrs">{'invisible': ['|','|', ('state', 'not in', ('waiting','confirmed')), ('show_validate', '=', False), ('need_approval', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//button[@name='button_validate']" position="before">
+                <button name="btn_waiting_approval" attrs="{'invisible': ['|', ('need_approval', '=', False), ('state_approval', '!=', 'confirmed')]}" string="Request Approval" type="object" class="oe_highlight" groups="base.group_user" data-hotkey="a"/>
+                <button name="btn_approved" string="Approve" type="object" class="btn btn-primary" attrs="{'invisible': ['|', ('user_in_assigned_to', '=', False),('state_approval', '!=', 'to_approve')]}"/>
+            </xpath>
+            <xpath expr="//header/field[@name='state']" position="attributes">
+                <attribute name="attrs">{'invisible': [('need_approval', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//header/field[@name='state']" position="after">
+                <field name="state_approval" statusbar_visible="confirmed,to_approve,done" widget="statusbar" attrs="{'invisible': ['|', ('need_approval', '=', False), ('state_approval', 'in', ['done','cancel'])]}"/>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="attrs"></attribute>
+            </xpath>
+            
+        </field>
+    </record>
+
+
+    <!-- Invoice from picking -->
+    <record id="eran_view_picking_form_inherit_add_field_invoice_state_inherit" model="ir.ui.view">
+        <field name="name">eran.view.picking.form.inherit.add.field.invoice.state.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="invoice_from_picking.view_picking_form_inherit_add_field_invoice_state"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_state']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- tree view transfer -->
+    <record id="eran_vpicktree_tree_view_inherit" model="ir.ui.view">
+        <field name="name">eran.vpicktree.tree.view.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="revision_picking_id" string="Revision Picking" optional="hide"/>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="requester" optional="show"/>
+                <field name="suplier" optional="show"/>
+                <!-- <field name="po_ref" optional="show"/> -->
+                <field name="eran_amount_total" invisible="1"/>
+                <field name="ready_to_invoice" invisible="1"/>
+                <field name="transfer_reference"/>
+            </xpath>
+            <!-- <xpath expr="//field[@name='scheduled_date']" position="attributes">
+                <attribute name="attrs">{'invisible': False}</attribute>
+            </xpath> -->
+            <xpath expr="//field[@name='scheduled_date']" position="replace">
+                <field name="scheduled_date" 
+                    widget="date" 
+                   options="{'format': 'YYYY-MM-DD'}" 
+                   optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='backorder_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="backorder_id" class="text-primary"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_view_picking_internal_search_inherit" model="ir.ui.view">
+        <field name="name">eran.view.picking.internal.search.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="filter_domain">['|', '|', ('name', 'ilike', self), ('origin', 'ilike', self), ('revision_picking_id', 'ilike', self)]</attribute>
+            </xpath>
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="revision_picking_id"/>
+            </xpath>
+            <xpath expr="//field[@name='origin']" position="before">
+                <field name="purchase_ref_id"/>
+                <field name="transfer_reference"/>
+                <filter string="Transfer Reference" name="transfer_reference" context="{'group_by':'transfer_reference'}"/>
+            </xpath>
+            <xpath expr="//field[@name='move_line_ids']" position="after">
+                <field name="dn_supplier"/>
+            </xpath>
+            <xpath expr="//filter[@name='picking_type']" position="after">
+                <filter string="DN Supplier" name="dn_supplier" domain="[]" context="{'group_by': 'dn_supplier'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_vpicktree_receipt_tree_view_inherit" model="ir.ui.view">
+        <field name="name">eran.vpicktree.tree.view.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="priority">1000</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="eran_custom.eran_vpicktree_tree_view_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ready_to_invoice']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="stock.action_picking_tree_all" model="ir.actions.act_window">
+        <field name="name">Transfer Posting</field>
+        <field name="view_id" ref="eran_custom.eran_vpicktree_tree_view_inherit"/>
+    </record>
+
+    <!-- invoice from picking view form -->
+     <record id="eran_view_picking_inherit_bi_id_view_3rd_inherit" model="ir.ui.view">
+        <field name="name">eran.view.picking.inherit.bi.id.view.3rd.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="invoice_from_picking.view_picking_inherit_bi_id"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='%(invoice_from_picking.bi_action_stock_invoice)d']" position="attributes">
+                <attribute name="attrs">{'invisible': ['|','|',('state','&lt;&gt;','done'),('invoice_state','&lt;&gt;','2binvoiced'), ('ready_to_invoice', '!=', True)]}</attribute>
+            </xpath>
+        </field>
+     </record>
+
+    <!-- Stock Move Detailed Operations-->
+    <record id="eran_view_stock_move_operations_inherit" model="ir.ui.view">
+        <field name="name">eran.view.stock.move.operations.inherit</field>
+        <field name="model">stock.move</field>
+        <field name="inherit_id" ref="stock.view_stock_move_operations"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group/group/field[@name='product_id']" position="after">
+                <field name="good_qty" invisible="1" readonly="1" />
+                <field name="is_serial" readonly="1" invisible="1"/>
+                <field name="is_lot" readonly="1" invisible="1"/>
+            </xpath>
+            <xpath expr="//group/group/field[@name='next_serial']" position="attributes">
+              <attribute name="attrs">{'invisible': [('is_serial', '!=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//group/group/label[@for='next_serial_count']" position="attributes">
+              <attribute name="attrs">{'invisible': [('is_serial', '!=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//group/group/div[3]" position="attributes">
+              <attribute name="attrs">{'invisible': [('is_serial', '!=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//group/group/field[@name='next_serial']" position="before">
+                <field name="next_serial" string="First Lots"
+                                attrs="{'invisible': [('is_lot', '!=', True)]}"/>
+                <label for="next_serial_count" string="Number of Lots" attrs="{'invisible': [('is_lot', '!=', True)]}"/>
+                <div class="o_row" attrs="{'invisible': [('is_lot', '!=', True)]}">
+                    <span><field name="next_serial_count"/></span>
+                    <button name="action_assign_serial_show_details" type="object"
+                            class="btn-link" data-hotkey="k"
+                            title="Assign Lots">
+                        <span>Assign Lots</span>
+                    </button>
+                    <button name="action_clear_lines_show_details" type="object"
+                            class="btn-link" data-hotkey="y"
+                            title="Clear Lines"
+                            attrs="{'invisible': [('display_clear_serial', '=', False)]}">
+                        <span>Clear All</span>
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- DELIVERY ORDER LINE SALE REPORTING  -->
+    <record id="eran_sale_delivery_report_tree_view_inherit" model="ir.ui.view">
+        <field name="name">eran.sale.delivery.report</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <tree string="Delivery Oder Line">
+                <field name="contact_id"  string="Contact"/>
+                <field name="id_pkp" optional="hide"/>
+                <field name="product_id"/>
+                <field name="quantity_done" string="Quantity"/>
+                <field name="product_uom"/>
+                <field name="price_so" string="Unit Price"/>
+                <field name="quantity_total_so"/>
+                <field name="sale_line_id" string="SO Number"/>
+                <field name="sale_order_date" string="SO Date"/>
+                <field name="do_number"/>
+                <field name="scheduled_date"/>
+                <field name="delivery_preparation_number"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_sale_delivery_report_search_view" model="ir.ui.view">
+        <field name="name">eran.sale.delivery.report.search</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <search string="Invoiceable">
+                <field name="product_id" string="Product" filter_domain="[('product_id','ilike',self)]"/>
+                <field name="do_number" string="DO Number" filter_domain="[('do_number','ilike',self)]"/>
+                <filter string="Invoiceable" name="invoiceable" domain="[('picking_id.picking_type_id.able_to_invoice', '=', 'invoiceable')]" />
+                <filter string="Billable" name="billable" domain="[('picking_id.picking_type_id.able_to_invoice', '=', 'billable')]" />
+                <filter name="filter_done" string="Done" domain="[('do_state', '=', 'done')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Category Group" name="category_group" domain="[]" context="{'group_by':'category_group_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_sale_delivery_report" model="ir.actions.act_window">
+        <field name="name">Delivery Order Line</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.move</field>
+        <field name="view_mode">tree</field>   
+        <field name="view_id" ref="eran_sale_delivery_report_tree_view_inherit"/>
+        <field name="search_view_id" ref="eran_custom.eran_sale_delivery_report_search_view"/>
+        <field name="context">{"search_default_filter_done": 1,'create':False, 'delete':False}</field>
+        <field name="domain">[('picking_id.picking_type_code','=','outgoing')]</field>
+    </record>
+
+    <record id="stock.stock_picking_action_picking_type" model="ir.actions.act_window">
+        <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('eran_custom.eran_vpicktree_receipt_tree_view_inherit')}),
+        (0, 0, {'view_mode': 'form'})]"/>
+    </record>
+
+    <!-- RECEIPT LINE PURCHASE REPORTING  -->
+    <record id="eran_purchase_receipt_report_tree_view_inherit" model="ir.ui.view">
+        <field name="name">eran.purchase.receipt.report</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <tree string="Receipt Line">
+                <field name="contact_id" string="Contact"/>
+                <field name="id_pkp" optional="hide"/>
+                <field name="product_id"/>
+                <field name="quantity_done" string="Quantity"/>
+                <field name="product_uom"/>
+                <field name="price_po" string="Unit Price"/>
+                <field name="quantity_total_po"/>
+                <field name="po_number" string="PO Number"/>
+                <field name="purchase_order_date" string="PO Date"/>
+                <field name="do_number"/>
+                <field name="scheduled_date"/>
+                <field name="invoice_state"/>
+                <field name="payment_state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_purchase_receipt_view_pivot" model="ir.ui.view">
+        <field name="name">eran.purchase.receipt.view.pivot</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <pivot string="pivot_receipt">
+                <field name="category_group_id" type="row"/>
+                <field name="qty_os" type="measure"/>
+                <field name="quantity_done" type="measure"/>
+                <field name="quantity_after_returns" type="measure"/>
+                <field name="price_po" type="measure"/>
+                <field name="quantity_total_po" type="measure"/>
+                <field name="amount_plan" type="measure"/>
+                <field name="delivery_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="eran_stock_move_line_operations_tree" model="ir.ui.view">
+        <field name="name">eran.stock.move.line.operations.tree.inherit</field>
+        <field name="model">stock.move.line</field>
+        <field name="inherit_id" ref="stock.view_stock_move_line_operation_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='qty_done']" position="after">
+                <field name="alternative_qty_done" attrs="{'readonly': ['|', '&amp;', ('state', '=', 'done'), ('is_locked', '=', True), '&amp;', ('package_level_id', '!=', False), ('parent.picking_type_entire_packs', '=', True)]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_purchase_receipt_report_search_view" model="ir.ui.view">
+        <field name="name">eran.purchase.receipt.report.search</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <search string="Invoiceable">
+                <field name="product_id" string="Product" filter_domain="[('product_id','ilike',self)]"/>
+                <field name="do_number" string="DO Number" filter_domain="[('do_number','ilike',self)]"/>
+                <filter string="Invoiceable" name="invoiceable" domain="[('picking_id.picking_type_id.able_to_invoice', '=', 'invoiceable')]" />
+                <filter string="Billable" name="billable" domain="[('picking_id.picking_type_id.able_to_invoice', '=', 'billable')]" />
+                <filter name="filter_done" string="Done" domain="[('do_state', '=', 'done')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Category Group" name="category_group" domain="[]" context="{'group_by':'category_group_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_purchase_receipt_report" model="ir.actions.act_window">
+        <field name="name">Receipt Line</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.move</field>
+        <field name="view_mode">tree,pivot</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('eran_purchase_receipt_report_tree_view_inherit')}),
+                (0, 0, {'view_mode': 'pivot', 'view_id': ref('eran_purchase_receipt_view_pivot')})]"/>
+        <field name="search_view_id" ref="eran_custom.eran_purchase_receipt_report_search_view"/>
+        <field name="context">{'search_default_filter_done':1,'create':False, 'delete':False}</field>
+        <field name="domain">[('picking_id.picking_type_code','=','incoming')]</field>
+    </record>
+
+    <!-- Eran Stock Approval Views -->
+    <record id="eran_stock_view_search" model="ir.ui.view">
+        <field name="name">stock.picking.view.search</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <search string="Search Stock Picking">
+                <field name="name" string="Refrence"/>
+                <!-- <field name="partner_id"/> -->
+                <!-- <field name="pricelist_id"/> -->
+                <filter name="assigned_to_ids" string="Assigned to me" domain="[('assigned_to_ids','in',[uid])]"/>
+                <!-- <group expand="0" string="Group By">
+                    <filter string="Pricelist" name="pricelist" domain="[]" context="{'group_by': 'pricelist_id'}"/>
+                    <filter name="customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
+                </group> -->
+            </search>
+        </field>
+    </record>
+
+    <record id="eran_view_stock_move_line_operations_tree_inherit" model="ir.ui.view">
+        <field name="name">eran.view.stock.move.line.operations.tree.inherit</field>
+        <field name="model">stock.move.line</field>
+        <field name="inherit_id" ref="stock.view_stock_move_line_operation_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='qty_done']" position="before">
+                <field name="is_weight" invisible="1"/>
+                <field name="qty_per_lot" attrs="{'readonly': [('is_weight', '=', False)]}"/>
+            </xpath>
+            <xpath expr="//field[@name='qty_done']" position="attributes">
+                <attribute name="attrs">{'readonly':['|', '|', ('is_weight', '=', True),'&amp;', ('state', '=', 'done'), ('is_locked', '=', True), '&amp;', ('package_level_id', '!=', False), ('parent.picking_type_entire_packs', '=', True)]}</attribute>
+                <attribute name="force_save">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_outstanding_delivery_tree_view" model="ir.ui.view">
+        <field name="name">eran.outstanding.delivery.view.tree</field>
+        <field name="model">sale.order.line</field>
+        <field name="arch" type="xml">
+            <tree string="Outstanding Delivery" create="false" edit="false" delete="false">
+                <field name="po_ref"/>
+                <field name="date_order"/>
+                <field name="product_code"/>
+                <field name="product_name"/>
+                <field name="product_uom_qty"/>
+                <field name="qty_delivered"/>
+                <field name="balance_quantity"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eran_outstanding_delivery_action" model="ir.actions.act_window">
+        <field name="name">Outstanding Delivery</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sale.order.line</field>
+        <field name="view_mode">tree,pivot,graph</field>   
+        <field name="view_id" ref="eran_outstanding_delivery_tree_view"/>
+        <field name="context">{'create':False, 'delete':False}</field>
+        <!-- <field name="domain">[('order_sheet_id.type_order','=','sale')]</field> -->
+    </record>
+
+    <record id="eran_view_stock_invoice_onshipping_form_inherit" model="ir.ui.view">
+        <field name="name">eran_stock.invoice.onshipping.view.form.inherit</field>
+        <field name="model">stock.invoice.onshipping</field>
+        <field name="inherit_id" ref="invoice_from_picking.view_stock_invoice_onshipping_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_date']" position="after">
+                <field name="deduct_down_payments" attrs="{'invisible':[('has_down_payments','=',False)]}"/>
+                <field name="has_down_payments" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- <record id="eran_stock_move_tree2_inherit" model="ir.ui.view">
+        <field name="name">eran.stock.move.tree2</field>
+        <field name="model">stock.move</field>
+        <field name="inherit_id" ref="stock.view_move_tree_receipt_picking"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" string="Customer Name"/>
+            <field name="picking_id" string="DO No"/>
+            <field name="effective_date" string="DO Date"/>
+            <field name="sale_id" string="SO No"/>
+        </field>
+    </record> -->
+
+</odoo>

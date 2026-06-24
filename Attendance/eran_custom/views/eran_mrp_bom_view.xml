@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_mrp_bom_form_inherit" model="ir.ui.view">
+        <field name="name">eran.mrp.bom.form</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='picking_type_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//div[@class='o_row']" position="after">
+                <field name="picking_type_id"/>
+            </xpath>
+            <xpath expr="//page[@name='miscellaneous']" position="after">
+                <page string="Tooling" name="tooling">
+                    <field name="product_ids">
+                        <tree string="Product" editable="bottom">
+                            <field name="product_template_id" string="Tooling Name"/>
+                            <field name="cost" string="Cost"/>
+                            <field name="quantity" string="Quantity"/>
+                            <field name="tooling_start_date"/>
+                            <field name="tooling_end_date"/>
+                            <field name="bom_line_ids" invisible="1"/>
+                            <button name="btn_confirm" string="Confirm" class="oe_highlight" type="object" />
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//field[@name='bom_line_ids']/tree/field[@name='product_tmpl_id']" position="after">
+                <field name="component_type"/>
+                <field name="product_tooling_id" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

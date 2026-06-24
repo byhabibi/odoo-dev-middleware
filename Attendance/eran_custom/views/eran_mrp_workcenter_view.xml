@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_mrp_workcenter_view_from_inherit" model="ir.ui.view">
+        <field name="name">eran.mrp.workcenter.view.form.inherit</field>
+        <field name="model">mrp.workcenter</field>
+        <field name="inherit_id" ref="mrp.mrp_workcenter_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='resource_calendar_id']" position="after">
+                <field name="workcenter_group_id"/>
+            </xpath>
+            <xpath expr="//label[@for='costs_hour']" position="before">
+                <field name="product_ids" mode="tree" >
+                    <tree string="Input Data" editable="bottom">
+                        <field name="product_template_id" string="Cost Name"/>
+                        <field name="cost"/>
+                        <field name="quantity" string="Quantity"/>
+                        <field name="total_cost"/>                        
+                    </tree>
+                </field>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Overhead">
+                    <field name="overhead_ids">
+                        <tree editable="bottom">
+                            <field name="product_id" options="{'no_open':True,'no_create': True}" required="1" 
+                                domain="[('detailed_type', '=', 'product')]"/>
+                            <field name="min_capacity" />
+                            <field name="max_capacity" />
+                            <field name="qty" />
+                            <field name="uom_id" options="{'no_open':True,'no_create': True}" required="1" force_save="1" readonly="1"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_oee_tree_view_inherit" model="ir.ui.view">
+        <field name="name">mrp.workcenter.productivity.tree.inherit</field>
+        <field name="model">mrp.workcenter.productivity</field>
+        <field name="inherit_id" ref="mrp.oee_tree_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='date_end']" position="after">
+                <field name="product_id"/>
+            </xpath>
+            <xpath expr="//field[@name='workcenter_id']" position="after">
+                <field name="workcenter_group_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="eran_oee_form_view_inherit" model="ir.ui.view">
+        <field name="name">mrp.workcenter.productivity.form.inherit</field>
+        <field name="model">mrp.workcenter.productivity</field>
+        <field name="inherit_id" ref="mrp.oee_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='workcenter_id']" position="before">
+                <field name="product_id"/>
+            </xpath>
+            <xpath expr="//field[@name='workcenter_id']" position="after">
+                <field name="workcenter_group_id"/>
+            </xpath>
+            <xpath expr="//field[@name='duration']" position="after">
+                <field name="real_duration" widget="float_time"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

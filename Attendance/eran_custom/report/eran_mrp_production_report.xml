@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="mrp.report_mrp_production_components">
+        <h3>
+            <span>
+                Components
+            </span>
+        </h3>
+        <table class="table table-sm">
+            <t t-set="has_product_barcode" t-value="any(m.product_id.barcode for m in o.move_raw_ids)"/>
+            <thead>
+                <tr>
+                    <th style="width:37%;">Product</th>
+                    <th>Reserved</th>
+                    <th>Available Stock</th>
+                    <!-- <th t-if="o.state in ('progress', 'to_close','done')" t-attf-class="{{ 'text-end' if not has_product_barcode else '' }}">Consumed</th> -->
+                    <th t-attf-class="{{ 'text-end' if not has_product_barcode else '' }}">Plan Supply</th>
+                    <th>Actual Supply</th>
+                    <th t-if="has_product_barcode" width="15%" class="text-center">Barcode</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr t-foreach="o.move_raw_ids" t-as="raw_line">
+                    <!-- cari stock avaliable di stock quant -->
+                    <t t-set="available_stock" t-value="o.env['stock.quant'].search([('product_id', '=', raw_line.product_id.id), ('location_id', '=', raw_line.location_id.id)])"/>
+                    <t t-set="qty_available" t-value="0"/>
+                    <t t-foreach="available_stock" t-as="val">
+                        <t t-set="qty_available" t-value="qty_available + val.quantity"/>
+                    </t>
+                    <!-- cari total actual supply dari request material -->
+                    <t t-set="move_ids" t-value="o.env['stock.move'].search([('picking_id.manufacture_production_id', '=', o.id), ('picking_id.state', '!=', 'cancel'), ('product_id', '=', raw_line.product_id.id)])"/>
+                    <t t-set="qty_actual" t-value="0"/>
+                    <t t-foreach="move_ids" t-as="value">
+                        <t t-set="qty_actual" t-value="qty_actual + value.quantity_done"/>
+                    </t>
+                    <!--Cari Reserved quantity components-->
+                    <t t-set="reserve_qty" t-value="0"/>
+                    <t t-set="move_raw" t-value="o.env['stock.move'].search([('product_id', '=', raw_line.product_id.id), ('state', '=', 'assigned'), ('raw_material_production_id', '!=', False)])"/>
+                    <t t-foreach="move_raw" t-as="val">
+                        <t t-set="reserve_qty" t-value="reserve_qty + val.product_uom_qty"/>
+                    </t>
+                    
+                    <t t-set="available_stock_qty" t-value="qty_available - reserve_qty"/>
+                    <td>
+                        <span t-field="raw_line.product_id"/>
+                    </td>
+                    <td><span t-esc="reserve_qty" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/> <span t-field="raw_line.product_uom" groups="uom.group_uom"/></td>
+                    <td><span t-esc="available_stock_qty" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/> <span t-field="raw_line.product_id.uom_id" groups="uom.group_uom"/></td>
+                    <!-- <td t-attf-class="{{ 'text-end' if not has_product_barcode else '' }}" t-if="o.state in ('progress', 'to_close','done')">
+                        <div>
+                            <span t-field="raw_line.quantity_done"/>
+                        </div>
+                    </td> -->
+                    <td t-attf-class="{{ 'text-end' if not has_product_barcode else '' }}">
+                        <span t-field="raw_line.product_uom_qty"/>
+                        <span t-field="raw_line.product_uom" groups="uom.group_uom"/>
+                    </td>
+                    <!-- <td><span t-esc="qty_actual" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/> <span t-field="raw_line.product_uom" groups="uom.group_uom"/></td> -->
+                    <td><span t-esc="qty_actual" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/> <span t-field="raw_line.product_id.uom_id" groups="uom.group_uom"/></td>
+                    <td t-if="has_product_barcode" width="15%" class="text-center">
+                        <t t-if="raw_line.product_id.barcode">
+                            <div t-field="raw_line.product_id.barcode" t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px'}"/>
+                        </t>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </template>
+
+</odoo>

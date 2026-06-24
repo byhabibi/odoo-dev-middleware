@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="eran_stock_picking_type_form_view" model="ir.ui.view">
+        <field name="name">eran.stock.picking.type.form.inherit</field>
+        <field name="model">stock.picking.type</field>
+        <field name="inherit_id" ref="stock.view_picking_type_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='show_reserved']" position="after">
+                <field name="able_to_invoice"/>
+                <field name="source_location_material"/>
+                <field name="auto_create_request_material"/>
+                <field name="is_request_material" />
+            </xpath>
+            <xpath expr="//field[@name='sequence_code']" position="after">
+                <field name="need_approval_exceeding_demand"/>
+            </xpath>
+            <xpath expr="//field[@name='default_location_dest_id']" position="after">
+                <field name="ng_location_id" domain="[('usage', '=', 'inventory')]" attrs="{'required': [('code', '=', 'mrp_operation')], 'invisible': [('code', '!=', 'mrp_operation')]}"
+                    options="{'no_open':True,'no_create': True}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

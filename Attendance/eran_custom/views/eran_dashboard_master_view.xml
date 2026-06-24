@@ -1,0 +1,261 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="eran_master_loss_opportunity_view_tree" model="ir.ui.view">
+        <field name="name">eran.master.loss.opportunity.view.tree</field>
+        <field name="model">master.loss.opportunity</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date" />
+                <field name="currency_id" invisible="1"/>
+                <field name="category_group_id" />
+                <field name="target" />
+                <field name="problem" />
+                <field name="activity" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_master_loss_opportunity" model="ir.actions.act_window">
+        <field name="name">Loss Opportunity</field>
+        <field name="res_model">master.loss.opportunity</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_master_loss_opportunity_view_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_master_vendor_performance_customer_view_tree" model="ir.ui.view">
+        <field name="name">eran.master.vendor.performance.customer.view.tree</field>
+        <field name="model">master.vendor.performance.customer</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date" />
+                <field name="partner_id" />
+                <field name="point" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_master_vendor_performance_customer" model="ir.actions.act_window">
+        <field name="name">Vendor Performance by Customer </field>
+        <field name="res_model">master.vendor.performance.customer</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_master_vendor_performance_customer_view_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_master_delivery_achivement_rate_tree" model="ir.ui.view">
+        <field name="name">eran.master.delivery.achivement.rate.tree</field>
+        <field name="model">master.delivery.achivement.rate</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date" />
+                <field name="category_group_id" />
+                <field name="problem" />
+                <field name="corective_action" string="Corrective Action"/>
+                <field name="user_pic" />
+                <field name="remark" />
+                <field name="key_message" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_master_delivery_achivement_rate" model="ir.actions.act_window">
+        <field name="name">Delivery Achievement Rate </field>
+        <field name="res_model">master.delivery.achivement.rate</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_master_delivery_achivement_rate_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_master_production_achivement_rate_view_tree" model="ir.ui.view">
+        <field name="name">eran.master.production.achivement.rate.view.tree</field>
+        <field name="model">master.production.achivement.rate</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date" />
+                <field name="problem" />
+                <field name="corective_action" string="Corrective Action"/>
+                <field name="user_pic" />
+                <field name="remark" />
+                <field name="key_message" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_master_production_achivement_rate" model="ir.actions.act_window">
+        <field name="name">Production Achievement Rate </field>
+        <field name="res_model">master.production.achivement.rate</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_master_production_achivement_rate_view_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_master_production_achivement_rate_line_tree" model="ir.ui.view">
+        <field name="name">eran_master_production_achivement_rate_line_tree</field>
+        <field name="model">master.production.achivement.rate.line</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date" />
+                <field name="work_center_id" />
+                <field name="key_message" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_master_production_achivement_rate_line" model="ir.actions.act_window">
+        <field name="name">Production Achievement Rate Line</field>
+        <field name="res_model">master.production.achivement.rate.line</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_master_production_achivement_rate_line_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_master_line_stop_view_tree" model="ir.ui.view">
+        <field name="name">eran.master.line.stop.view.tree</field>
+        <field name="model">master.line.stop</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date" />
+                <field name="work_center_id" />
+                <field name="currency_id" invisible="1"/>
+                <field name="target" />
+                <field name="key_message" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_master_line_stop" model="ir.actions.act_window">
+        <field name="name">Line Stop</field>
+        <field name="res_model">master.line.stop</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_master_line_stop_view_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_master_rejection_rate_view_tree" model="ir.ui.view">
+        <field name="name">eran.master.rejection.rate.view.tree</field>
+        <field name="model">master.rejection.rate</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date" />
+                <field name="target" />
+                <field name="work_center_id" />
+                <field name="key_message" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_master_rejection_rate" model="ir.actions.act_window">
+        <field name="name">Rejection Rate</field>
+        <field name="res_model">master.rejection.rate</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_master_rejection_rate_view_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_master_date_view_tree" model="ir.ui.view">
+        <field name="name">eran.master.date.view.tree</field>
+        <field name="model">master.date</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_master_date" model="ir.actions.act_window">
+        <field name="name">Date Master</field>
+        <field name="res_model">master.date</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree,pivot</field>
+        <field name="view_id" ref="eran_master_date_view_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_control_delivery_order_view_tree" model="ir.ui.view">
+        <field name="name">eran.control.delivery.order.view.tree</field>
+        <field name="model">master.control.delivery.order.customer</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date" />
+                <field name="key_message" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_control_delivery_order" model="ir.actions.act_window">
+        <field name="name">Control Delivery Order Customer</field>
+        <field name="res_model">master.control.delivery.order.customer</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_control_delivery_order_view_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new
+            </p>
+        </field>
+    </record>
+
+    <record id="eran_master_inventory_control_view_tree" model="ir.ui.view">
+        <field name="name">eran.master.inventory.control.view.tree</field>
+        <field name="model">master.inventory.control</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date" />
+                <field name="key_message" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_master_inventory_control" model="ir.actions.act_window">
+        <field name="name">Inventory Control</field>
+        <field name="res_model">master.inventory.control</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="eran_master_inventory_control_view_tree" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new
+            </p>
+        </field>
+    </record>
+</odoo>
