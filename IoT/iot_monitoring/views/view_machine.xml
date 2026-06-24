@@ -1,0 +1,49 @@
+<odoo>
+  <data>
+
+    <!-- LIST VIEW MACHINE -->
+    <record id="view_iot_machine_tree" model="ir.ui.view">
+      <field name="name">iot.machine.tree</field>
+      <field name="model">iot.machine</field>
+      <field name="arch" type="xml">
+        <tree string="Mesin">
+          <field name="name" string="Nama Mesin"/>
+          <field name="area_id" string="Area"/>
+          <field name="workcenter_id" string="Work Center"/>
+        </tree>
+      </field>
+    </record>
+
+    <!-- FORM VIEW MACHINE -->
+    <record id="view_iot_machine_form" model="ir.ui.view">
+      <field name="name">iot.machine.form</field>
+      <field name="model">iot.machine</field>
+      <field name="arch" type="xml">
+        <form string="IoT Machine">
+          <sheet>
+            <group>
+              <field name="name" string="Nama Mesin"/>
+              <field name="area_id" string="Area"/>
+              <field name="workcenter_id" string="Work Center"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- ACTION MACHINE -->
+    <record id="action_iot_machine" model="ir.actions.act_window">
+      <field name="name">Mesin</field>
+      <field name="res_model">iot.machine</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- MENU MACHINE -->
+    <menuitem id="menu_iot_machine"
+              name="Mesin"
+              parent="menu_iot_root"
+              action="action_iot_machine"
+              sequence="10"/>
+
+  </data>
+</odoo>

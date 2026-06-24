@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_iot_area,iot.area,model_iot_area,,1,1,1,1
+access_iot_machine,iot.machine,model_iot_machine,,1,1,1,1
+access_iot_sensor_data,iot.sensor.data,model_iot_sensor_data,,1,1,1,1
+access_iot_production_summary,iot.production.summary,model_iot_production_summary,,1,0,0,0

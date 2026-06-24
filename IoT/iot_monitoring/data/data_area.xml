@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="area_nf" model="iot.area">
+            <field name="name">NF</field>
+        </record>
+        <record id="area_nc" model="iot.area">
+            <field name="name">NC</field>
+        </record>
+        <record id="area_stay" model="iot.area">
+            <field name="name">Stay</field>
+        </record>
+        <record id="area_stamping" model="iot.area">
+            <field name="name">Stamping</field>
+        </record>
+        <record id="area_tool" model="iot.area">
+            <field name="name">Tool Set</field>
+        </record>
+        <record id="area_spot" model="iot.area">
+            <field name="name">Spot Welding</field>
+        </record>
+        <record id="area_frame" model="iot.area">
+            <field name="name">Frame Seat</field>
+        </record>
+        <record id="area_robot" model="iot.area">
+            <field name="name">Robot Welding</field>
+        </record>
+        <record id="area_barrel" model="iot.area">
+            <field name="name">Barrel</field>
+        </record>
+        <record id="area_multi" model="iot.area">
+            <field name="name">Multi Forming</field>
+        </record>
+        <record id="area_bor" model="iot.area">
+            <field name="name">Bor and Champer</field>
+        </record>
+        <record id="area_auto" model="iot.area">
+            <field name="name">Auto Thread and Tapping</field>
+        </record>
+    </data>
+</odoo>

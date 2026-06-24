@@ -1,0 +1,85 @@
+<odoo>
+    <data>
+
+        <!-- ACTION -->
+        <record id="action_iot_area" model="ir.actions.act_window">
+            <field name="name">IoT Area</field>
+            <field name="res_model">iot.area</field>
+            <field name="view_mode">kanban,tree,form</field>
+        </record>
+
+        <!-- KANBAN VIEW -->
+        <record id="view_iot_area_kanban" model="ir.ui.view">
+            <field name="name">iot.area.kanban</field>
+            <field name="model">iot.area</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_view">
+                    <field name="name"/>
+
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div style="width:300px; height:150px; border:1px solid #ccc; padding:10px;">
+                                
+                                <div>
+                                    <strong>
+                                        <t t-esc="record.name.value"/>
+                                    </strong>
+                                </div>
+
+                            </div>
+                        </t>
+                    </templates>
+
+                </kanban>
+            </field>
+        </record>
+
+        <!-- MENU ROOT -->
+        <menuitem id="menu_iot_root" name="IoT Monitoring"/>
+
+        <!-- MENU AREA -->
+        <menuitem id="menu_iot_area" 
+                name="Areas"
+                parent="menu_iot_root"
+                action="action_iot_area"/>
+
+        <!-- DATA AREA -->
+        <record id="area_nf" model="iot.area">
+            <field name="name">NF</field>
+        </record>
+        <record id="area_nc" model="iot.area">
+            <field name="name">NC</field>
+        </record>
+        <record id="area_stay" model="iot.area">
+            <field name="name">Stay</field>
+        </record>
+        <record id="area_bor" model="iot.area">
+            <field name="name">Bor &amp; Champer</field>
+        </record>
+        <record id="area_auto" model="iot.area">
+            <field name="name">Auto Thread &amp; Tapping</field>
+        </record>
+        <record id="area_stamping" model="iot.area">
+            <field name="name">Stamping</field>
+        </record>
+        <record id="area_tool" model="iot.area">
+            <field name="name">Tool Set</field>
+        </record>
+        <record id="area_spot" model="iot.area">
+            <field name="name">Spot Welding</field>
+        </record>
+        <record id="area_frame" model="iot.area">
+            <field name="name">Frame Seat</field>
+        </record>
+        <record id="area_robot" model="iot.area">
+            <field name="name">Robot Welding</field>
+        </record>
+        <record id="area_barrel" model="iot.area">
+            <field name="name">Barrel</field>
+        </record>
+        <record id="area_multi" model="iot.area">
+            <field name="name">Multi Forming</field>
+        </record>
+
+    </data>
+</odoo>
