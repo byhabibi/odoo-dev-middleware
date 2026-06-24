@@ -1,52 +1,12 @@
-from fastapi import FastAPI, HTTPException, Request, APIRouter
+from fastapi import APIRouter
 from src.utility import get_odoo_client
 from dotenv import load_dotenv
+from datetime import datetime
 import os
 
 router = APIRouter()
-
 load_dotenv()
-  
-ODOO_URL = os.getenv("ODOO_URL")
-ODOO_DB = os.getenv("ODOO_DB")
-ODOO_USER = os.getenv("ODOO_USER")
-ODOO_PASSWORD = os.getenv("ODOO_PASSWORD") 
 
-
-# Fungsi Dummy untuk simulasi status absensi
-# --- KONFIGURASI TESTING ---
-# Set ke True untuk simulasi "Sudah Absen", False untuk "Belum Absen"
-TEST_MODE_ABSEN = True 
-
-async def check_attendance_dummy(employee_id):
-    """
-    Fungsi ini melakukan pengecekan absensi.
-    - Jika TEST_MODE_ABSEN adalah True, simulasi dianggap sudah absen.
-    - Jika TEST_MODE_ABSEN adalah False, sistem akan mengecek data riil di Odoo.
-    """
-    
-    # 1. BAGIAN TESTING (DUMMY)
-    # Anda cukup ganti variabel TEST_MODE_ABSEN di atas saja
-    # Jika Anda ingin testing flow 'berhasil', ubah jadi True
-    # Jika ingin testing flow 'belum absen', ubah jadi False
-    # KITA TAMBAHKAN KONDISI: hanya gunakan dummy jika kita memang mau memaksa mode testing
-    # Jika Anda ingin selalu pakai dummy, biarkan kode ini berjalan:
-    return TEST_MODE_ABSEN 
-
-    # 2. BAGIAN ASLI (PRODUCTION)
-    # Nanti, saat programmer absensi sudah selesai, cukup hapus 
-    # baris 'return TEST_MODE_ABSEN' dan buka comment di bawah ini:
-    
-    """
-    uid, models = get_odoo_client()
-    # Mencari record attendance yang check_in ada tapi check_out masih False
-    attendance_ids = models.execute_kw(
-        os.getenv("ODOO_DB"), uid, os.getenv("ODOO_PASSWORD"), 
-        'hr.attendance', 'search',
-        [[['employee_id', '=', employee_id], ['check_out', '=', False]]]
-    )
-    return len(attendance_ids) > 0
-    """
 
 @router.post("/api/scan-operator")
 async def scan_operator(payload: dict):
@@ -55,42 +15,131 @@ async def scan_operator(payload: dict):
         db = os.getenv("ODOO_DB")
         pwd = os.getenv("ODOO_PASSWORD")
 
-        pin = payload.get('pin')
-        machine_id = payload.get('machine_id')
-        
-        # 1. Cari Employee
-        employee = models.execute_kw(db, uid, pwd, 'hr.employee', 'search_read', [[['pin', '=', pin]]], {'fields': ['id', 'name']})
-        if not employee: return {"status": "error", "message": "PIN tidak ditemukan"}
-        emp = employee[0]
+        # Ambil data dari request
+        barcode = payload.get("barcode")
+        machine_id = payload.get("machine_id")
 
-        # 2. Cari WO yang ready bang
-        wo_list = models.execute_kw(db, uid, pwd, 'mrp.workorder', 'search_read',
-            [[
-                ['workcenter_id.name', 'ilike', machine_id], 
-                ['state', 'in', ['ready', 'waiting', 'pending']], 
-                ['employee_id', '=', False]
-            ]],
+        print("=" * 50)
+        print(f"DEBUG - Barcode    : {barcode}")
+        print(f"DEBUG - Machine ID : {machine_id}")
+
+        if not barcode or not machine_id:
+            return {
+                "status": "error",
+                "message": "Barcode atau Machine ID tidak lengkap"
+            }
+
+        # ==========================================================
+        # 1. Cari Employee
+        # ==========================================================
+        employee = models.execute_kw(
+            db,
+            uid,
+            pwd,
+            "hr.employee",
+            "search_read",
+            [[["barcode", "=", barcode]]],
             {
-                'fields': ['id', 'name', 'state', 'employee_id'], 
-                'limit': 1,
-                'order': 'id asc'  
+                "fields": ["id", "name"],
+                "limit": 1
             }
         )
 
+        print("DEBUG Employee :", employee)
+
+        if not employee:
+            return {
+                "status": "error",
+                "message": f"Karyawan dengan barcode {barcode} tidak ditemukan"
+            }
+
+        emp = employee[0]
+
+        print(f"DEBUG Employee ID   : {emp['id']}")
+        print(f"DEBUG Employee Name : {emp['name']}")
+
+        # ==========================================================
+        # 2. Cari Work Order
+        # ==========================================================
+        domain = [
+            ["workcenter_id.name", "ilike", machine_id],
+            ["state", "in", ["ready", "waiting", "pending"]]
+        ]
+
+        print("DEBUG Domain :", domain)
+
+        wo_list = models.execute_kw(
+            db,
+            uid,
+            pwd,
+            "mrp.workorder",
+            "search_read",
+            [domain],
+            {
+                "fields": [
+                    "id",
+                    "name",
+                    "state",
+                    "workcenter_id"
+                ],
+                "limit": 1,
+                "order": "id asc"
+            }
+        )
+
+        print("DEBUG WO :", wo_list)
+
         if not wo_list:
-            return {"status": "error", "message": "Tidak ada WO yang tersedia."}
+            return {
+                "status": "error",
+                "message": f"Tidak ada WO READY untuk mesin {machine_id}"
+            }
 
         wo = wo_list[0]
 
-        # 3. Update Operator terus ubah jadi In Progress
-        # Pakai 'write' ae biar gampang di Odoo nya
-        models.execute_kw(db, uid, pwd, 'mrp.workorder', 'write', [[wo['id']], {
-            'employee_id': emp['id'],
-            'state': 'progress' 
-        }])
-        
-        return {"status": "success", "employee_name": emp['name']}
+        print(f"DEBUG WO ID    : {wo['id']}")
+        print(f"DEBUG WO Name  : {wo['name']}")
+        print(f"DEBUG WO State : {wo['state']}")
+
+        # ==========================================================
+        # 3. Update WO
+        # ==========================================================
+        values = {
+            "employee_id": emp["id"],
+            "operator_id": emp["id"],   # pastikan field ini memang ada
+            "state": "progress",
+            "date_start": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+        print("DEBUG Update Values :", values)
+
+        models.execute_kw(
+            db,
+            uid,
+            pwd,
+            "mrp.workorder",
+            "write",
+            [[wo["id"]], values]
+        )
+
+        print("SUCCESS UPDATE")
+
+        return {
+            "status": "success",
+            "message": "Operator berhasil login",
+            "employee_name": emp["name"],
+            "workorder": wo["name"]
+        }
 
     except Exception as e:
-        print(f"ERROR: {str(e)}") 
-        return {"status": "error", "message": str(e)}
+        import traceback
+
+        print("=" * 50)
+        print("ERROR TERJADI")
+        traceback.print_exc()
+        print("=" * 50)
+
+        return {
+            "status": "error",
+            "message": str(e)
+        }
