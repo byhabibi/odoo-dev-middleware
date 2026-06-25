@@ -3,3 +3,4 @@ access_iot_area,iot.area,model_iot_area,,1,1,1,1
 access_iot_machine,iot.machine,model_iot_machine,,1,1,1,1
 access_iot_sensor_data,iot.sensor.data,model_iot_sensor_data,,1,1,1,1
 access_iot_production_summary,iot.production.summary,model_iot_production_summary,,1,0,0,0
+access_mes_request,mes.request,model_mes_request,base.group_user,1,1,1,1

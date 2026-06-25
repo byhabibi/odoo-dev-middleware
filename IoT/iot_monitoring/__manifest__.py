@@ -6,11 +6,12 @@
     'depends': ['base', 'mrp', 'hr', 'eran_custom'],
     'data': [
         'security/ir.model.access.csv',
-        'data/cron.xml',
+        #'data/cron.xml',
         #'data/data_machine.xml',
         'views/view_area.xml',
         'views/view_machine.xml',
         'views/view_sensor.xml',
+        'views/view_mes_request.xml',
     ],
     
     'assets' : {

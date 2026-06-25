@@ -9,6 +9,21 @@ class IoTMachine(models.Model):
     _name = 'iot.machine'
     _description = 'IoT Machine'
 
+    def action_open_requests(self):
+        self.ensure_one()
+
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Operator Request",
+            "res_model": "mes.request",
+            "view_mode": "tree,form",
+            "target": "current",
+            "domain": [
+                ("machine_id", "=", self.id),
+                ("request_state", "=", "waiting"),
+            ],
+        }
+
     name = fields.Char(required=True)
     area_id = fields.Many2one('iot.area', string='Area')
     workcenter_id = fields.Many2one('mrp.workcenter', string='Work Center')
@@ -64,6 +79,22 @@ class IoTMachine(models.Model):
         compute='_compute_latest_counter',
         store=False
     )
+
+    # Request dari MES
+    request_count = fields.Integer(
+        compute="_compute_request_count",
+        string="Request"
+    )
+
+    @api.depends()
+    def _compute_request_count(self):
+        Request = self.env["mes.request"]
+
+        for machine in self:
+            machine.request_count = Request.search_count([
+                ("machine_id", "=", machine.id),
+                ("request_state", "=", "waiting")
+            ])
 
     @api.depends('counter', 'product_qty')
     def _compute_plan_status(self):

@@ -221,6 +221,40 @@
                                     📡 Monitoring
                                 </button>
                             </div>
+
+                            <t t-if="record.request_count.raw_value &gt; 0">
+
+                                <div style="
+                                    margin-top:6px;
+                                    background:#fff3cd;
+                                    border:1px solid #ffeeba;
+                                    border-radius:6px;
+                                    padding:6px;
+                                    text-align:center;">
+
+                                    <button
+                                        name="action_open_requests"
+                                        type="object"
+                                        style="
+                                            width:100%;
+                                            background:#ffc107;
+                                            color:#212529;
+                                            border:none;
+                                            border-radius:5px;
+                                            padding:5px;
+                                            font-size:12px;
+                                            font-weight:bold;">
+
+                                        🔔
+                                        <field name="request_count"/>
+                                        Request Baru
+
+                                    </button>
+
+                                </div>
+
+                            </t>
+
                         </div>
                     </t>
                 </templates>
