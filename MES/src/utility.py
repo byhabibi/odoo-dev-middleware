@@ -3,6 +3,14 @@ import xmlrpc.client
 from fastapi.responses import HTMLResponse
 from dotenv import load_dotenv
 import db, os
+from dotenv import load_dotenv
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+print("ENV FILE =", os.path.join(BASE_DIR, ".env"))
+print("DB =", os.getenv("ODOO_DB"))
 
 load_dotenv()
 # -------------------------------------------------------------
@@ -16,6 +24,7 @@ ODOO_PASSWORD = os.getenv("ODOO_PASSWORD")
 def get_odoo_client():
     """Fungsi helper untuk melakukan autentikasi ke Odoo XML-RPC"""
     try:
+
         common = xmlrpc.client.ServerProxy(f"{ODOO_URL}/xmlrpc/2/common")
         uid = common.authenticate(ODOO_DB, ODOO_USER, ODOO_PASSWORD, {})
         if not uid:

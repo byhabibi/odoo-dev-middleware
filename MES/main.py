@@ -35,11 +35,30 @@ ODOO_USER = os.getenv("ODOO_USER")
 ODOO_PASSWORD = os.getenv("ODOO_PASSWORD")   
 # -------------------------------------------------------------
 
+@app.get("/test")
+def test():
+    return {"ok": True}
+
 @app.get("/api/area")
 @app.get("api/area_id")
 def get_area():
     """End Point untuk mengambil Area Produksi dari Odoo"""
     uid, models = get_odoo_client()
+
+    print("==========================")
+    print("DB =", ODOO_DB)
+
+    area_id = models.execute_kw(
+        ODOO_DB,
+        uid,
+        ODOO_PASSWORD,
+        'iot.area',
+        'search_read',
+        [],
+        {'fields': ['id', 'name', 'machine_count', 'running_machine', 'stop_machine']}
+    )
+
+    print("AREA =", area_id)
 
     try:
         area_id = models.execute_kw(

@@ -10,24 +10,17 @@ load_dotenv()
 
 @router.post("/api/scan-operator")
 async def scan_operator(payload: dict):
+    print("===== BARCODE ACTION TERBARU =====")
     try:
         uid, models = get_odoo_client()
         db = os.getenv("ODOO_DB")
         pwd = os.getenv("ODOO_PASSWORD")
 
-        # Ambil data dari request
         barcode = payload.get("barcode")
-        machine_id = payload.get("machine_id")
 
         print("=" * 50)
-        print(f"DEBUG - Barcode    : {barcode}")
-        print(f"DEBUG - Machine ID : {machine_id}")
+        print(f"DEBUG Barcode    : {barcode}")
 
-        if not barcode or not machine_id:
-            return {
-                "status": "error",
-                "message": "Barcode atau Machine ID tidak lengkap"
-            }
 
         # ==========================================================
         # 1. Cari Employee
@@ -45,99 +38,59 @@ async def scan_operator(payload: dict):
             }
         )
 
-        print("DEBUG Employee :", employee)
-
         if not employee:
             return {
                 "status": "error",
-                "message": f"Karyawan dengan barcode {barcode} tidak ditemukan"
+                "message": "Employee tidak ditemukan"
             }
 
         emp = employee[0]
 
-        print(f"DEBUG Employee ID   : {emp['id']}")
-        print(f"DEBUG Employee Name : {emp['name']}")
+        print(f"Employee : {emp['name']}")
 
         # ==========================================================
-        # 2. Cari Work Order
+        # 2. Cek Attendance
         # ==========================================================
-        domain = [
-            ["workcenter_id.name", "ilike", machine_id],
-            ["state", "in", ["ready", "waiting", "pending"]]
-        ]
 
-        print("DEBUG Domain :", domain)
-
-        wo_list = models.execute_kw(
+        attendance = models.execute_kw(
             db,
             uid,
             pwd,
-            "mrp.workorder",
+            "hr.attendance",
             "search_read",
-            [domain],
+            [[
+                ["employee_id", "=", emp["id"]],
+                ["check_out", "=", False]
+            ]],
             {
                 "fields": [
                     "id",
-                    "name",
-                    "state",
-                    "workcenter_id"
+                    "check_in",
+                    "check_out"
                 ],
-                "limit": 1,
-                "order": "id asc"
+                "limit": 1
             }
         )
 
-        print("DEBUG WO :", wo_list)
+        print("Attendance :", attendance)
 
-        if not wo_list:
+        if not attendance:
             return {
-                "status": "error",
-                "message": f"Tidak ada WO READY untuk mesin {machine_id}"
+                "status": "not_checked_in",
+                "employee": emp["name"],
+                "message": "Operator belum Check In"
             }
-
-        wo = wo_list[0]
-
-        print(f"DEBUG WO ID    : {wo['id']}")
-        print(f"DEBUG WO Name  : {wo['name']}")
-        print(f"DEBUG WO State : {wo['state']}")
-
-        # ==========================================================
-        # 3. Update WO
-        # ==========================================================
-        values = {
-            "employee_id": emp["id"],
-            "operator_id": emp["id"],   # pastikan field ini memang ada
-            "state": "progress",
-            "date_start": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        }
-
-        print("DEBUG Update Values :", values)
-
-        models.execute_kw(
-            db,
-            uid,
-            pwd,
-            "mrp.workorder",
-            "write",
-            [[wo["id"]], values]
-        )
-
-        print("SUCCESS UPDATE")
 
         return {
-            "status": "success",
-            "message": "Operator berhasil login",
-            "employee_name": emp["name"],
-            "workorder": wo["name"]
+            "status": "checked_in",
+            "employee": emp["name"],
+            "check_in": attendance[0]["check_in"],
+            "message": "Operator sudah Check In"
         }
 
     except Exception as e:
         import traceback
-
-        print("=" * 50)
-        print("ERROR TERJADI")
         traceback.print_exc()
-        print("=" * 50)
 
         return {
             "status": "error",
