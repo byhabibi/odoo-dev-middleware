@@ -36,7 +36,10 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     // Pastikan menggunakan pinValue yang sudah didefinisikan di atas
-                    body: JSON.stringify({ pin: pinValue, machine_id: "nf03" }) 
+                    body: JSON.stringify({
+                        barcode: barcode,
+                        machine_id: machineId
+                    })
                 });
 
                 const result = await response.json();

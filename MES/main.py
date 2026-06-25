@@ -196,13 +196,17 @@ async def scan_page(request: Request):
 
 # Gatau ini fitur apa pokoknya kerem
 
-@app.get("/scan/nf/{machine_id}")
+@app.get("/scan/{machine_id}")
 async def scan_page(request: Request, machine_id: str):
+
+    machine_id = machine_id.strip().upper()
+
     return templates.TemplateResponse(
-        request=request,  
+        request=request,
         name="barcode_action.html",
         context={
-            "machine_id": machine_id.upper() 
+            "request": request,
+            "machine_id": machine_id
         }
     )
 
