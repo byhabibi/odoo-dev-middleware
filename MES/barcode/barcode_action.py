@@ -168,9 +168,33 @@ async def scan_operator(payload: dict):
                 "status": "error",
                 "message": f"Tidak ada Work Order aktif di {machine['name']}"
             }
-        
+    
+
+        # ==========================================================
+        # 5. Requesr je Odoo
+        # ==========================================================
+        request_id = models.execute_kw(
+            db,
+            uid,
+            pwd,
+            "mes.request",
+            "create",
+            [{
+                "employee_id": emp["id"],
+                "machine_id": machine["id"],
+                "workcenter_id": workcenter_id,
+                "production_id": wo[0]["production_id"][0],
+                "workorder_id": wo[0]["id"],
+                "attendance_id": attendance[0]["id"],
+                "check_in": attendance[0]["check_in"],
+            }]
+        )
+
+        print("REQUEST CREATED :", request_id)
+
         return {
             "status": "success",
+            "request_id": request_id,
             "employee": emp["name"],
             "check_in": attendance[0]["check_in"],
             "machine": machine["name"],
@@ -179,6 +203,7 @@ async def scan_operator(payload: dict):
             "wo_state": wo[0]["state"],
             "mo": wo[0]["production_id"][1]
         }
+
 
     except Exception as e:
         import traceback
