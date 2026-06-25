@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_mes_request_tree" model="ir.ui.view">
+        <field name="name">mes.request.tree</field>
+        <field name="model">mes.request</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="employee_id"/>
+                <field name="machine_id"/>
+                <field name="workcenter_id"/>
+                <field name="production_id"/>
+                <field name="workorder_id"/>
+                <field name="check_in"/>
+                <field name="wo_state"/>
+                <field name="request_state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_mes_request_form" model="ir.ui.view">
+        <field name="name">mes.request.form</field>
+        <field name="model">mes.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="employee_id"/>
+                        <field name="machine_id"/>
+                        <field name="workcenter_id"/>
+                        <field name="production_id"/>
+                        <field name="workorder_id"/>
+                        <field name="attendance_id"/>
+                        <field name="check_in"/>
+                        <field name="wo_state"/>
+                        <field name="request_state"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

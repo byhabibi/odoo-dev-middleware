@@ -212,7 +212,7 @@ class IoTMachine(models.Model):
         related = 'workcenter_id.sph_machine',
         string = 'SPH Target'
     )
- 
+  
     @api.model
     def cron_generate_sph(self):
 
