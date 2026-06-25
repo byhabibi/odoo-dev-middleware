@@ -76,7 +76,7 @@
 "access_eran_attendance_overtime_approval_line","eran_attendance_overtime_approval_line","model_eran_attendance_overtime_approval_line","dsn_approval.group_approval_user",1,1,1,1
 "access_eran_rekap_absen_report_detail","eran_rekap_absen_report_detail","model_eran_rekap_absen_report_detail","",1,1,1,1
 "access_eran_rekap_absen_report_global","eran_rekap_absen_report_global","model_eran_rekap_absen_report_global","base.group_user",1,1,1,1
-
+"access_eran_mrp_workcenter_employee_admin","eran_mrp_workcenter_employee_admin","model_eran_mrp_workcenter_employee","base.group_system",1,1,1,1
 
 
 

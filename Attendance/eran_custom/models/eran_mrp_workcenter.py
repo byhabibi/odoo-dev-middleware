@@ -51,6 +51,14 @@ class MrpWorkCenter(models.Model):
         for rec in self:
             rec.costs_hour = sum(rec.product_ids.mapped('total_cost'))
 
+    sph_machine = fields.Integer(string="SPH Target")
+
+    employee_ids = fields.One2many(
+        'eran.mrp.workcenter.employee',
+        'workcenter_id',
+        string='Employee Mapping'
+    )
+
 class MrpWorkcenterProductivity(models.Model):
     _inherit = "mrp.workcenter.productivity"
     _order = 'id asc'
@@ -165,3 +173,28 @@ class EranWorkCenterOverhead(models.Model):
         self.uom_id = False
         if self.product_id:
             self.uom_id = self.product_id.uom_po_id
+
+class EranMrpWorkcenterEmployee(models.Model):
+    _name = "eran.mrp.workcenter.employee"
+
+    workcenter_id = fields.Many2one(
+        'mrp.workcenter',
+        ondelete='cascade',
+        required=True
+    )
+
+    company_id = fields.Many2one(
+        'res.company',
+        related='workcenter_id.company_id',
+        store=True,
+        readonly=True
+    )
+
+    role = fields.Selection([
+        ('leader', 'Leader'),
+        ('operator', 'Operator')
+    ])
+
+    employee_id = fields.Many2one(
+        'hr.employee'
+    )

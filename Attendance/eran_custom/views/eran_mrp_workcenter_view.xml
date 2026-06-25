@@ -8,6 +8,14 @@
             <xpath expr="//field[@name='resource_calendar_id']" position="after">
                 <field name="workcenter_group_id"/>
             </xpath>
+
+            <xpath expr="//field[@name='oee_target']/.." position="after">
+                <label for="sph_machine"/>
+                <div class="o_row">
+                    <field name="sph_machine"/>
+                </div>
+            </xpath>
+
             <xpath expr="//label[@for='costs_hour']" position="before">
                 <field name="product_ids" mode="tree" >
                     <tree string="Input Data" editable="bottom">
@@ -31,7 +39,16 @@
                         </tree>
                     </field>
                 </page>
-            </xpath>
+
+                <page string="Employee Mapping">
+                    <field name="employee_ids">
+                        <tree editable="bottom">
+                            <field name="role"/>
+                            <field name="employee_id"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>   
         </field>
     </record>
 
