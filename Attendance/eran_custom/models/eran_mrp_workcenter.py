@@ -157,7 +157,7 @@ class EranWorkCenterOverhead(models.Model):
     _description = 'Eran Work Center Overhead'
 
 
-    workcenter_id = fields.Many2one('mrp.workcenter', odelete='cascade')
+    workcenter_id = fields.Many2one('mrp.workcenter', ondelete='cascade')
     demand_id = fields.Many2one('dsn.demand.planning', ondelete='cascade', tracking=True)
     demand_workcenter_id = fields.Many2one('mrp.workcenter', string='Work Center')
     product_id = fields.Many2one('product.product', string='Product')

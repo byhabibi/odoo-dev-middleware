@@ -37,3 +37,4 @@ from . import eran_sale_request_quotation
 from . import eran_pica
 from . import eran_account_asset
 from . import eran_stock_scarp
+from . import eran_attendance_barcode

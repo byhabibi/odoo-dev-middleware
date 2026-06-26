@@ -90,6 +90,8 @@
         'views/eran_workcenter_activity_view.xml',
         'views/eran_account_asset_view.xml',
         'views/eran_attendance_view.xml',
+        'views/eran_attendance_barcode_view.xml',
+
 
         #wizard
         'wizard/eran_quotation_loi_wiz_view.xml',

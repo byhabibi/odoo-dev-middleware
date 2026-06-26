@@ -749,3 +749,141 @@ class eranAttendanceOvertimeLine(models.Model):
                 rec.durasi_actual = rec.finish_actual - rec.start_actual - rec.istirahat_actual
             else:
                 rec.durasi_actual = 0
+
+
+class HrEmployee(models.Model):
+    _inherit = "hr.employee"
+
+    @api.model
+    def attendance_scan(self, barcode):
+
+        _logger.warning("========== BARCODE SCAN ==========")
+        _logger.warning("Barcode : %s", barcode)
+
+        # ===================================
+        # Cari Employee
+        # ===================================
+        employee = self.sudo().search([
+            ("barcode", "=", barcode)
+        ], limit=1)
+
+        if not employee:
+            _logger.warning("Employee tidak ditemukan")
+            return super().attendance_scan(barcode)
+
+        _logger.warning("Employee : %s", employee.name)
+        _logger.warning("Employee ID : %s", employee.id)
+
+        # ===================================
+        # Jalankan Attendance bawaan Odoo
+        # ===================================
+        result = super().attendance_scan(barcode)
+
+        # ===================================
+        # Attendance terbaru
+        # ===================================
+        attendance = self.env["hr.attendance"].sudo().search([
+            ("employee_id", "=", employee.id)
+        ], order="id desc", limit=1)
+
+        # ===================================
+        # Mapping Work Center
+        # ===================================
+        mapping = self.env["eran.mrp.workcenter.employee"].sudo().search([
+            ("employee_id", "=", employee.id)
+        ], limit=1)
+
+        workcenter = mapping.workcenter_id if mapping else False
+
+        workorder = self.env["mrp.workorder"].sudo().search([
+            ("workcenter_id", "=", workcenter.id),
+            ("state", "in", ["ready", "pending", "progress"]),
+        ], order="date_planned_start asc", limit=1)
+
+        productions = self.env["mrp.production"].search([
+            ("date_planned_start", ">=", "2026-06-26 00:00:00"),
+            ("date_planned_start", "<",  "2026-06-27 00:00:00"),
+        ])
+
+        for production in productions:
+
+            workorder = production.workorder_ids.filtered(
+                lambda w:
+                    w.state == "ready"
+                    and w.workcenter_id.id == workcenter.id
+                    and w.shift_id.id == attendance.shift_id.id
+            )
+
+            if workorder:
+                break
+
+        # ===================================
+        # LOG
+        # ===================================
+        _logger.warning("Attendance ID : %s", attendance.id)
+        _logger.warning("Check In      : %s", attendance.check_in)
+        _logger.warning("Shift         : %s", attendance.shift_id.name if attendance.shift_id else "-")
+        _logger.warning("Work Center   : %s", workcenter.name if workcenter else "-")
+
+        # ===================================
+        # TODO
+        # Cari MES Request
+        # ===================================
+
+        request = False
+        production = False
+        workorder = False
+
+        # nanti kita isi setelah lihat model mes.request
+
+        # ===================================
+        # Create Approval
+        # ===================================
+
+        approval = self.env["mes.scan.approval"].sudo().create({
+
+            "employee_id": employee.id,
+
+            "check_in": attendance.check_in,
+
+            "scan_time": fields.Datetime.now(),
+
+            "shift_id": attendance.shift_id.id if attendance.shift_id else False,
+
+            "workcenter_id": workcenter.id if workcenter else False,
+
+            "production_id": production.id if production else False,
+
+            "workorder_id": workorder.id if workorder else False,
+
+            "state": "ready",
+
+            "workorder_id": workorder.id if workorder else False,
+
+            "production_id": production.id if production else False,
+
+        })
+
+        _logger.warning("Approval Created : %s", approval.id)
+
+        return result
+    
+class eranAttendance(models.Model):
+    _inherit = "hr.attendance"
+
+    @api.model_create_multi
+    def create(self, vals_list):
+
+        records = super().create(vals_list)
+
+        for rec in records:
+
+            # cari shift berdasarkan check_in
+            shift = self.env["eran.master.shift"].search([
+                # logika shift
+            ], limit=1)
+
+            if shift:
+                rec.shift_id = shift.id
+
+        return records

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <!-- TREE -->
+
+    <record id="view_mes_scan_approval_tree" model="ir.ui.view">
+
+        <field name="name">mes.scan.approval.tree</field>
+
+        <field name="model">mes.scan.approval</field>
+
+        <field name="arch" type="xml">
+
+            <tree>
+
+                <field name="employee_id"/>
+
+                <field name="barcode"/>
+
+                <field name="check_in"/>
+
+                <field name="scan_time"/>
+
+                <field name="shift_id"/>
+
+                <field name="state"/>
+
+            </tree>
+
+        </field>
+
+    </record>
+
+    <!-- FORM -->
+
+    <record id="view_mes_scan_approval_form" model="ir.ui.view">
+
+        <field name="name">mes.scan.approval.form</field>
+
+        <field name="model">mes.scan.approval</field>
+
+        <field name="arch" type="xml">
+
+            <form>
+
+                <header>
+
+                    <button name="action_approve"
+                            string="Approve"
+                            type="object"
+                            class="btn-primary"
+                            states="draft"/>
+
+                    <button name="action_reject"
+                            string="Reject"
+                            type="object"
+                            class="btn-danger"
+                            states="draft"/>
+
+                    <field
+                        name="state"
+                        widget="statusbar"
+                        statusbar_visible="draft,approved,reject"/>
+
+                </header>
+
+                <sheet>
+
+                    <group>
+
+                        <field name="employee_id"/>
+
+                        <field name="barcode"/>
+
+                        <field name="check_in"/>
+
+                        <field name="scan_time"/>
+
+                        <field name="shift_id"/>
+
+                    </group>
+
+                    <group>
+
+                        <field name="note"/>
+
+                    </group>
+
+                </sheet>
+
+            </form>
+
+        </field>
+
+    </record>
+
+    <!-- KANBAN -->
+
+    <record id="view_mes_scan_approval_kanban" model="ir.ui.view">
+
+        <field name="name">mes.scan.approval.kanban</field>
+
+        <field name="model">mes.scan.approval</field>
+
+        <field name="arch" type="xml">
+
+            <kanban>
+
+                <field name="employee_id"/>
+
+                <field name="scan_time"/>
+
+                <field name="check_in"/>
+
+                <field name="shift_id"/>
+
+                <field name="state"/>
+
+                <templates>
+
+                    <t t-name="kanban-box">
+
+                        <div class="oe_kanban_global_click">
+
+                            <strong>
+
+                                <field name="employee_id"/>
+
+                            </strong>
+
+                            <br/>
+
+                            Shift :
+                            <field name="shift_id"/>
+
+                            <br/>
+
+                            Check In :
+                            <field name="check_in"/>
+
+                            <br/>
+
+                            Scan :
+                            <field name="scan_time"/>
+
+                            <br/>
+
+                            <strong>
+
+                                <field name="state"/>
+
+                            </strong>
+
+                        </div>
+
+                    </t>
+
+                </templates>
+
+            </kanban>
+
+        </field>
+
+    </record>
+
+    <!-- ACTION -->
+
+    <record id="action_mes_scan_approval" model="ir.actions.act_window">
+
+        <field name="name">MES Scan Approval</field>
+
+        <field name="res_model">mes.scan.approval</field>
+
+        <field name="view_mode">kanban,tree,form</field>
+
+    </record>
+
+    <!-- MENU -->
+
+    <menuitem
+        id="menu_mes_scan_root"
+        name="MES Scan"/>
+
+    <menuitem
+        id="menu_mes_scan_approval"
+        parent="menu_mes_scan_root"
+        action="action_mes_scan_approval"
+        name="Approval"/>
+
+</odoo>
