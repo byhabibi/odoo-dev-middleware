@@ -795,14 +795,20 @@ class HrEmployee(models.Model):
 
         workcenter = mapping.workcenter_id if mapping else False
 
-        workorder = self.env["mrp.workorder"].sudo().search([
-            ("workcenter_id", "=", workcenter.id),
-            ("state", "in", ["ready", "pending", "progress"]),
-        ], order="date_planned_start asc", limit=1)
+        today = fields.Date.today()
 
+        workorder = self.env["mrp.workorder"].search([
+            ("workcenter_id", "=", workcenter.id),
+            ("state", "in", ["waiting","ready","progress"]),
+            ("production_id.date_planned_start", ">=", datetime.combine(today, time.min)),
+            ("production_id.date_planned_start", "<", datetime.combine(today + timedelta(days=1), time.min)),
+        ], limit=1)
+        
         productions = self.env["mrp.production"].search([
             ("date_planned_start", ">=", "2026-06-26 00:00:00"),
             ("date_planned_start", "<",  "2026-06-27 00:00:00"),
+            ("production_id.shift_id", "=", attendance.shift_id.id),
+            ("shift_id", "=", attendance.shift_id.id)
         ])
 
         for production in productions:
