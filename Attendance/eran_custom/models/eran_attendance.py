@@ -789,26 +789,26 @@ class HrEmployee(models.Model):
         # ===================================
         # Mapping Work Center
         # ===================================
-        mapping = self.env["eran.mrp.workcenter.employee"].sudo().search([
+        mapping = self.env["eran.mrp.workcenter.employee"].search([
             ("employee_id", "=", employee.id)
-        ], limit=1)
+        ])
 
         workcenter = mapping.workcenter_id if mapping else False
 
-        today = fields.Date.today()
+        today = attendance.check_in.replace(hour=0, minute=0, second=0, microsecond=0)
+        tomorrow = today + timedelta(days=1)
 
-        workorder = self.env["mrp.workorder"].search([
+        workorders = self.env["mrp.workorder"].search([
             ("workcenter_id", "=", workcenter.id),
-            ("state", "in", ["waiting","ready","progress"]),
-            ("production_id.date_planned_start", ">=", datetime.combine(today, time.min)),
-            ("production_id.date_planned_start", "<", datetime.combine(today + timedelta(days=1), time.min)),
-        ], limit=1)
+            ("state", "in", ["waiting", "ready", "progress"]),
+            ("production_id.date_planned_start", ">=", today),
+            ("production_id.date_planned_start", "<", tomorrow),
+        ])
         
         productions = self.env["mrp.production"].search([
-            ("date_planned_start", ">=", "2026-06-26 00:00:00"),
-            ("date_planned_start", "<",  "2026-06-27 00:00:00"),
-            ("production_id.shift_id", "=", attendance.shift_id.id),
-            ("shift_id", "=", attendance.shift_id.id)
+            ("date_planned_start", ">=", today),
+            ("date_planned_start", "<", tomorrow),
+            ("state", "in", ["confirmed", "progress", "to_close"]),
         ])
 
         for production in productions:

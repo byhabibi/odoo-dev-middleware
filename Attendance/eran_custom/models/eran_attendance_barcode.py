@@ -1,5 +1,28 @@
-from odoo import models, fields
+from odoo import models, fields, api
+import logging
 
+_logger = logging.getLogger(__name__)
+
+class MrpWorkorder(models.Model):
+    _inherit = "mrp.workorder"
+
+    def name_get(self):
+        _logger.warning("=== NAME_GET WORKORDER ===")
+
+        result = []
+
+        for rec in self:
+
+            mo = rec.production_id.name or "-"
+            wo = rec.name or "-"
+            product = rec.production_id.product_id.display_name or "-"
+            wc = rec.workcenter_id.name or "-"
+
+            name = f"{mo} | {wo} | {product} | {wc}"
+
+            result.append((rec.id, name))
+
+        return result
 
 class BarcodeScanLog(models.Model):
     _name = "barcode.scan.log"
@@ -66,7 +89,7 @@ class MesScanApproval(models.Model):
         "mrp.production"
     )
 
-    workorder_id = fields.Many2one(
+    workorder_ids = fields.Many2one(
         "mrp.workorder"
     )
 
@@ -83,6 +106,11 @@ class MesScanApproval(models.Model):
     # =========================
     # STATUS
     # =========================
+
+    available_workorder_ids = fields.Many2many(
+        "mrp.workorder",
+        string="Today's Work Orders"
+    )
 
     state = fields.Selection([
         ("draft", "Waiting"),
