@@ -79,6 +79,6 @@
 "access_eran_mrp_workcenter_employee_admin","eran_mrp_workcenter_employee_admin","model_eran_mrp_workcenter_employee","base.group_system",1,1,1,1
 "access_mes_scan_approval_admin","mes_scan_approval_admin","model_mes_scan_approval","base.group_system",1,1,1,1
 "access_barcode_scan_log_admin","barcode_scan_log_admin","model_barcode_scan_log","base.group_system",1,1,1,1
-
+"access_mes_scan_approval_line_user","mes_scan_approval_line_user","model_mes_scan_approval_line","base.group_user",1,1,1,1
 
 

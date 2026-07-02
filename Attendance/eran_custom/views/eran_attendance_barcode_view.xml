@@ -5,35 +5,20 @@
     <!-- TREE -->
 
     <record id="view_mes_scan_approval_tree" model="ir.ui.view">
-
         <field name="name">mes.scan.approval.tree</field>
-
         <field name="model">mes.scan.approval</field>
-
         <field name="arch" type="xml">
-
             <tree>
 
                 <field name="employee_id"/>
-
                 <field name="barcode"/>
-
                 <field name="check_in"/>
-
                 <field name="scan_time"/>
-
                 <field name="shift_id"/>
-
-                <field name="workcenter_id"/>
-
-                <field name="workorder_info" nolabel="1" readonly="1"/>
-
                 <field name="state"/>
 
             </tree>
-
         </field>
-
     </record>
 
     <!-- FORM -->
@@ -50,18 +35,6 @@
 
                 <header>
 
-                    <button name="action_approve"
-                            string="Approve"
-                            type="object"
-                            class="btn-primary"
-                            states="draft"/>
-
-                    <button name="action_reject"
-                            string="Reject"
-                            type="object"
-                            class="btn-danger"
-                            states="draft"/>
-
                     <field
                         name="state"
                         widget="statusbar"
@@ -74,28 +47,39 @@
                     <group>
 
                         <field name="employee_id"/>
-
                         <field name="barcode"/>
-
                         <field name="check_in"/>
-
                         <field name="scan_time"/>
-
                         <field name="shift_id"/>
 
-                        <field name="workcenter_id"/>
-
                     </group>
 
-                    <field name="workorder_info" nolabel="1" readonly="1"/>
+                    <separator string="Today's Work Orders"/>
 
-                    <group>
+                    <field name="line_ids">
 
-                        <field name="state"/>
+                        <tree create="0" delete="0" editable="false">
 
-                        <field name="note"/>
+                            <field name="production_id"/>
+                            <field name="workorder_id"/>
+                            <field name="leader_id"/>
+                            <field name="wo_state"/>
 
-                    </group>
+                            <button
+                                name="action_start"
+                                type="object"
+                                string="START"
+                                class="btn-success"/>
+
+                            <button
+                                name="action_stop"
+                                type="object"
+                                string="STOP"
+                                class="btn-danger"/>
+
+                        </tree>
+
+                    </field>
 
                 </sheet>
 
@@ -124,10 +108,6 @@
                 <field name="check_in"/>
 
                 <field name="shift_id"/>
-
-                <field name="workcenter_id"/>
-
-                <field name="workorder_info" nolabel="1" readonly="1"/>
 
                 <field name="state"/>
 
@@ -159,14 +139,6 @@
                             <field name="scan_time"/>
 
                             <br/>
-
-                            Work Center :
-                            <field name="workcenter_id"/>
-
-                            <br/>
-
-                            Work Order :
-                            <field name="workorder_info" widget="html" nolabel="1"/>
 
                             <strong>
 

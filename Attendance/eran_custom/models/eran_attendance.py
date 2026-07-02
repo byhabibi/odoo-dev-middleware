@@ -756,121 +756,55 @@ class HrEmployee(models.Model):
 
     @api.model
     def attendance_scan(self, barcode):
-
-        _logger.warning("========== BARCODE SCAN ==========")
-        _logger.warning("Barcode : %s", barcode)
-
-        # ===================================
-        # Cari Employee
-        # ===================================
-        employee = self.sudo().search([
-            ("barcode", "=", barcode)
-        ], limit=1)
-
+        from odoo.exceptions import UserError
+        
+        # 1. Cari Employee
+        employee = self.sudo().search([("barcode", "=", barcode)], limit=1)
         if not employee:
-            _logger.warning("Employee tidak ditemukan")
             return super().attendance_scan(barcode)
 
-        _logger.warning("Employee : %s", employee.name)
-        _logger.warning("Employee ID : %s", employee.id)
-
-        # ===================================
-        # Jalankan Attendance bawaan Odoo
-        # ===================================
+        # 2. Jalankan Attendance bawaan Odoo
         result = super().attendance_scan(barcode)
 
-        # ===================================
-        # Attendance terbaru
-        # ===================================
+        # 3. Cari Data Attendance Terakhir
         attendance = self.env["hr.attendance"].sudo().search([
             ("employee_id", "=", employee.id)
         ], order="id desc", limit=1)
 
-        # ===================================
-        # Mapping Work Center
-        # ===================================
+        if not attendance:
+            return result
+
+        # 4. Mapping Work Center
         mapping = self.env["eran.mrp.workcenter.employee"].search([
             ("employee_id", "=", employee.id)
         ])
-
-        workcenter = mapping.workcenter_id if mapping else False
-
-        today = attendance.check_in.replace(hour=0, minute=0, second=0, microsecond=0)
-        tomorrow = today + timedelta(days=1)
-
+        workcenters = mapping.mapped("workcenter_id")
+        
+        # Cari Workorders
         workorders = self.env["mrp.workorder"].search([
-            ("workcenter_id", "=", workcenter.id),
+            ("workcenter_id", "in", workcenters.ids),
             ("state", "in", ["waiting", "ready", "progress"]),
-            ("production_id.date_planned_start", ">=", today),
-            ("production_id.date_planned_start", "<", tomorrow),
         ])
         
-        productions = self.env["mrp.production"].search([
-            ("date_planned_start", ">=", today),
-            ("date_planned_start", "<", tomorrow),
-            ("state", "in", ["confirmed", "progress", "to_close"]),
-        ])
-
-        for production in productions:
-
-            workorder = production.workorder_ids.filtered(
-                lambda w:
-                    w.state == "ready"
-                    and w.workcenter_id.id == workcenter.id
-                    and w.shift_id.id == attendance.shift_id.id
-            )
-
-            if workorder:
-                break
-
-        # ===================================
-        # LOG
-        # ===================================
-        _logger.warning("Attendance ID : %s", attendance.id)
-        _logger.warning("Check In      : %s", attendance.check_in)
-        _logger.warning("Shift         : %s", attendance.shift_id.name if attendance.shift_id else "-")
-        _logger.warning("Work Center   : %s", workcenter.name if workcenter else "-")
-
-        # ===================================
-        # TODO
-        # Cari MES Request
-        # ===================================
-
-        request = False
-        production = False
-        workorder = False
-
-        # nanti kita isi setelah lihat model mes.request
-
-        # ===================================
-        # Create Approval
-        # ===================================
-
+        # --- LOG KHUSUS (Cari tag ini di PowerShell) ---
+        _logger.warning("[DEBUG_MES] WC_IDS: %s", workcenters.ids)
+        _logger.warning("[DEBUG_MES] WO_FOUND: %s", workorders.ids)
+        _logger.warning("[DEBUG_MES] JUMLAH_WO: %s", len(workorders))
+        
+        # 6. Create Approval & Line
         approval = self.env["mes.scan.approval"].sudo().create({
-
             "employee_id": employee.id,
-
             "check_in": attendance.check_in,
-
             "scan_time": fields.Datetime.now(),
-
             "shift_id": attendance.shift_id.id if attendance.shift_id else False,
-
-            "workcenter_id": workcenter.id if workcenter else False,
-
-            "production_id": production.id if production else False,
-
-            "workorder_id": workorder.id if workorder else False,
-
             "state": "ready",
-
-            "workorder_id": workorder.id if workorder else False,
-
-            "production_id": production.id if production else False,
-
         })
 
-        _logger.warning("Approval Created : %s", approval.id)
+        for wo in workorders:
+            self.env["mes.scan.approval.line"].create({
+                "approval_id": approval.id,
+                "workorder_id": wo.id,
+            })
 
         return result
     

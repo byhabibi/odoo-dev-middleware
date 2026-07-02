@@ -50,166 +50,107 @@ class MesScanApproval(models.Model):
     _description = "MES Scan Approval"
     _order = "scan_time desc"
 
-    # =========================
-    # OPERATOR
-    # =========================
-
     employee_id = fields.Many2one(
         "hr.employee",
-        required=True
+        required=True,
     )
 
     barcode = fields.Char(
         related="employee_id.barcode",
-        store=True
+        store=True,
     )
-
-    shift_id = fields.Many2one(
-        "eran.master.shift",
-        string="Shift"
-    )
-
-    workcenter_id = fields.Many2one(
-        "mrp.workcenter",
-        string="Work Center"
-    )
-
-    # =========================
-    # SCAN
-    # =========================
 
     check_in = fields.Datetime()
 
-    scan_time = fields.Datetime()
-
-    # =========================
-    # MES
-    # =========================
-
-    production_id = fields.Many2one(
-        "mrp.production"
+    scan_time = fields.Datetime(
+        default=fields.Datetime.now
     )
 
-    workorder_ids = fields.Many2one(
-        "mrp.workorder"
+    shift_id = fields.Many2one(
+        "eran.master.shift"
     )
-
-    # =========================
-    # PRODUKSI
-    # =========================
-
-    qty_target = fields.Float()
-
-    qty_actual = fields.Float(default=0)
-
-    sph = fields.Integer()
-
-
-    # ========================
-    # WORK ORDER
-    # ========================
-
-    workorder_info = fields.Html(
-        string="Today's Assignment",
-        compute="_compute_workorder_info",
-        sanitize=False,
-    )
-
-    @api.depends("check_in", "employee_id")
-    def _compute_workorder_info(self):
-
-        for rec in self:
-
-            if not rec.check_in:
-                rec.workorder_info = ""
-                continue
-
-            mappings = self.env["eran.mrp.workcenter.employee"].search([
-                ("employee_id", "=", rec.employee_id.id)
-            ])
-
-            workcenters = mappings.mapped("workcenter_id")
-
-            today = rec.check_in.replace(
-                hour=0,
-                minute=0,
-                second=0,
-                microsecond=0,
-            )
-
-            tomorrow = today + timedelta(days=1)
-
-            workorders = self.env["mrp.workorder"].search([
-                ("workcenter_id", "in", workcenters.ids),
-                ("state", "in", ["waiting", "ready", "progress"]),
-                ("production_id.date_planned_start", ">=", today),
-                ("production_id.date_planned_start", "<", tomorrow),
-            ])
-
-            cards = []
-
-            for wo in workorders:
-
-                leader = wo.leader_id.name if wo.leader_id else "-"
-
-                cards.append(f"""
-                <div style="
-                    border:1px solid #dcdcdc;
-                    border-radius:8px;
-                    padding:12px;
-                    margin-bottom:12px;
-                    background:#fafafa;
-                ">
-
-                    <h4 style="margin:0;color:#0b72b9;">
-                        📍 {wo.workcenter_id.name}
-                    </h4>
-
-                    <p>
-                        <b>Leader :</b> {leader}
-                    </p>
-
-                    <p>
-                        <b>Manufacturing Order</b><br/>
-                        {wo.production_id.name}
-                    </p>
-
-                    <p>
-                        <b>Work Order</b><br/>
-                        {wo.name}
-                    </p>
-
-                    <p>
-                        <b>Product</b><br/>
-                        {wo.product_id.display_name}
-                    </p>
-
-                    <p>
-                        <b>Status</b><br/>
-                        {wo.state.upper()}
-                    </p>
-
-                </div>
-                """)
-
-            rec.workorder_info = "".join(cards)
-
-    available_workorder_ids = fields.Many2many(
-        "mrp.workorder",
-        string="Today's Work Orders"
-    )
-
-
-    # =========================
-    # STATUS
-    # =========================
 
     state = fields.Selection([
         ("draft", "Waiting"),
         ("ready", "Ready"),
         ("running", "Running"),
         ("done", "Done"),
-    ], default="draft")
+    ], default="ready")
+
+    note = fields.Text()
+
+    line_ids = fields.One2many(
+        "mes.scan.approval.line",
+        "approval_id",
+        string="Today's Work Orders",
+    )
+
+
+class MesScanApprovalLine(models.Model):
+    _name = "mes.scan.approval.line"
+    _description = "MES Scan Approval Line"
+    _order = "id"
+
+    #Ini relasi nih bang
+
+    approval_id = fields.Many2one(
+        "mes.scan.approval",
+        required=True,
+        ondelete="cascade",
+    )
+
+    workorder_id = fields.Many2one(
+        "mrp.workorder",
+        required=True,
+    )
+
+    # Ini related to my love story :(
+
+    production_id = fields.Many2one(
+        related="workorder_id.production_id",
+        store=True,
+    )
+
+    workcenter_id = fields.Many2one(
+        related="workorder_id.workcenter_id",
+        store=True,
+    )
+
+    leader_id = fields.Many2one(
+        related="workorder_id.leader_id",
+        store=True,
+    )
+
+    product_id = fields.Many2one(
+        related="workorder_id.product_id",
+        store=True,
+    )
+
+    # Status Hubungan 
+
+    wo_state = fields.Selection(
+        related="workorder_id.state",
+        store=True,
+        string="WO Status",
+    )
+
+    mes_state = fields.Selection([
+        ("waiting", "Waiting"),
+        ("running", "Running"),
+        ("done", "Done"),
+    ], default="waiting")
+
+    operator_id = fields.Many2one(
+        "hr.employee"
+    )
+
+    shift_id = fields.Many2one(
+        "eran.master.shift"
+    )
+
+    # Waktu 
+
+    scan_time = fields.Datetime()
 
     start_time = fields.Datetime()
 
@@ -217,19 +158,39 @@ class MesScanApproval(models.Model):
 
     duration = fields.Float()
 
-    note = fields.Text()
+    # Button
 
-    def action_approve(self):
+    def action_start(self):
+
+        self.ensure_one()
+
+        vals = {
+            "mes_state": "running",
+            "operator_id": self.approval_id.employee_id.id,
+            "shift_id": self.approval_id.shift_id.id,
+            "scan_time": self.approval_id.scan_time,
+        }
+
+        if not self.start_time:
+            vals["start_time"] = fields.Datetime.now()
+
+        self.write(vals)
+
+        return True
+    
+    def action_stop(self):
+
+        self.ensure_one()
+
         self.write({
-            "state": "ready"
+            "mes_state": "done",
+            "stop_time": fields.Datetime.now(),
         })
+
         return True
 
-    def action_reject(self):
-        self.write({
-            "state": "draft"
-        })
-        return True
+
+
 
 
 
