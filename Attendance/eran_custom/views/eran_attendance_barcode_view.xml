@@ -26,15 +26,7 @@
 
                 <field name="workcenter_id"/>
 
-                <field name="workorder_ids">
-                    <tree>
-                        <field name="production_id"/>
-                        <field name="name"/>
-                        <field name="product_id"/>
-                        <field name="workcenter_id"/>
-                        <field name="state"/>
-                    </tree>
-                </field>
+                <field name="workorder_info" nolabel="1" readonly="1"/>
 
                 <field name="state"/>
 
@@ -93,21 +85,13 @@
 
                         <field name="workcenter_id"/>
 
-                        <field name="workorder_ids">
-                            <tree>
-                                <field name="production_id"/>
-                                <field name="name"/>
-                                <field name="product_id"/>
-                                <field name="workcenter_id"/>
-                                <field name="state"/>
-                            </tree>
-                        </field>
-
-                        <field name="state"/>
-
                     </group>
 
+                    <field name="workorder_info" nolabel="1" readonly="1"/>
+
                     <group>
+
+                        <field name="state"/>
 
                         <field name="note"/>
 
@@ -143,15 +127,7 @@
 
                 <field name="workcenter_id"/>
 
-                <field name="workorder_ids">
-                    <tree>
-                        <field name="production_id"/>
-                        <field name="name"/>
-                        <field name="product_id"/>
-                        <field name="workcenter_id"/>
-                        <field name="state"/>
-                    </tree>
-                </field>
+                <field name="workorder_info" nolabel="1" readonly="1"/>
 
                 <field name="state"/>
 
@@ -190,15 +166,7 @@
                             <br/>
 
                             Work Order :
-                            <field name="workorder_ids">
-                                <tree>
-                                    <field name="production_id"/>
-                                    <field name="name"/>
-                                    <field name="product_id"/>
-                                    <field name="workcenter_id"/>
-                                    <field name="state"/>
-                                </tree>
-                            </field>
+                            <field name="workorder_info" widget="html" nolabel="1"/>
 
                             <strong>
 

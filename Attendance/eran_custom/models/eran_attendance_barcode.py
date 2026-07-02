@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 import logging
+from datetime import timedelta
 
 _logger = logging.getLogger(__name__)
 
@@ -103,14 +104,105 @@ class MesScanApproval(models.Model):
 
     sph = fields.Integer()
 
-    # =========================
-    # STATUS
-    # =========================
+
+    # ========================
+    # WORK ORDER
+    # ========================
+
+    workorder_info = fields.Html(
+        string="Today's Assignment",
+        compute="_compute_workorder_info",
+        sanitize=False,
+    )
+
+    @api.depends("check_in", "employee_id")
+    def _compute_workorder_info(self):
+
+        for rec in self:
+
+            if not rec.check_in:
+                rec.workorder_info = ""
+                continue
+
+            mappings = self.env["eran.mrp.workcenter.employee"].search([
+                ("employee_id", "=", rec.employee_id.id)
+            ])
+
+            workcenters = mappings.mapped("workcenter_id")
+
+            today = rec.check_in.replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
+
+            tomorrow = today + timedelta(days=1)
+
+            workorders = self.env["mrp.workorder"].search([
+                ("workcenter_id", "in", workcenters.ids),
+                ("state", "in", ["waiting", "ready", "progress"]),
+                ("production_id.date_planned_start", ">=", today),
+                ("production_id.date_planned_start", "<", tomorrow),
+            ])
+
+            cards = []
+
+            for wo in workorders:
+
+                leader = wo.leader_id.name if wo.leader_id else "-"
+
+                cards.append(f"""
+                <div style="
+                    border:1px solid #dcdcdc;
+                    border-radius:8px;
+                    padding:12px;
+                    margin-bottom:12px;
+                    background:#fafafa;
+                ">
+
+                    <h4 style="margin:0;color:#0b72b9;">
+                        📍 {wo.workcenter_id.name}
+                    </h4>
+
+                    <p>
+                        <b>Leader :</b> {leader}
+                    </p>
+
+                    <p>
+                        <b>Manufacturing Order</b><br/>
+                        {wo.production_id.name}
+                    </p>
+
+                    <p>
+                        <b>Work Order</b><br/>
+                        {wo.name}
+                    </p>
+
+                    <p>
+                        <b>Product</b><br/>
+                        {wo.product_id.display_name}
+                    </p>
+
+                    <p>
+                        <b>Status</b><br/>
+                        {wo.state.upper()}
+                    </p>
+
+                </div>
+                """)
+
+            rec.workorder_info = "".join(cards)
 
     available_workorder_ids = fields.Many2many(
         "mrp.workorder",
         string="Today's Work Orders"
     )
+
+
+    # =========================
+    # STATUS
+    # =========================
 
     state = fields.Selection([
         ("draft", "Waiting"),
